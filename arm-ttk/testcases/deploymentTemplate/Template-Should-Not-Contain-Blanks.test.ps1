@@ -8,7 +8,8 @@
 # Empty strings, arrays, objects and null property values are not allowed, they have specific meaning in a declarative model
 $emptyItems = @([Regex]::Matches($TemplateText, "\{\s{0,}\}")) + # Empty objects
               @([Regex]::Matches($TemplateText, "\[\s{0,}\]")) + # empty arrays
-              @([Regex]::Matches($TemplateText, '"\s{0,}"')) # empty strings
+              @([Regex]::Matches($TemplateText, '"\s{0,}"')) + # empty strings
+              @([Regex]::Matches($TemplateText, ':\s{0,}null'))
 
 # TODO: This test will flag things like json('null') - that needs to be fixed before we add a check for null
 # @([Regex]::Matches($TemplateText, 'null')) # null json property value
