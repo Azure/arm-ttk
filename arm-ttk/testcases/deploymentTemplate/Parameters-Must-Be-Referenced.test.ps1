@@ -27,7 +27,7 @@ foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
 
     if (!($parameter.name.startswith('__'))) {
         
-        if ($TemplateText -notmatch "(?s)`"\s{0,}\[.*?parameters\s{0,}\(\s{0,}'$($Parameter.Name)'") {
+        if ($TemplateText -notmatch "parameters\s{0,}\(\s{0,}'$($Parameter.Name)'\s{0,}\)") {
             Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject $parameter
         }
 

@@ -30,7 +30,7 @@ foreach ($variable in $TemplateObject.variables.psobject.properties) {
     # TODO: if the variable name is "copy": we need to loop through the array and pull each var and check individually
     if (!($variable.name.startswith('__')) -and ($variable.name -ne 'copy') ) {
 
-        if ($TemplateText -notmatch "(?s)`"\s{0,}\[.*?variables\s{0,}\(\s{0,}'$($Variable.Name)'") {
+        if ($TemplateText -notmatch "variables\s{0,}\(\s{0,}'$($Variable.Name)'\s{0,}\)") {
             Write-Error -Message "Unreferenced variable: $($Variable.Name)" -ErrorId Variables.Must.Be.Referenced -TargetObject $variable
         }
         
