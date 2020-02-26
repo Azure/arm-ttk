@@ -20,7 +20,8 @@ $ids = $TemplateObject  | Find-JsonContent -Key id -Value * -Like
 foreach ($id in $ids) { # Then loop over each object with an ID
     $myId = "$($id.id)".Trim() # Grab the actual ID,
     if (-not $myId) {
-        Write-Error "Blank ID Property found" -TargetObject $id -ErrorId ResourceId.Is.Missing
+        Write-Error "Blank ID Property found: $($id | Out-String)" -TargetObject $id -ErrorId ResourceId.Is.Missing
+        continue
     }
     $expandedId = Expand-AzTemplate -Expression $myId -InputObject $TemplateObject # then expand it.
     
