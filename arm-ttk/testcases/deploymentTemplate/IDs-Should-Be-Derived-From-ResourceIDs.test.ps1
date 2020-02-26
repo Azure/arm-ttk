@@ -19,7 +19,11 @@ $ids = $TemplateObject  | Find-JsonContent -Key id -Value * -Like
 
 foreach ($id in $ids) { # Then loop over each object with an ID
     $myId = "$($id.id)".Trim() # Grab the actual ID,
-    $expandedId = Expand-AzTemplate -Expression $myId -InputObject $TemplateObject # then expand it.
+    if (-not $myId) {
+        Write-Error "Blank ID Property found: $($id | Out-String)" -TargetObject $id -ErrorId ResourceId.Is.Missing
+        continue
+    }
+    $expandedId = Expand-AzTemplate -Expression $myId -InputObject $TemplateObject -Exclude Parameters # then expand it.
     
     # Check that it uses the ResourceID or a param or var - can remove variables once Expand-Template does full eval of nested vars
     # REGEX
