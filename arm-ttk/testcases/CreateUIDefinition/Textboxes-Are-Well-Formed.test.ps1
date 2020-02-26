@@ -7,7 +7,7 @@ $CreateUIDefinitionObject
 
 # First, find all textboxes within CreateUIDefinition.
 
-$allTextBoxes = $CreateUiDefinitionObject | Find-JsonContent -Key type -value microsoft.commmon.textbox
+$allTextBoxes = $CreateUiDefinitionObject | Find-JsonContent -Key type -value Microsoft.Common.TextBox
 
 foreach ($textbox in $allTextBoxes) { # Then we walk over each textbox.
     if (-not $textbox.constraints) { # If constraints was missing or blank,
