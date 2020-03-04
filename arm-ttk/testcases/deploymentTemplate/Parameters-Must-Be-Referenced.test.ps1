@@ -9,26 +9,37 @@
 )
 
 <# REGEX
-- start with "
-- 0 or more whitespace
-- open bracket for expression [
-- any number of chars, the reference can be anywhere in the expression
+- 
 - parameters
-- 0 or more whitespace
-- open paren (
-- 0 or more whitespace
-- opening '
+- whitespace
+- ('
+- whitespace
+- <ParameterName>
+- whitespace
+- ')
 
-An expression could be: "[ concat ( parameters ( 'test' ), ...)]"
+An expression could be: "[ concat ( variables ( 'test' ), ...)]"
 
 #>
-
+$exprStrOrQuote = [Regex]::new('(?<!\\)(?>"\s{0,}\[|")', 'RightToLeft')
 foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
 
     if (!($parameter.name.startswith('__'))) {
         
-        if ($TemplateText -notmatch "parameters\s{0,}\(\s{0,}'$($Parameter.Name)'\s{0,}\)") {
+        if ($TemplateText -notmatch ) {
             Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject $parameter
+        }
+        $findVar = [Regex]::new("parameters\s{0,}\(\s{0,}'$($Parameter.Name)'\s{0,}\)")
+        $foundRefs = @($findVar.Matches($TemplateText))
+        if (-not $foundRefs) {
+            Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject $parameter
+        } else {
+            foreach ($fr in $foundRefs) {
+                $foundQuote =$exprStrOrQuote.Match($TemplateText, $fr.Index)                
+                if ($foundQuote.Value -eq '"') {
+                    Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject $parameter
+                }
+            }
         }
 
     }
