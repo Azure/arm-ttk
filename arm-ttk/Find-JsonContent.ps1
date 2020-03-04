@@ -108,7 +108,7 @@
             }
 
                 
-
+            if ($parent -contains $in) { continue } 
             $mySplat.Parent = @($in) + $Parent
 
             if ($depth -and $mySplat.Parent.Length -ge $Depth) {
