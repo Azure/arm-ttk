@@ -19,29 +19,13 @@ $CreateUIDefinitionObject,
 [PSObject]
 $TemplateObject
 )
-<#{
-    good: {
-        CreateUIDefinitionObject: {
-            parameters: {
-                outputs: {
-                    testOutput: {}
-                }
-            }
-        },
-        TemplateObject: {
-            parameters: {
-                outputs: {
-                    testOutput: {}
-                }
-            }
-        }
-    }
-}#>
 
 # First, make sure CreateUIDefinition has outputs
 if (-not $CreateUIDefinitionObject.parameters.outputs) {
     Write-Error "CreateUIDefinition is missing the .parameters.outputs property" -ErrorId CreateUIDefinition.Missing.Outputs     # ( write an error if it doesn't)
 }
+
+$parameterInfo = $CreateUIDefinitionObject.parameters
 
 foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk thru each output
     $outputName = $output.Name
