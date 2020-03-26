@@ -189,20 +189,22 @@ function Expand-AzTemplate
                         }
                         # All FolderFile objects will have the following properties:
 
-                        $fileObject = [Ordered]@{
-                            Name = $fileInfo.Name #*Name (the name of the file)
-                            Extension = $fileInfo.Extension #*Extension (the file extension) 
-                            Text = [IO.File]::ReadAllText($fileInfo.FullName)#*Text (the file content as text)
-                            FullPath = $fileInfo.Fullname#*FullPath (the full path to the file)
-                        }
+                        
                         if ($fileInfo.Extension -eq '.json') { 
+                            $fileObject = [Ordered]@{
+                                Name = $fileInfo.Name #*Name (the name of the file)
+                                Extension = $fileInfo.Extension #*Extension (the file extension) 
+                                Text = [IO.File]::ReadAllText($fileInfo.FullName)#*Text (the file content as text)
+                                FullPath = $fileInfo.Fullname#*FullPath (the full path to the file)
+                            }
                             # If the file is JSON, two additional properties may be present:
                             #*Object (the file's text, converted from JSON)
                             $fileObject.Object = Import-Json $fileObject.FullPath 
                             #*Schema (the value of the $schema property of the JSON object, if present)
                             $fileObject.schema = $fileObject.Object.'$schema'                        
+                            $fileObject
                         }
-                        $fileObject
+                        
                     })
 
             if ($isMainTemplate) { # If the file was a main template,
