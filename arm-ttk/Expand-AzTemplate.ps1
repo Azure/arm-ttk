@@ -1,4 +1,4 @@
-function Expand-AzTemplate
+﻿function Expand-AzTemplate
 {
     <#
     .Synopsis
@@ -15,13 +15,14 @@ function Expand-AzTemplate
         It does not expand recursively, and it does not attempt to evaluate complex expressions.
     #>
     [CmdletBinding(DefaultParameterSetName='SpecificTemplate')]
+    [OutputType([string],[PSObject])]
     param(
     # The path to an Azure resource manager template
     [Parameter(Mandatory=$true,Position=0,ValueFromPipelineByPropertyName=$true,ParameterSetName='SpecificTemplate')]
     [Alias('Fullname','Path')]
     [string]
     $TemplatePath,
-    
+
     # An Azure Template Expression, for example [parameters('foo')].bar.
     # If this expression was expanded, it would look in -InputObject for a .Parameters object containing the property 'foo'.
     # Then it would look in that result for a property named bar.
@@ -57,7 +58,7 @@ function Expand-AzTemplate
             [PSObject[]]
             $Parent
         ) {
-            process { 
+            process {
                 foreach ($r in $Resource) {
                     $r |
                         Add-Member NoteProperty ParentResources $parent -Force -PassThru
@@ -66,7 +67,7 @@ function Expand-AzTemplate
                         $r | Expand-Resource -Parent (@($r) + @(if ($parent) { $parent }))
                     }
                 }
-            }   
+            }
         }
 
         $TemplateLanguageExpression = "
@@ -79,7 +80,7 @@ function Expand-AzTemplate
 (?<Index>\[\d{1,}\]){0,1} # an optional index
 (?<Property>\. # a property
     (?<PropertyName>[^\.\[\]\s]{1,}){1,1}
-    (?<PropertyIndex>\[\d{1,}\]){0,1} # One or more optional properties    
+    (?<PropertyIndex>\[\d{1,}\]){0,1} # One or more optional properties
 ){0,}
 \] # closing bracket
 \s{0,} # optional whitespace
@@ -97,7 +98,7 @@ function Expand-AzTemplate
         (?<Parameters>\( # the opening parenthesis
             (?>[^\(\)]+|\((?<Depth>)|\)(?<-Depth>))*(?(Depth)(?!)) # anything until we're balanced
         \)) # the closing parenthesis
-    ) 
+    )
     (?<Index>\[\d{1,}\]){0,} # One or more indeces
     (?<Property>\.[^\.\s]{1,}){0,} # One or more optional properties
 )\s{0,}
@@ -108,17 +109,17 @@ function Expand-AzTemplate
     }
 
     process {
-        if ($PSCmdlet.ParameterSetName -eq 'SpecificTemplate') {        
+        if ($PSCmdlet.ParameterSetName -eq 'SpecificTemplate') {
             # Now let's try to resolve the template path.
-            $resolvedTemplatePath = 
+            $resolvedTemplatePath =
                 # If the template path doesn't appear to be a path to a json file,
-                if ($TemplatePath -notlike '*.json') { 
+                if ($TemplatePath -notlike '*.json') {
                     # see if it looks like a file
                     if (($templatePath | Split-Path -Leaf) -like '*.*') {
                         $TemplatePath = $TemplatePath | Split-Path # if it does, reassign template path to it's directory.
                     }
                     # Then, go looking beneath that template path
-                    $preferredJsonFile = $TemplatePath | 
+                    $preferredJsonFile = $TemplatePath |
                         Get-ChildItem -Filter *.json |
                         # for a file named azuredeploy.json, prereq.azuredeploy.json or mainTemplate.json
                         Where-Object { 'azuredeploy.json', 'mainTemplate.json', 'prereq.azuredeploy.json' -contains $_.Name } |
@@ -129,7 +130,7 @@ function Expand-AzTemplate
                         return
                     }
                     $preferredJsonFile
-                } else { 
+                } else {
                     $ExecutionContext.SessionState.Path.GetResolvedPSPathFromPSPath($templatePath)
                 }
 
@@ -141,14 +142,14 @@ function Expand-AzTemplate
             # These variables will be available to every test case.   They are:
             $WellKnownVariables = 'TemplateFullPath','TemplateText','TemplateObject','TemplateFileName',
                 'CreateUIDefinitionFullPath','createUIDefinitionText','CreateUIDefinitionObject',
-                'FolderName', 'HasCreateUIDefinition', 'IsMainTemplate','FolderFiles', 
-                'MainTemplatePath', 'MainTemplateObject', 'MainTemplateText', 
+                'FolderName', 'HasCreateUIDefinition', 'IsMainTemplate','FolderFiles',
+                'MainTemplatePath', 'MainTemplateObject', 'MainTemplateText',
                 'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 'MainTemplateOutputs'
 
             foreach ($_ in $WellKnownVariables) {
                 $ExecutionContext.SessionState.PSVariable.Set($_, $null)
             }
-            
+
             #*$templateFullPath (the full path to the .json file)
             $TemplateFullPath = "$resolvedTemplatePath"
             #*$TemplateFileName (the name of the azure template file)
@@ -162,7 +163,7 @@ function Expand-AzTemplate
             #*$TemplateText (the text contents of the template file)
             $TemplateText = [IO.File]::ReadAllText($resolvedTemplatePath)
             #*$TemplateObject (the template text, converted from JSON)
-            $TemplateObject = Import-Json -FilePath $TemplateFullPath 
+            $TemplateObject = Import-Json -FilePath $TemplateFullPath
             #*$CreateUIDefinitionFullPath (the path to CreateUIDefinition.json)
             $createUiDefinitionFullPath = Join-Path -childPath 'createUiDefinition.json' -Path $templateFolder
             if (Test-Path $createUiDefinitionFullPath) {
@@ -171,14 +172,14 @@ function Expand-AzTemplate
                 #*$CreateUIDefinitionObject (the createuidefinition text, converted from json)
                 $createUIDefinitionObject =  Import-Json -FilePath $createUiDefinitionFullPath
                 #*$HasCreateUIDefinition (indicates if a CreateUIDefinition.json file exists)
-                $HasCreateUIDefinition = $true            
-            } else {                
+                $HasCreateUIDefinition = $true
+            } else {
                 $HasCreateUIDefinition = $false
-                $createUiDefinitionFullPath = $null 
-            }       
+                $createUiDefinitionFullPath = $null
+            }
 
             #*$FolderFiles (a list of objects of each file in the directory)
-            $FolderFiles = 
+            $FolderFiles =
                 @(Get-ChildItem -Path $templateFolder.FullName -Recurse |
                     Where-Object { -not $_.PSIsContainer } |
                     ForEach-Object {
@@ -189,20 +190,22 @@ function Expand-AzTemplate
                         }
                         # All FolderFile objects will have the following properties:
 
-                        $fileObject = [Ordered]@{
-                            Name = $fileInfo.Name #*Name (the name of the file)
-                            Extension = $fileInfo.Extension #*Extension (the file extension) 
-                            Text = [IO.File]::ReadAllText($fileInfo.FullName)#*Text (the file content as text)
-                            FullPath = $fileInfo.Fullname#*FullPath (the full path to the file)
-                        }
-                        if ($fileInfo.Extension -eq '.json') { 
+
+                        if ($fileInfo.Extension -eq '.json') {
+                            $fileObject = [Ordered]@{
+                                Name = $fileInfo.Name #*Name (the name of the file)
+                                Extension = $fileInfo.Extension #*Extension (the file extension)
+                                Text = [IO.File]::ReadAllText($fileInfo.FullName)#*Text (the file content as text)
+                                FullPath = $fileInfo.Fullname#*FullPath (the full path to the file)
+                            }
                             # If the file is JSON, two additional properties may be present:
                             #*Object (the file's text, converted from JSON)
-                            $fileObject.Object = Import-Json $fileObject.FullPath 
+                            $fileObject.Object = Import-Json $fileObject.FullPath
                             #*Schema (the value of the $schema property of the JSON object, if present)
-                            $fileObject.schema = $fileObject.Object.'$schema'                        
+                            $fileObject.schema = $fileObject.Object.'$schema'
+                            $fileObject
                         }
-                        $fileObject
+
                     })
 
             if ($isMainTemplate) { # If the file was a main template,
@@ -233,9 +236,9 @@ function Expand-AzTemplate
                     $MainTemplateOutputs[$prop.Name] = $prop.Value
                 }
             }
-        
-            # If we've found a CreateUIDefinition, we'll want to process it first.                
-            if ($HasCreateUIDefinition) { 
+
+            # If we've found a CreateUIDefinition, we'll want to process it first.
+            if ($HasCreateUIDefinition) {
                 # Loop over the folder files and get every file that isn't createUIDefinition
                 $otherFolderFiles = @(foreach ($_ in $FolderFiles) {
                     if ($_.Name -ne 'CreateUIDefinition.json') {
@@ -256,28 +259,28 @@ function Expand-AzTemplate
             $out
         }
         elseif ($PSCmdlet.ParameterSetName -eq 'Expression') {
-            
+
             # First, we need to see if the expression provided looks like a template language expression
-            $matched? = 
+            $matched? =
                 [Regex]::Match($Expression, $TemplateLanguageExpression, $regexOptions, $regexTimeout)
             if (-not $matched?.Success) { # If it wasn't
                 Write-Verbose "$Expression is not an expression" # Write to the verbose stream
-                return $Expression # and return the original expression 
+                return $Expression # and return the original expression
             }
 
-            
+
 
             $functionName = $matched?.Groups["Function"].Value
 
-            if (-not $InputObject.$functionName) { # If there wasn't a property on the inputobject 
+            if (-not $InputObject.$functionName) { # If there wasn't a property on the inputobject
                 return $matched?.Value # Return the expression
             }
 
-            # Get the parameters 
+            # Get the parameters
             $parametersExpression = $matched?.Groups["Parameters"].Value
             # strip off the () (don't use trim, or we might hurt subexpressions)
             $parametersExpression = $parametersExpression.Substring(1,$parametersExpression.Length - 1)
-            
+
             $functionParameters = @([Regex]::Matches($parametersExpression, $TemplateParametersExpression, $regexOptions, $regexTimeout))
             if (-not $functionParameters) { # If there were no parameters
                 return $matched?.Value      # return the partially resolved expression.
@@ -305,7 +308,7 @@ function Expand-AzTemplate
 
             if (-not $targetObject) {  # If the object didn't resolve,
                 Write-Error ".$functionName.$targetProperty not found" # error out.
-                return 
+                return
             }
 
 
@@ -314,10 +317,10 @@ function Expand-AzTemplate
 
                 if (-not $targetObject[$index]) {
                     Write-Error "Index $index not found"
-                    return 
+                    return
                 } else {
                     $targetObject = $targetObject[$index]
-                }                
+                }
             }
             # Since we can nest properties and indices, we just have to work thru each remaining one.
             $propertyMatchGroup = $matched?.Groups["Property"]
@@ -339,9 +342,9 @@ function Expand-AzTemplate
                             $targetObject = $targetObject[$propIndex -as [int]]
                         }
                     }
-                }    
+                }
             }
-            
+
             # and at last, we can return whatever was resolved.
             return $targetObject
         }
