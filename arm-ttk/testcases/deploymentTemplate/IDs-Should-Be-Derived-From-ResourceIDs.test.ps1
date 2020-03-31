@@ -31,7 +31,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         continue
     }
 
-    if ($prop.JsonPath -match '^(parameters|outputs)') {
+    if ($id.JsonPath -match '^(parameters|outputs)') {
         continue
     }
 
