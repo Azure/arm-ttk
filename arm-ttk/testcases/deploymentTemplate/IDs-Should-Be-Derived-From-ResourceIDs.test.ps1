@@ -15,10 +15,41 @@ $TemplateObject
 )
 
 # First, find all objects with an ID property in the MainTemplate.
-$ids = $TemplateObject  | Find-JsonContent -Key id -Value * -Like
+$ids = $TemplateObject  | Find-JsonContent -Key *id <#-Value *#> -Like
+
+
+# If the "Parameters" property or "Outputs" property is in the lineage, skip check
+
+# If the id points to an object, we can skip, unless:
+# the object contains a single property Value, which will will treat as the ID
 
 foreach ($id in $ids) { # Then loop over each object with an ID
-    $myId = "$($id.id)".Trim() # Grab the actual ID,
+    $myIdFieldName = $id.PropertyName
+    $myId = $id.$myIdFieldName        
+
+    if ($myIdFieldName -eq 'tenantId') { # We're checking resource ids, not tenant IDs
+        continue
+    }
+
+    if ($id.JsonPath -match '^(parameters|outputs)') {
+        continue
+    }
+
+    if ($myId -isnot [string]) {
+        if (-not $myId.Value) {
+            continue
+        } else {
+            $myId = $myId.Value
+            if ($myId -isnot [string]) {
+                continue
+            }
+        }
+    }
+
+    
+    
+
+    # $myId = "$($id.id)".Trim() # Grab the actual ID,
     if (-not $myId) {
         Write-Error "Blank ID Property found: $($id | Out-String)" -TargetObject $id -ErrorId ResourceId.Is.Missing
         continue

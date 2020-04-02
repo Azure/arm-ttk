@@ -56,8 +56,33 @@
     $Depth,
 
     # The name of the current property.  This parameter will be passed recursively.
-    [string]
+    [string[]]
     $Property)
+
+    begin {
+        $OutputMatch = {
+            param([Parameter(Mandatory)][PSObject]$in)
+            
+            $OutObject = [Ordered]@{}
+            foreach ($prop in $in.psobject.properties) {
+                $OutObject[$prop.Name] = $prop.Value
+            }
+            $OutObject['ParentObject'] = $parent  
+            $OutObject['PropertyName'] = $Property[-1]
+            
+            $OutObject['JSONPath']     = @(
+                $np =0 
+                foreach ($p in $property) {
+                    if ($p.StartsWith('[') -or -not $np) {
+                        $p
+                    } else {
+                        ".$p"
+                    }
+                    $np++
+                }) -join ''
+            [PSCustomObject]$OutObject
+        }
+    }
 
     process {
         $mySplat = @{} + $PSBoundParameters
@@ -65,8 +90,10 @@
         if (-not $InputObject) { return }
             
 
+        $index = -1
         foreach ($in in $InputObject) {
             if (-not $in) { continue } 
+            $index++
             if ($in -is [string] -or $in -is [int] -or $in -is [bool] -or 
                 $in -is [double] -or $in -is [long] -or $in -is [float]) {
                 continue
@@ -84,26 +111,43 @@
                             $OutObject[$prop.Name] = $prop.Value
                         }
                         $OutObject['ParentObject'] = $parent
-                        $OutObject['PropertyName'] = $Property
+                        $OutObject['PropertyName'] = $Property[-1]
+                        $OutObject['JSONPath']     = @(
+                        $np =0 
+                        foreach ($p in $property) {
+                            if ($p.StartsWith('[') -or -not $np) {
+                                $p
+                            } else {
+                                ".$p"
+                            }
+                            $np++
+                        }) -join ''
                         [PSCustomObject]$OutObject
                     }
                 }
             } elseif ($PSCmdlet.ParameterSetName -eq 'Key') {
                 $propertyNames = @(foreach ($_ in $in.psobject.properties) { $_.Name })
-                if (
-                    ($NotMatch -and $propertyNames -notmatch $Key) -or 
-                    ($NotLike -and $propertyNames -notlike $Key) -or 
-                    ($Like -and $propertyNames -like $key) -or
+                if (($Like -and $propertyNames -like $key) -or
                     ($Match -and $propertyNames -match $key) -or 
-                    ($propertyNames -eq $key -and -not ($NotLike -or $NotMatch))
-                ) {
-                    $OutObject = [Ordered]@{}
-                    foreach ($prop in $in.psobject.properties) {
-                        $OutObject[$prop.Name] = $prop.Value
-                    }
-                    $OutObject['ParentObject'] = $parent
-                    $OutObject['PropertyName'] = $Property
-                    [PSCustomObject]$OutObject
+                    ($propertyNames -eq $key -and -not ($NotLike -or $NotMatch)))
+                {
+                    $matchingKeys = 
+                        @(if ($like) {
+                            $propertyNames -like $key 
+                        } elseif ($match) {
+                            $propertyNames -match $key
+                        } else {
+                            $key  
+                        }) -join ','
+                    $property += $matchingKeys
+                    . $OutputMatch $in
+                } 
+                elseif (
+                    ($NotMatch -and $propertyNames -notmatch $Key) -or 
+                    ($NotLike -and $propertyNames -notlike $Key)
+                ) 
+                {                    
+                    . $OutputMatch $in
                 }
             }
 
@@ -116,12 +160,22 @@
             }
         
             if ($in -is [Object[]]) {
+                
                 Find-JsonContent @mySplat -InputObject $in
             } else {
+                $propertyAndIndex = 
+                    @(if ($Property) {
+                        $property
+                    }
+                    if ($InputObject.Count) {
+                        "[$index]"
+                    })
                 foreach ($prop in $in.psobject.properties) {
                     if (-not $prop.Value) { continue } 
                     if ($prop.Name -like 'parent*') { continue }
-                    $mySplat.Property = $prop.Name 
+                    $mySplat.Property = $propertyAndIndex + $prop.Name
+                    
+                      
                     Find-JsonContent @mySplat -InputObject $prop.Value 
                 }
             }
