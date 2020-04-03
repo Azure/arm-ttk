@@ -68,7 +68,7 @@
                 $OutObject[$prop.Name] = $prop.Value
             }
             $OutObject['ParentObject'] = $parent
-            $OutObject['PropertyName'] = $Property[-1]
+            $OutObject['PropertyName'] = if ($property) {$Property[-1]}
 
             $OutObject['JSONPath']     = @(
                 $np =0
