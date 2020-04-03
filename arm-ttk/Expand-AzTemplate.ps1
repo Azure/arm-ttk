@@ -115,7 +115,7 @@
                 # If the template path doesn't appear to be a path to a json file,
                 if ($TemplatePath -notlike '*.json') {
                     # see if it looks like a file
-                    if (($templatePath | Split-Path -Leaf) -like '*.*') {
+                    if ( test-path -path $templatePath -PathType leaf) {
                         $TemplatePath = $TemplatePath | Split-Path # if it does, reassign template path to it's directory.
                     }
                     # Then, go looking beneath that template path
