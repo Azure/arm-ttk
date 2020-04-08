@@ -15,7 +15,7 @@ if (-not $templateSchema) {
     return
 }
 
-$validSchemas = 
+$validSchemas =
     'https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#',
     'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#',
     'https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#',
@@ -27,6 +27,6 @@ if ($validSchemas -notcontains $templateSchema) {
     Write-Error "DeploymentTemplate has an unexpected Schema.
 It should be one of the following:
 $($validSchemas -join ([Environment]::NewLine))
-"
+" -ErrorId Template.Bad.Schema
     return
 }
