@@ -19,7 +19,8 @@ foreach ($selector in $sizeSelectors) { # Then walk each selector,
     # and attempt to find it in the main template
     $controlName = $selector.Name
     $stepName = $selector.ParentObject[0].name
-    $lookingFor= if ($stepName) { "*steps(*$stepName*).$controlName*"} else {"*basics(*$($controlName)*"} 
+    $isInSteps = $selector.JSONPath.Contains('steps[')
+    $lookingFor= if ($isInSteps) { "*steps(*$stepName*).$controlName*"} else {"*basics(*$($controlName)*"} 
     $theOutput = foreach ($out in $CreateUIDefinitionObject.parameters.outputs.psobject.properties) {
         if ($out.Value -like $lookingFor) { 
             $out; break
