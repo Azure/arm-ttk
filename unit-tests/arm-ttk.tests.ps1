@@ -13,28 +13,32 @@
 
     For example, given the arm-ttk validation rule in:
 
-        deploymentTemplate\adminUsername-Should-Not-Be-A-Literal.test.ps1
+        /arm-ttk/testcases/deploymentTemplate/adminUsername-Should-Not-Be-A-Literal.test.ps1
 
-    There should be a test data directory:
+    There should be a test data directory in /unit-tests/:
         
-        adminUsername-Should-Not-Be-A-Literal
+        /unit-tests/adminUsername-Should-Not-Be-A-Literal
 
     
     This will map to a describe block named deploymentTemplate\adminUsername-Should-Not-Be-A-Literal
 
     This directory should contain two subfolders:
 
-    * Pass
-    * Fail
+    * /unit-tests/adminUsername-Should-Not-Be-A-Literal/Pass
+    * /unit-tests/adminUsername-Should-Not-Be-A-Literal/Fail
 
     ### The Pass Folder 
-    The Pass folder can contain one or more JSON files.  Running these rules on these files should produce no errors.
+    The Pass folder can contain one or more JSON files or folders.
+    Running these rules on these files should produce no errors.
     
-    The Pass folder may also contain one or more .path.txt files.  These will contain a relative path to a JSON file that should produce no errors.
+    The Pass folder may also contain one or more .path.txt files.
+    These will contain a relative path to a JSON file that should produce no errors.
 
     ### The Fail Folder
 
-    The Fail folder may also contain one or more JSON files.  These JSON files are expected to produce errors.
+    The Fail folder may also contain one or more JSON files or folders.
+    
+    These JSON files are expected to produce errors.
 
     Each JSON file may have a corresponding .should.be.ps1 or .should.be.txt
 
@@ -43,21 +47,6 @@
 
     If the corresponding .should.be file is a script (.ps1),
     the error will be passed to the .ps1, which should throw if the error was unexpected. 
-
-    
-
-# Top Level folder matching test name
-# Subfolders named pass\fail
-# Subfolders for each test beneath that
-# Must be human readable 
-# Must be logically related to test purpose
-# _should not be ErrorID_
-# File in a folder _should_ exercise as many scenarios as possible
-# ErrorIDs from failures will be reconciled with code to give a coverage metric (though we can also use Pester)
-# -This runs thru Pester- (for code coverage)
-    
-
-    
 #>
 
 
@@ -147,6 +136,9 @@ function Test-TTKFail {
             $ttkResults = Get-Item -Path $testFile.Fullname | 
                 Test-AzTemplate @ttkParams 
             if (-not $ttkResults) { throw "No Test Results" }
+            if (-not ($ttkResults | Where-Object {$_.Errors })) {
+                throw 'Errors were expected'
+            }
             if (Test-Path $targetTextPath) { # If we have a .should.be.txt
                 $targetText = [IO.File]::ReadAllText($targetTextPath) # read it
                 foreach ($ttkResult in $ttkResults) {
@@ -165,6 +157,7 @@ $(if ($ttkError.FullyQualifiedErrorID -notlike 'Microsoft.PowerShell*') {
                 
                 & "$targetScriptPath" $ttkResults
             }
+            
         }
     }
 }
