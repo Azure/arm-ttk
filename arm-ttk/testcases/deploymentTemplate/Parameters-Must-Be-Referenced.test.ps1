@@ -21,14 +21,10 @@
 An expression could be: "[ concat ( variables ( 'test' ), ...)]"
 
 #>
-$exprStrOrQuote = [Regex]::new('(?<!\\)(?>"\s{0,}\[|")', 'RightToLeft')
+$exprStrOrQuote = [Regex]::new('(?<!\\)(?>"\s{0,}\[")', 'RightToLeft')
 foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
 
-    if (!($parameter.name.startswith('__'))) {
-        
-        if ($TemplateText -notmatch ) {
-            Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject $parameter
-        }
+    if (!($parameter.name.startswith('__')) -and ($parameter.name -ne 'copy') ) {
         $findVar = [Regex]::new("parameters\s{0,}\(\s{0,}'$($Parameter.Name)'\s{0,}\)")
         $foundRefs = @($findVar.Matches($TemplateText))
         if (-not $foundRefs) {
