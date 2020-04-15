@@ -1,4 +1,10 @@
-﻿param(
+﻿<#
+.Synopsis
+    Ensures that the VM Size is a Parameter
+.Description
+    Ensures that the Sizes of a virtual machine in a template are parameters
+#>
+param(
 [Parameter(Mandatory=$true)]
 [PSObject]
 $TemplateObject
