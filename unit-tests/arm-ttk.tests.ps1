@@ -140,7 +140,7 @@ function Test-TTKFail {
                 throw 'Errors were expected'
             }
             if (Test-Path $targetTextPath) { # If we have a .should.be.txt
-                $targetText = [IO.File]::ReadAllText($targetTextPath) # read it
+                $targetText = [IO.File]::ReadAllText($targetTextPath).Trim() # read it
                 foreach ($ttkResult in $ttkResults) {
                     foreach ($ttkError in $ttkResult.Errors) {
                         if ($ttkError.Message -ne $targetText -and $ttkError.FullyQualifiedErrorID -notlike "$targetText,*") {
@@ -169,10 +169,18 @@ $testDirectories = $MyRoot |
     Get-ChildItem -Directory
 
 foreach ($td in $testDirectories) {
-    if ('Pass','Fail','CommonPass','CommonFail' -contains $td.Name ) { continue } # skip some well-known names
+    if ('Pass','Fail','Common' -contains $td.Name ) { continue } # skip some well-known names
     Push-Location $td.FullName
     
     describe "$($td.Name)" {
+        $failDirectory = Get-ChildItem -Filter Fail -ErrorAction Ignore
+
+        if ($failDirectory) { # If the fail directory is present, run fail
+            context 'Fail' { 
+                Test-TTKFail -Name $td.Name -Path $failDirectory.FullName
+            }
+        }
+
         $passDirectory = Get-ChildItem -Filter Pass -ErrorAction Ignore
         if ($passDirectory) { # If the pass directory is present, run pass
             context 'Pass' {
@@ -181,13 +189,7 @@ foreach ($td in $testDirectories) {
             }
         }
 
-        $failDirectory = Get-ChildItem -Filter Fail -ErrorAction Ignore
 
-        if ($failDirectory) { # If the fail directory is present, run fail
-            context 'Fail' { 
-                Test-TTKFail -Name $td.Name -Path $failDirectory.FullName
-            }
-        }
     }
 
     Pop-Location
