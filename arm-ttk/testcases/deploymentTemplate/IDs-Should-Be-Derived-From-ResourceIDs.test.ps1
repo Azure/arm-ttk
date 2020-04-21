@@ -72,6 +72,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         $expandedId -notmatch "\s{0,}\[\s{0,}tenantResourceId\s{0,}\(\s{0,}'" -and `
         $expandedId -notmatch "\s{0,}\[\s{0,}if\s{0,}\(\s{0,}" -and `
         $expandedId -notmatch "\s{0,}\[\s{0,}parameters\s{0,}\(\s{0,}'" -and `
+        $expandedId -notmatch "\s{0,}\[\s{0,}reference\s{0,}\(\s{0,}'" -and `
         $expandedId -notmatch "\s{0,}\[\s{0,}variables\s{0,}\(\s{0,}'" ){
             Write-Error "Property: `"$($id.propertyName)`" must use one of the following expressions for an resourceId property:
              (resourceId(), subscriptionResourceId(), tenantResourceId(), if(), extensionResourceId(), parameters(), variables())" -TargetObject $id -ErrorId ResourceId.Should.Contain.Proper.Expression
