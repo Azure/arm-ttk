@@ -1,1 +1,9 @@
-{"$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#","resources":[{"type":"Microsoft.Compute/virtualMachines","apiVersion":"[providers(\u0027Microsoft.Compute\u0027,\u0027virtualMachines\u0027).apiVersions[0]]"}]}
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "[providers('Microsoft.Compute', 'virtualMachines').apiVersions[0]]"
+        }
+    ]
+}
