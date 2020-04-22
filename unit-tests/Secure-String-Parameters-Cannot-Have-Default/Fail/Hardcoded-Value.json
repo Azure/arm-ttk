@@ -1,1 +1,9 @@
-{"$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#","parameters":{"SecureStringParameter":{"defaultValue":"HardcodedPassword","type":"SecureString"}}}
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "parameters": {
+        "SecureStringParameter": {
+            "defaultValue": "HardcodedPassword",
+            "type": "SecureString"
+        }
+    }
+}
