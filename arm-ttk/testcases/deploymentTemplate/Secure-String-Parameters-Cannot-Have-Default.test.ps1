@@ -1,8 +1,17 @@
+<#
+.Synopsis
+    Ensures SecureString Parameters do not have a default
+.Description
+    Ensures Parameters of the type 'SecureString' do not have a default value, or have a default using a [newguid()]
+#>
 param(
+    # The template object
     [Parameter(Mandatory = $true, Position = 0)]
     [PSObject]
     $TemplateObject
 )
+
+# Walk thru each parameter in the template object
 foreach ($parameterProp in $templateObject.parameters.psobject.properties) {
     $parameter = $parameterProp.Value
     $name = $parameterProp.Name
