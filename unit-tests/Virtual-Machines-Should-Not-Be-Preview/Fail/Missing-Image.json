@@ -1,0 +1,1 @@
+{"$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#","resources":[{"type":"Microsoft.Compute/virtualMachines","apiVersion":"2019-12-01","properties":{"storageProfile":{"osDisk":{"caching":"ReadWrite","createOption":"FromImage"}}}}]}

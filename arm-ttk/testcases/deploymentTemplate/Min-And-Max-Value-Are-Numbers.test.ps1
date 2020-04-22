@@ -14,15 +14,17 @@ foreach ($parameterInfo in $templateObject.parameters.psobject.properties) {
         if ($parameter.maxValue -isnot [long] -and $parameter.maxValue -isnot [int]) {  # PS Core is interpreting the int/longs as long
             Write-Error "$($ParameterName) maxValue is not an [int] or [long] (it's a [$($parameter.maxValue.GetType())])" `
                 -ErrorId Parameter.Max.Not.Int -TargetObject $parameter
+            continue
         } else {
             $max = $parameter.maxValue
         }
 
     }
     if ($parameter.psobject.properties.item('minValue')) {
-        if ($parameter.minValue -isnot [long] -and $parameter.maxValue -isnot [int]) {
+        if ($parameter.minValue -isnot [long] -and $parameter.minValue -isnot [int]) {
             Write-Error "$($ParameterName) minValue is not an [int] or [long] (it's a [$($parameter.minValue.GetType())])" `
-                -ErrorId Parameter.Max.Not.Int -TargetObject $parameter           
+                -ErrorId Parameter.Min.Not.Int -TargetObject $parameter           
+            continue
         } else {
             $min = $Parameter.minValue
         }

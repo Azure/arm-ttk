@@ -1,0 +1,25 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "parameters": {
+        "SecureStringParameter": {
+            "defaultValue": "[ newGuid() ]",
+            "type": "SecureString"
+        },
+        "SecureStringParameter1": {
+            "defaultValue": "[ newGuid( ) ]", //empty params in the fn
+            "type": "SecureString"
+        },
+        "SecureStringParameter2": {
+            "defaultValue": "[ newGuid () ]", //space between fn and paren
+            "type": "SecureString"
+        },
+        "SecureStringParameter3": {
+            "defaultValue": "[newGuid() ]",
+            "type": "SecureString"
+        },
+        "SecureStringParameter4": {
+            "defaultValue": " [ newGuid() ]",
+            "type": "SecureString"
+        }
+    }
+}

@@ -10,12 +10,12 @@ function Format-AzTemplate
     #>
     param(
     # The path to a file
-    [Parameter(Mandatory=$true,ParameterSetName='FilePath',ValueFromPipelineByPropertyName=$true)]
+    [Parameter(Mandatory=$true,ParameterSetName='FilePath',ValueFromPipelineByPropertyName=$true,Position=0)]
     [Alias('Fullname')]
     [string]$FilePath,
 
     # The path to a file
-    [Parameter(Mandatory=$true,ParameterSetName='TemplateObject',ValueFromPipelineByPropertyName=$true)]
+    [Parameter(Mandatory=$true,ParameterSetName='TemplateObject',ValueFromPipelineByPropertyName=$true,Position=0)]
     [PSObject]$TemplateObject)
 
     begin {
@@ -84,12 +84,8 @@ function Format-AzTemplate
 
     process {
         if ($PSCmdlet.ParameterSetName -eq 'FilePath') { # If we're provided the path to a file
-            $resolvedPath = $ExecutionContext.SessionState.Path.GetResolvedPSPathFromPSPath($FilePath) # resolve it.
-        
-            if (-not $resolvedPath) { return } # If we couldn't, return.
-        
-            $templateText = [IO.File]::ReadAllText("$resolvedPath") # Read the file contents
-            $templateObject = $templateText | ConvertFrom-Json # convert them from JSON.
+            $templateObject = Import-Json -FilePath $FilePath
+
             if (-not $templateObject) { return } # If it was null, return.
 
             Format-AzTemplate -TemplateObject $TemplateObject # Call ourself, passing in the contents of the file. 
@@ -97,16 +93,23 @@ function Format-AzTemplate
         }
 
         if ($PSCmdlet.ParameterSetName -eq 'TemplateObject') { # If we're provided a template object
-            
-            $newTemplate = $TemplateObject | & $sortProperties -Order $topLevelPropertyOrder # sort the top-level properties.
-            
+            if ($templateObject -is [Collections.IDictionary]) {
+                $templateObject = [PSCustomObject]$templateObject
+            }
+            $templateObjectCopy = @{}
+            foreach ($prop in $templateObject.psobject.properties) {
+                $templateObjectCopy[$prop.Name] = $prop.Value
+            }
+            $newTemplate = 
+                [PSCustomObject]$TemplateObjectCopy | 
+                    & $sortProperties -Order $topLevelPropertyOrder # sort the top-level properties.            
             
             if ($newTemplate.resources) { # If the template had resources, sort them 
                 $newTemplate.resources =@(
                     $newTemplate.resources | & $sortProperties -Order $resourceOrder -LastOrder 'properties', 'resources' -Recurse
                 )
             }
-            return $newObject # then return the newly formatted object.
+            return $newTemplate # then return the newly formatted object.
         }
     }
 }
