@@ -194,3 +194,14 @@ foreach ($td in $testDirectories) {
 
     Pop-Location
 }
+
+describe 'Format-AzTemplate' {
+    it 'Sorts the format of an Azure Resource Manager Template' {
+        $formatted = Format-AzTemplate -TemplateObject ([PSCustomObject]@{
+            'parameters' = @{'foo'= @{defaultValue='bar'}}
+            '$schema' = 'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#'
+        })
+
+        @($formatted.psobject.properties)[0].name | should be '$schema'
+    }
+}
