@@ -1,1 +1,1 @@
-{"parameters":{"foo":{"maxValue":100}},"$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"}
+{"$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#","parameters":{"foo":{"maxValue":100}}}
