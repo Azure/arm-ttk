@@ -20,6 +20,7 @@ foreach ($resource in $templateObject.resources) {
         'microsoft.compute/virtualmachines' -notcontains $resource.type) {
         continue
     }
+    # Check for the VMSS property and if it's not there, check the VM property
     $imageReference = $resource.virtualmachineprofile.storageProfile.imageReference
     if (-not $imageReference) { 
         # If we couldn't find the reference on the .virtualmachineprofile, just look for a .storageprofile
