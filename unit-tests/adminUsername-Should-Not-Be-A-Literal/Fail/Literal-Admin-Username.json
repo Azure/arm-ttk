@@ -7,7 +7,7 @@
                     "adminUserName":  "NotRoot"
                 },
                 "hardwareProfile":  {
-                    "vmSize":  "[parameters(\u0027vmSize\u0027)]"
+                    "vmSize":  "[parameters('vmSize')]"
                 }
             },
             "apiVersion":  "2019-12-01",
