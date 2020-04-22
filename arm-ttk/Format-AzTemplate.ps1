@@ -93,6 +93,9 @@ function Format-AzTemplate
         }
 
         if ($PSCmdlet.ParameterSetName -eq 'TemplateObject') { # If we're provided a template object
+            if ($templateObject -is [Collections.IDictionary]) {
+                $templateObject = [PSCustomObject]$templateObject
+            }
             $templateObjectCopy = @{}
             foreach ($prop in $templateObject.psobject.properties) {
                 $templateObjectCopy[$prop.Name] = $prop.Value
