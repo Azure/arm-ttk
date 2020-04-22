@@ -1,29 +1,17 @@
 {
+    "$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "resources":  [
-                      {
-                          "properties":  {
-                                             "storageProfile":  {
-                                                                    "imageReference":  {
-                                                                                           "publisher":  "Canonical",
-                                                                                           "version":  "latest",
-                                                                                           "offer":  "UbuntuServer",
-                                                                                           "sku":  "16.04-LTS"
-                                                                                       },
-                                                                    "osDisk":  {
-                                                                                   "caching":  "ReadWrite",
-                                                                                   "createOption":  "FromImage"
-                                                                               }
-                                                                },
-                                             "osProfile":  {
-                                                               "adminUserName":  "NotRoot"
-                                                           },
-                                             "hardwareProfile":  {
-                                                                     "vmSize":  "[parameters(\u0027vmSize\u0027)]"
-                                                                 }
-                                         },
-                          "apiVersion":  "2019-12-01",
-                          "type":  "Microsoft.Compute/virtualMachines"
-                      }
-                  ],
-    "$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
+        {
+            "properties":  {
+                "osProfile":  {
+                    "adminUserName":  "NotRoot"
+                },
+                "hardwareProfile":  {
+                    "vmSize":  "[parameters(\u0027vmSize\u0027)]"
+                }
+            },
+            "apiVersion":  "2019-12-01",
+            "type":  "Microsoft.Compute/virtualMachines"
+        }
+    ]
 }
