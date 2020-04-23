@@ -1,4 +1,4 @@
-function Test-AzTemplate
+﻿function Test-AzTemplate
 {
 [Alias('Test-AzureRMTemplate')] # Added for backward compat with MP
     <#
@@ -29,7 +29,7 @@ Each test script has access to a set of well-known variables:
 * MainTemplateResources (the resources and child resources of the main template)
 * MainTemplateParameters (a hashtable containing the parameters found in the main template)
 * MainTemplateVariables (a hashtable containing the variables found in the main template)
-* MainTemplateOutputs (a hashtable containing the outputs found in the main template) 
+* MainTemplateOutputs (a hashtable containing the outputs found in the main template)
 
     #>
     [CmdletBinding(DefaultParameterSetName='NearbyTemplate')]
@@ -90,7 +90,7 @@ Each test script has access to a set of well-known variables:
     [Alias('TestGroups')]
     $TestGroup = [Ordered]@{},
 
-    # Any additional parameters to pass to each test.  
+    # Any additional parameters to pass to each test.
     # If the parameter does not exist for a given test case, it will be ignored.
     [Collections.IDictionary]
     [Alias('TestParameters')]
@@ -105,17 +105,17 @@ Each test script has access to a set of well-known variables:
     $Pester)
 
     begin {
-        # First off, let's get all of the built-in test scripts.   
+        # First off, let's get all of the built-in test scripts.
         $testCaseSubdirectory = 'testcases'
-        $myLocation =  $MyInvocation.MyCommand.ScriptBlock.File  
+        $myLocation =  $MyInvocation.MyCommand.ScriptBlock.File
         $testScripts= @($myLocation| # To do that, we start from the current file,
             Split-Path | # get the current directory,
-            Get-ChildItem -Filter $testCaseSubdirectory | # get the cases directory, 
+            Get-ChildItem -Filter $testCaseSubdirectory | # get the cases directory,
             Get-ChildItem -Filter *.test.ps1 -Recurse)  # and get all test.ps1 files within it.
 
 
         $builtInTestCases = @{}
-        # Next we'll define some human-friendly built-in groups.        
+        # Next we'll define some human-friendly built-in groups.
         $builtInGroups = @{
             'all' = 'deploymentTemplate', 'createUIDefinition'
             'mainTemplateTests' = 'deploymentTemplate'
@@ -124,7 +124,7 @@ Each test script has access to a set of well-known variables:
 
         # Now we loop over each potential test script
         foreach ($testScript  in $testScripts) {
-            # The test file name (minus .test.ps1) becomes the name of the test.           
+            # The test file name (minus .test.ps1) becomes the name of the test.
             $TestName = $testScript.Name -ireplace '\.test\.ps1$', '' -replace '_', ' ' -replace '-', ' '
             $testDirName = $testScript.Directory.Name
             if ($testDirName -ne $testCaseSubdirectory) { # If the test case was in a subdirectory
@@ -139,10 +139,10 @@ Each test script has access to a set of well-known variables:
                     $builtInGroups.Ungrouped = @()
                 }
                 $builtInGroups.Ungrouped += $TestName
-            } 
+            }
             $builtInTestCases[$testName] = $testScript.Fullname
         }
-        
+
         # This lets our built-in groups be automatically defined by their file structure.
 
         if (-not $script:AlreadyLoadedCache) { $script:AlreadyLoadedCache = @{} }
@@ -151,9 +151,9 @@ Each test script has access to a set of well-known variables:
         $cacheItemNames = @(foreach ($cacheFile in (Get-ChildItem -Path $cacheDir -Filter *.cache.json)) {
             $cacheName = $cacheFile.Name -replace '\.cache\.json', ''
             if (-not $script:AlreadyLoadedCache[$cacheFile.Name]) {
-                $script:AlreadyLoadedCache[$cacheFile.Name] = 
+                $script:AlreadyLoadedCache[$cacheFile.Name] =
                     [IO.File]::ReadAllText($cacheFile.Fullname) | Microsoft.PowerShell.Utility\ConvertFrom-Json
-                
+
             }
             $cacheData = $script:AlreadyLoadedCache[$cacheFile.Name]
             $ExecutionContext.SessionState.PSVariable.Set($cacheName, $cacheData)
@@ -162,37 +162,37 @@ Each test script has access to a set of well-known variables:
 
 
         # Next we want to declare some internal functions:
-        #*Test-Case (executes a test, given a set of parameters) 
-        function Test-Case($TheTest, $TestParameters = @{}) {            
-            $testCommandParameters = 
+        #*Test-Case (executes a test, given a set of parameters)
+        function Test-Case($TheTest, $TestParameters = @{}) {
+            $testCommandParameters =
                 if ($TheTest -is [ScriptBlock]) {
                     $function:f = $TheTest
                     ([Management.Automation.CommandMetaData]$function:f).Parameters
-                    Remove-Item function:f                
+                    Remove-Item function:f
                 } elseif ($TheTest -is [string]) {
                     $testCmd = $ExecutionContext.SessionState.InvokeCommand.GetCommand($TheTest, 'ExternalScript')
-                    if (-not $testCmd) { return } 
+                    if (-not $testCmd) { return }
                     ([Management.Automation.CommandMetaData]$testCmd).Parameters
                 } else {
                     return
                 }
             $testInput = @{} + $TestParameters
-            
+
             foreach ($k in @($testInput.Keys)) {
-                if (-not $testCommandParameters.ContainsKey($k)) {                    
+                if (-not $testCommandParameters.ContainsKey($k)) {
                     $testInput.Remove($k)
                 }
             }
-            
+
             if (-not $Pester) {
                 & $TheTest @testInput 2>&1 3>&1
             } else {
                 & $TheTest @testInput
-            }            
+            }
         }
 
         #*Test-Group (executes a group of tests)
-        function Test-Group {                
+        function Test-Group {
             $testQueue = [Collections.Queue]::new(@($GroupName))
             while ($testQueue.Count) {
                 $dq = $testQueue.Dequeue()
@@ -211,14 +211,14 @@ Each test script has access to a set of well-known variables:
                     $testStartedAt = [DateTime]::Now
                     $testCaseOutput = Test-Case $testCase.$dq $TestInput 2>&1 3>&1
                     $testTook = [DateTime]::Now - $testStartedAt
-                    
-                    $testErrors = [Collections.ArrayList]::new() 
+
+                    $testErrors = [Collections.ArrayList]::new()
                     $testWarnings = [Collections.ArrayList]::new()
                     $testOutput = [Collections.ArrayList]::new()
                     foreach ($_ in $testCaseOutput) {
                         $null=
-                            if ($_ -is [Exception] -or $_ -is [Management.Automation.ErrorRecord]) { 
-                                $testErrors.Add($_) 
+                            if ($_ -is [Exception] -or $_ -is [Management.Automation.ErrorRecord]) {
+                                $testErrors.Add($_)
                             }
                             elseif ($_ -is [Management.Automation.WarningRecord]) {
                                 $testWarnings.Add($_)
@@ -226,7 +226,7 @@ Each test script has access to a set of well-known variables:
                                 $testOutput.Add($_)
                             }
                     }
-                                        
+
                     New-Object PSObject -Property ([Ordered]@{
                         pstypename = 'Template.Validation.Test.Result'
                         Errors = $testErrors
@@ -241,28 +241,28 @@ Each test script has access to a set of well-known variables:
                     })
                 } else {
                     it $dq {
-                        # Pester tests only fail on a terminating error, 
+                        # Pester tests only fail on a terminating error,
                         $errorMessages = Test-Case $testCase.$dq $TestInput 2>&1 |
-                            Where-Object { $_ -is [Management.Automation.ErrorRecord] } | 
+                            Where-Object { $_ -is [Management.Automation.ErrorRecord] } |
                             # so collect all non-terminating errors.
                             Select-Object -ExpandProperty Exception |
                             Select-Object -ExpandProperty Message
-                        
+
                         if ($errorMessages) { # If any were found,
                             throw ($errorMessages -join ([Environment]::NewLine)) # throw.
                         }
                     }
-                }                                               
+                }
             }
         }
 
         #*Test-FileList (tests a list of files)
         function Test-FileList {
             foreach ($fileInfo in $FolderFiles) { # We loop over each file in the folder.
-                $matchingGroups = 
+                $matchingGroups =
                     @(if ($fileInfo.Schema) { # If a given file has a schema,
                         foreach ($key in $TestGroup.Keys) { # and it matches the name of the testgroup
-                            if ("$key".StartsWith("_") -or "$key".StartsWith('.')) { continue } 
+                            if ("$key".StartsWith("_") -or "$key".StartsWith('.')) { continue }
                             if ($fileInfo.Schema -match $key) {
                                 $key # then run that group of tests.
                             }
@@ -272,13 +272,13 @@ Each test script has access to a set of well-known variables:
                             if ($fileInfo.Extension -eq '.json') { # and it was a JSON file
                                 $fn = $fileInfo.Name -ireplace '\.json$',''
                                 if ($fn -match $key) { # check to see if it's name matches the key
-                                    $key; continue # (this handles CreateUIDefinition.json, even if no schema is present). 
+                                    $key; continue # (this handles CreateUIDefinition.json, even if no schema is present).
                                 }
                                 if ($key -eq 'DeploymentTemplate' -and # Otherwise, if we're checking the deploymentTemplate
                                     'mainTemplate.json', 'azuredeploy.json', 'prereq.azuredeploy.json' -contains $fn) { # and the file name is something we _know_ will be an ARM template
                                     $key; continue # then run the deployment tests regardless of schema.
                                 }
-                            }                            
+                            }
                             if (-not ("$key".StartsWith('_') -or "$key".StartsWith('.'))) { continue } # Last, check if the test group is for a file extension.
                             if ($fileInfo.Extension -eq "$key".Replace('_', '.')) { # If it was, run tests associated with that extension.
                                 $key
@@ -290,14 +290,14 @@ Each test script has access to a set of well-known variables:
                     $matchingGroups += 'Ungrouped'
                 }
 
-                if (-not $matchingGroups) { continue } 
-                if ($fileInfo.Schema -like '*deploymentTemplate*') {                     
+                if (-not $matchingGroups) { continue }
+                if ($fileInfo.Schema -like '*deploymentTemplate*') {
                     $isMainTemplate = 'mainTemplate.json', 'azureDeploy.json', 'prereq.azuredeploy.json' -contains $fileInfo.Name
                     $templateFileName = $fileInfo.Name
                     $TemplateObject = $fileInfo.Object
                     $TemplateText = $fileInfo.Text
                 }
-                foreach ($groupName in $matchingGroups) {                    
+                foreach ($groupName in $matchingGroups) {
                     $testInput = @{}
                     foreach ($_ in $WellKnownVariables) {
                         $testInput[$_] = $ExecutionContext.SessionState.PSVariable.Get($_).Value
@@ -307,7 +307,22 @@ Each test script has access to a set of well-known variables:
                         if (-not $testList) {
                             Write-Warning "Test '$test' was not found, all tests will be run"
                         }
-                        $testList
+                        if ($skip) {
+                            foreach ($tl in $testList) {
+                                if ($skip -replace '[_-]', ' ' -notcontains $tl) {
+                                    $tl
+                                }
+                            }
+                        } else {
+                            $testList
+                        }
+                    } elseif ($skip) {
+                        $testList = @(Get-TestGroups -GroupName $groupName -includeTest)
+                        foreach ($tl in $testList) {
+                            if ($skip -replace '[_-]', ' ' -notcontains $tl) {
+                                $tl
+                            }
+                        }
                     } else {
                         $null
                     }
@@ -320,9 +335,9 @@ Each test script has access to a set of well-known variables:
                     }
                 }
             }
-                
+
         }
-        
+
         #*Get-TestGroups (expands nested test groups)
         function Get-TestGroups([string[]]$GroupName, [switch]$includeTest) {
             foreach ($gn in $GroupName) {
@@ -333,28 +348,28 @@ Each test script has access to a set of well-known variables:
                 }
             }
         }
-        
-        $accumulatedTemplates = [Collections.Arraylist]::new()    
+
+        $accumulatedTemplates = [Collections.Arraylist]::new()
     }
 
     process {
         # If no template was passed,
         if ($PSCmdlet.ParameterSetName -eq 'NearbyTemplate') {
-            # attempt to find one in the current directory and it's subdirectories 
+            # attempt to find one in the current directory and it's subdirectories
             $possibleJsonFiles = @(Get-ChildItem -Filter *.json -Recurse |
                 Sort-Object Name -Descending | # (sort by name descending so that MainTemplate.json comes first).
                 Where-Object {
-                    'azureDeploy.json', 'mainTemplate.json' -contains $_.Name 
+                    'azureDeploy.json', 'mainTemplate.json' -contains $_.Name
                 })
-                
-            
+
+
             # If more than one template was found, warn which one we'll be testing.
             if ($possibleJsonFiles.Count -gt 1) {
                 Write-Error "More than one potential template file found beneath '$pwd'.  Please have only azureDeploy.json or mainTemplate.json, not both."
                 return
             }
-            
-            
+
+
             # If no potential files were found, write and error and return.
             if (-not $possibleJsonFiles) {
                 Write-Error "No potential templates found beneath '$pwd'.  Templates should be named azureDeploy.json or mainTemplate.json."
@@ -363,17 +378,17 @@ Each test script has access to a set of well-known variables:
 
 
             # If we could find a potential json file, recursively call yourself.
-            $possibleJsonFiles | 
+            $possibleJsonFiles |
                 Select-Object -First 1 |
                 Test-AzTemplate @PSBoundParameters
-                             
+
             return
         }
 
         # First, merge the built-in groups and test cases with any supplied by the user.
         foreach ($kv in $builtInGroups.GetEnumerator()) {
             if (-not $testGroup[$kv.Key]) {
-                $TestGroup[$kv.Key] = $kv.Value            
+                $TestGroup[$kv.Key] = $kv.Value
             }
         }
         foreach ($kv in $builtInTestCases.GetEnumerator()) {
@@ -405,49 +420,49 @@ Each test script has access to a set of well-known variables:
                 $wellKnownVariables += foreach ($kv in $testParameter.GetEnumerator()) {
                     $ExecutionContext.SessionState.PSVariable.Set($kv.Key, $kv.Value)
                     $kv.Key
-                }                
+                }
             }
 
             # If a file list was provided,
             if ($PSBoundParameters.File) {
-                $FolderFiles = @(foreach ($ff in $FolderFiles) { # filter the folder files. 
+                $FolderFiles = @(foreach ($ff in $FolderFiles) { # filter the folder files.
                     $matched = @(foreach ($_ in $file) {
                         $ff.Name -like $_ # If file the name matched any of valid patterns.
                     })
-                    if ($matched -eq $true) 
+                    if ($matched -eq $true)
                     {
-                        $ff # then we include it.   
+                        $ff # then we include it.
                     }
                 })
             }
-        
-        
-        
-            # Now that the filelist and test groups are set up, we use Test-FileList to test the list of files.                   
+
+
+
+            # Now that the filelist and test groups are set up, we use Test-FileList to test the list of files.
             if ($Pester) {
                 $IsPesterLoaded? = $(
                     $loadedModules = Get-module
-                    foreach ($_ in $loadedModules) { 
+                    foreach ($_ in $loadedModules) {
                         if ($_.Name -eq 'Pester') {
                             $true
                             break
                         }
                     }
                 )
-                $DoesPesterExist? = 
+                $DoesPesterExist? =
                     if ($IsPesterLoaded?) {
                         $true
                     } else {
-                    
+
                         if ($PSVersionTable.Platform -eq 'Unix') {
                             $delimiter = ':' # used for bash
                         } else {
                             $delimiter = ';' # used for windows
                         }
 
-                        $env:PSModulePath -split $delimiter | 
+                        $env:PSModulePath -split $delimiter |
                         Get-ChildItem -Filter Pester |
-                        Import-Module -Global -PassThru     
+                        Import-Module -Global -PassThru
                     }
 
                 if (-not $DoesPesterExist?){
@@ -455,17 +470,17 @@ Each test script has access to a set of well-known variables:
                     $Pester = $false
                 }
             }
-        
-            if (-not $Pester) { # If we're not running Pester, 
+
+            if (-not $Pester) { # If we're not running Pester,
                 Test-FileList # we just call it directly.
             }
-            else { 
+            else {
                 # If we're running Pester, we pass the function defintion as a parameter to describe.
                 describe "Validating Azure Template $TemplateName" ${function:Test-FileList}
             }
 
         }
 
-        Write-Progress "Validating Templates" "Complete" -Completed -Id $progId        
-    }    
+        Write-Progress "Validating Templates" "Complete" -Completed -Id $progId
+    }
 }
