@@ -1,4 +1,4 @@
-<#
+﻿<#
 .Synopsis
     Ensures SecureString Parameters do not have a default
 .Description
@@ -12,7 +12,7 @@ param(
 )
 
 $usedNewGuid = [Regex]::new(@'
-\[             # Starting bracket 
+\[             # Starting bracket
 \s{0,}         # ... optional whitespace
 newGuid        # the literal 'newGuid'
 \s{0,}         # ... optional whitepace
@@ -27,13 +27,13 @@ newGuid        # the literal 'newGuid'
 foreach ($parameterProp in $templateObject.parameters.psobject.properties) {
     $parameter = $parameterProp.Value
     $name = $parameterProp.Name
-    
+
     # If the parameter is a secureString type and has a defaultValue:
-    if ($parameter.Type -eq 'securestring' -and $parameter.defaultValue) { 
+    if ($parameter.Type -eq 'securestring' -and $parameter.defaultValue) {
         # the defaultValue must be an empty string "" or must be an expression that contains use the newGuid() function
-        if ($parameter.defaultValue -and 
+        if ($parameter.defaultValue -and
             $parameter.defaultValue -notmatch $usedNewGuid) {
-            # Will return true when defaultvalue is not null or blank (blank values are OK). 
+            # Will return true when defaultvalue is not null or blank (blank values are OK).
             Write-Error -Message "Parameter $name is a SecureString and must not have a default value unless it is an expression that contains the newGuid() function." `
                 -ErrorId SecureString.Must.Not.Have.Default -TargetObject $parameter
         }
