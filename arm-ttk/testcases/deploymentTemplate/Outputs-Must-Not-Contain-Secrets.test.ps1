@@ -33,7 +33,7 @@ foreach ($output in $TemplateObject.outputs.psobject.properties) {
 
     $outputText = $output.value | ConvertTo-Json # search the entire output object to cover output copy scenarios
 
-<#    regex:
+    <#    regex:
       TODO - any number of non-alphanumeric chars (comma, space, paren, etc) (this ensures it's the start of a list* function and not a UDF with the name "list")
       DONE - literal match of "list"
       DONE - any number of alpha-numerica chars followed by 0 or more whitepace
@@ -44,6 +44,9 @@ foreach ($output in $TemplateObject.outputs.psobject.properties) {
     # TODO avoid UDFs, current regex will flag "myListKeys()" which would be ok, but current regex will match it
     if ($outputText -match "\s{0,}\[.*?\W{0,}list\w{1,}\s{0,}\(") {
         Write-Error -Message "Output contains secret: $($output.Name)" -ErrorId Output.Contains.Secret -TargetObject $output
+    }
+    if ($output.Name -like "*password*"){
+        Write-Error -Message "Output name suggests secret: $($output.Name)" -ErrorId Output.Contains.Secret.Name -TargetObject $output
     }
 }
 
