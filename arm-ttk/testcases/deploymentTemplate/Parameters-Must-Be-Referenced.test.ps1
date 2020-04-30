@@ -16,7 +16,16 @@ param(
     $TemplateText
 )
 
-$exprStrOrQuote = [Regex]::new('(?<!\\)(?>"\s{0,}\[")', 'RightToLeft')
+$TemplateObjectCopy = [PSObject]::new()
+foreach ($prop in $TemplateObject.psobject.properties) {
+    if ($prop.Name -eq 'Parameters') { continue }
+    $TemplateObjectCopy.psobject.Members.Add($prop)    
+}
+
+$TemplateTextWithoutParameters = 
+    $TemplateObjectCopy | ConvertTo-Json -Depth 100
+
+$exprStrOrQuote = [Regex]::new('(?<!\\)[\[\"]', 'RightToLeft')
 foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
     # If the parameter name starts with two underscores,
     if ($parameter.Name -like '__*') { continue } # skip it.
@@ -37,12 +46,12 @@ $($Parameter.Name)   # the parameter name
     # The Regex needs to be case-insensitive
 'Multiline,IgnoreCase,IgnorePatternWhitespace'
 )
-    $foundRefs = $findVar.Matches($TemplateText) # See if we found the variable
+    $foundRefs = @($findVar.Matches($TemplateTextWithoutParameters)) # See if we found the variable
     if (-not $foundRefs) { # If we didn't, error
         Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject $parameter
     } else {
         foreach ($fr in $foundRefs) { # Walk thru each reference
-            $foundQuote =$exprStrOrQuote.Match($TemplateText, $fr.Index) # make sure we hit a [ before a quote
+            $foundQuote =$exprStrOrQuote.Match($TemplateTextWithoutParameters, $fr.Index) # make sure we hit a [ before a quote
             if ($foundQuote.Value -eq '"') { # if we don't, error
                 Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject $parameter
             }
