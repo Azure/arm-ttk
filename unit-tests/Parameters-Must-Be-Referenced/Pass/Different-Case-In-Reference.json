@@ -1,1 +1,11 @@
-﻿{"$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#","parameters":{"myParameter":{"type":"string"}},"variables":{"foo":"[ parameters ( 'myParameter') ]"}}
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "parameters": {
+        "myParameter": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "foo": "[ parameters ( 'myParameter') ]"
+    }
+}
