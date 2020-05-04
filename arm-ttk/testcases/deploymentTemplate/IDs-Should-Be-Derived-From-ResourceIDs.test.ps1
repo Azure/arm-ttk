@@ -27,7 +27,12 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     $myIdFieldName = $id.PropertyName
     $myId = $id.$myIdFieldName        
 
-    if ($myIdFieldName -eq 'tenantId') { # We're checking resource ids, not tenant IDs
+    $exceptions = @(
+        'tenantId',
+        'workerSizeId' #serverFarms
+    )
+
+    if ($exceptions -contains $myIdFieldName) { # We're checking resource ids, not tenant IDs
         continue
     }
 
@@ -44,10 +49,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
                 continue
             }
         }
-    }
-
-    
-    
+    }    
 
     # $myId = "$($id.id)".Trim() # Grab the actual ID,
     if (-not $myId) {
