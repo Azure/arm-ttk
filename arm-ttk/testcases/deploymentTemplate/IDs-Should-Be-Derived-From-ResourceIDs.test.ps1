@@ -28,8 +28,9 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     $myId = $id.$myIdFieldName        
 
     $exceptions = @(
-        'tenantId',
-        'workerSizeId' #serverFarms
+        "tenantId",
+        "workerSizeId", # Microsoft.Web/serverFarms
+        "serverFarmId" # Microsoft.Web/sites
     )
 
     if ($exceptions -contains $myIdFieldName) { # We're checking resource ids, not tenant IDs
