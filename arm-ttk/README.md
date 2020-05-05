@@ -24,6 +24,14 @@ This will run the full suite of applicable tests on your template.  To run a spe
 
 Before you run the tests on Linux, you'll need to [install PowerShell Core](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-6).
 
+## Running Tests on macOS
+
+Before you run the tests on macOS, you'll need to [install PowerShell Core](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-macos?view=powershell-6) and `coreutils`.
+
+```
+brew install coreutils
+```
+
 ## Running Tests in PowerShell
 
 To run the tests in PowerShell, you'll need to import the module.
