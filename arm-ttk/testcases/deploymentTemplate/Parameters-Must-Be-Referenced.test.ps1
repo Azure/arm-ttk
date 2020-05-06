@@ -33,8 +33,8 @@ foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
     if ($parameter.Name -like '__*') { continue } # skip it.
 
 
-    # Create a Regex to find the var
-    $findVar = [Regex]::new(@"
+    # Create a Regex to find the parameter
+    $findParam = [Regex]::new(@"
 parameters           # the parameters keyword
 \s{0,}               # optional whitespace
 \(                   # opening parenthesis
@@ -48,7 +48,7 @@ $($Parameter.Name)   # the parameter name
     # The Regex needs to be case-insensitive
 'Multiline,IgnoreCase,IgnorePatternWhitespace'
 )
-    $foundRefs = @($findVar.Matches($TemplateTextWithoutParameters)) # See if we found the variable
+    $foundRefs = @($findParam.Matches($TemplateTextWithoutParameters)) # See if we found the variable
     if (-not $foundRefs) { # If we didn't, error
         Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject $parameter
     } else {
