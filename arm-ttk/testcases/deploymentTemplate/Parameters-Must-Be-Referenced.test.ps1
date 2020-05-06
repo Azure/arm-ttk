@@ -16,14 +16,16 @@ param(
     $TemplateText
 )
 
-$TemplateObjectCopy = [PSObject]::new()
-foreach ($prop in $TemplateObject.psobject.properties) {
-    if ($prop.Name -eq 'Parameters') { continue }
+# We need the -TemplateText, but without parameters, so 
+$TemplateObjectCopy = [PSObject]::new() # create a shallow copy
+foreach ($prop in $TemplateObject.psobject.properties) { # of every property 
+    if ($prop.Name -eq 'Parameters') { continue } # except 'Parameters'.
     $TemplateObjectCopy.psobject.Members.Add($prop)    
 }
 
-$TemplateTextWithoutParameters = 
-    $TemplateObjectCopy | ConvertTo-Json -Depth 100
+$TemplateTextWithoutParameters = # Then convert the shallow copy to JSON
+    $($TemplateObjectCopy | ConvertTo-Json -Depth 100) -replace # and replace 
+        '\\u0027', "'" # unicode-single quotes with single quotes (in case we are not on core).
 
 $exprStrOrQuote = [Regex]::new('(?<!\\)[\[\"]', 'RightToLeft')
 foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
@@ -37,9 +39,9 @@ parameters           # the parameters keyword
 \s{0,}               # optional whitespace
 \(                   # opening parenthesis
 \s{0,}               # more optional whitespace
-(?:'|\\u0027)        # either a single quote or an escaped single quote
+'                    # a single quote
 $($Parameter.Name)   # the parameter name
-(?:'|\\u0027)        # either a single quote or an escaped single quote
+'                    # either a single quote or an escaped single quote
 \s{0,}               # more optional whitespace
 \)                   # closing parenthesis
 "@,
