@@ -41,7 +41,7 @@ parameters           # the parameters keyword
 \s{0,}               # more optional whitespace
 '                    # a single quote
 $($Parameter.Name)   # the parameter name
-'                    # either a single quote or an escaped single quote
+'                    # a single quote
 \s{0,}               # more optional whitespace
 \)                   # closing parenthesis
 "@,
