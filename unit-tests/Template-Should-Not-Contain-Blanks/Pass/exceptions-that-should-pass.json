@@ -26,7 +26,8 @@
             "accessPolicies": [
             ],
             "value": null
-        }
+        },
+        "someLongString": "this case replicates putting 'code' inside of a string, found one like this byte[] in quickstarts"
     },
     "resources": []
 }
