@@ -48,17 +48,6 @@ foreach ($output in $TemplateObject.outputs.psobject.properties) {
 
     $outputText = $output.value | ConvertTo-Json # search the entire output object to cover output copy scenarios
 
-    <#    regex:
-      TODO - any number of non-alphanumeric chars (comma, space, paren, etc) (this ensures it's the start of a list* function and not a UDF with the name "list")
-      DONE - literal match of "list"
-      DONE - any number of alpha-numerica chars followed by 0 or more whitepace
-      DONE - literal match of open paren "("
-#>
-
-    # TODO avoid [[ doesn't work here like it does below
-    # TODO avoid UDFs, current regex will flag "myListKeys()" which would be ok, but current regex will match it
-
-    $oldRegex = "\s{0,}\[\s{0,.*?\W{0,}list\w{1,}\s{0,}\("
     if ($isListFunc.IsMatch($outputText)) {
         
         foreach ($m in $isListFunc.Matches($outputText)) {
@@ -105,19 +94,6 @@ $name                # the parameter name
             $outputText = $output.Value | ConvertTo-Json -Depth 100
             $outputText = $outputText -replace # and replace 
                 '\\u0027', "'" # unicode-single quotes with single quotes (in case we are not on core).
-            <#
-            - begins with "[
-            - any number of chars
-            - 0 or more whitespace
-            - parameters
-            - 0 or more whitespace
-            - (
-            - 0 or more whitespace
-            - '
-            - name of the parameter
-
-            An expression could be: "[ concat ( parameters ( 'test' ), ...)]"
-            #>
 
             $matched = $($findParam.Match($outputText))
             if ($matched.Success) {
