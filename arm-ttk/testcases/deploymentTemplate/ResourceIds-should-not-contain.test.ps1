@@ -28,6 +28,9 @@ $items = @([Regex]::Matches($TemplateText, "\s{0,}\[\s{0,}resourceId\s{0,}\(\s{0
        
 $lineBreaks = [Regex]::Matches($TemplateText, "`n|$([Environment]::NewLine)")
 
+# Some properties look like resourceId properties but are not (they are ususally uris)
+$PropertiesThatAreNotResourceIds = 'keyVaultSecretId' # Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
+
 # this just gets the line number and property name for the error message
 if ($items) {
     $sortedItems = @()
@@ -35,6 +38,10 @@ if ($items) {
         $nearbyContext = [Regex]::new('"(?<PropertyName>[^"]{1,})"\s{0,}:', "RightToLeft").Match($TemplateText, $item.Index)
         if ($nearbyContext -and $nearbyContext.Success) {
             $PropertyName = $nearbyContext.Groups["PropertyName"].Value
+            # exceptions
+            if ($PropertiesThatAreNotResourceIds -contains $PropertyName) {
+                continue
+            }
             $lineNumber = @($lineBreaks | ? { $_.Index -lt $item.Index }).Count + 1
             $obj = New-Object -TypeName psobject -Property @{item=$item;lineNumber=$lineNumber;PropertyName=$PropertyName}
             $sortedItems += $obj
