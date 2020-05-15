@@ -30,7 +30,8 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     $exceptions = @(
         "tenantId",
         "workerSizeId", # Microsoft.Web/serverFarms
-        "serverFarmId" # Microsoft.Web/sites
+        "serverFarmId", # Microsoft.Web/sites
+        "keyVaultSecretId" # Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
     )
 
     if ($exceptions -contains $myIdFieldName) { # We're checking resource ids, not tenant IDs
