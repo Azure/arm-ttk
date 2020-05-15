@@ -16,8 +16,10 @@
             "resources": [ //nested (top level test below)
             ],
             "outputs": "",
-            "variables": {},
-            "parameters": [],
+            "variables": {
+            },
+            "parameters": [
+            ],
             "functions": null,
             "properties": [
             ],
@@ -27,7 +29,22 @@
             ],
             "value": null
         },
-        "someLongString": "this case replicates putting 'code' inside of a string, found one like this byte[] in quickstarts"
+        "someLongString": "this case replicates putting 'code' inside of a string, found one like this byte[] in quickstarts",
+        "identityExpression": {
+            "type": "UserAssigned",
+            "userAssignedIdentities": {
+                "[variables('identityID')]": {
+                }
+            }
+        },
+        "identityLiteral": {
+            "type": "UserAssigned",
+            "userAssignedIdentities": {
+                " /subscriptions/guid/providers/blah/blah/blah": {
+                }
+            }
+        }
     },
-    "resources": []
+    "resources": [
+    ]
 }

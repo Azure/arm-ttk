@@ -41,7 +41,14 @@ if ($emptyItems) {
         $nearbyContext = [Regex]::new('"(?<PropertyName>[^"]{1,})"\s{0,}:', "RightToLeft").Match($TemplateText, $emptyItem.Index)
         if ($nearbyContext -and $nearbyContext.Success) {
             $emptyPropertyName = $nearbyContext.Groups["PropertyName"].Value
+            # exceptions
             if ($PropertiesThatCanBeEmpty -contains $emptyPropertyName) {
+                continue
+            }
+            # userAssigned Identity can have an expression for the property name
+            # it could also be a literal resourceId
+            if ($emptyPropertyName -match "\s{0,}\[" -or              # an expression starts with [
+                $emptyPropertyName -match "\s{0,}\/subscriptions\/"){ # a resourceId starts with /subscriptions/
                 continue
             }
             $lineNumber = @($lineBreaks | ? { $_.Index -lt $emptyItem.Index }).Count + 1
