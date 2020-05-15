@@ -18,7 +18,8 @@
         "fail5": "[extensionResourceId ( concat('Microsoft.Network/networkSecurityGroups'), 'foo', 'bar')]",
         "fail6": "[subscriptionResourceId(
                         subscription().id, 'Microsoft.Network/networkSecurityGroups', 'nsg')]",
-        "fail7": "[subscriptionResourceId(concat('Microsoft.Network/networkSecurityGroups'), 'nsg')]"
+        "fail7": "[subscriptionResourceId(concat('Microsoft.Network/networkSecurityGroups'), 'nsg')]",
+        "pass": "keyVaultSecretId" // Microsoft.Network/applicationGateways sslCertificates"
 
     },
     "resources": [
