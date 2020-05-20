@@ -1,0 +1,26 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "parameters": {
+        "vmsize": {
+            "type": "string",
+            "defaultValue": "Standard_A2_v2",
+            "metadata": {
+                "description": "Size for the Virtual Machine."
+            }
+        }
+    },
+    "resources": [
+        {
+            "properties": {
+                "osProfile": {
+                    "adminUserName": "NotRoot"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                }
+            },
+            "apiVersion": "2019-12-01",
+            "type": "Microsoft.Compute/virtualMachines"
+        }
+    ]
+}
