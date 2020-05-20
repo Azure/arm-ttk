@@ -60,6 +60,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     }
     $expandedId = Expand-AzTemplate -Expression $myId -InputObject $TemplateObject -Exclude Parameters # then expand it.
     
+    Write-Host $expandedId
     # Check that it uses the ResourceID or a param or var - can remove variables once Expand-Template does full eval of nested vars
     # REGEX
     # - 0 or more whitespace
@@ -77,8 +78,10 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         $expandedId -notmatch "\s{0,}\[\s{0,}if\s{0,}\(\s{0,}" -and `
         $expandedId -notmatch "\s{0,}\[\s{0,}parameters\s{0,}\(\s{0,}'" -and `
         $expandedId -notmatch "\s{0,}\[\s{0,}reference\s{0,}\(\s{0,}'" -and `
-        $expandedId -notmatch "\s{0,}\[\s{0,}variables\s{0,}\(\s{0,}'" ){
+        $expandedId -notmatch "\s{0,}\[\s{0,}variables\s{0,}\(\s{0,}'" -and `
+        $exceptions -notmatch "\s{0,}\[\s{0,}subscription\s{0,}\("  ){
             Write-Error "Property: `"$($id.propertyName)`" must use one of the following expressions for an resourceId property:
-             (resourceId(), subscriptionResourceId(), tenantResourceId(), if(), extensionResourceId(), parameters(), variables())" -TargetObject $id -ErrorId ResourceId.Should.Contain.Proper.Expression
+             (resourceId(), subscriptionResourceId(), tenantResourceId(), if(), extensionResourceId(), parameters(), variables(), reference(), subscription())" `
+             -TargetObject $id -ErrorId ResourceId.Should.Contain.Proper.Expression
     }
 }
