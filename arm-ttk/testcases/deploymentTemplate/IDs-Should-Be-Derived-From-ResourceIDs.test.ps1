@@ -82,12 +82,9 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     # - expression must be parameters|variables|*resourceId
     # - 0 or more whitespace
     # - opening paren (
-    # - 0 or more whitepace
-    # - single quote on parameters and variables (resourceId first parameters may not be a literal string)
     #
     $exprMatch = "\s{0,}\[\s{0,}($($allowedExpressions -join '|' ))\s{0,}\(\s{0,}"
 
-    # this is an "or" scenario since extensionResourceId should contain resourceId and would provide non-whitespace before the function name
     if ($expandedId -is [string] -and ` #if it happens to be an object property, skip it
         $expandedId -notmatch $exprMatch  ){
             Write-Error "Property: `"$($id.propertyName)`" must use one of the following expressions for an resourceId property:
