@@ -27,7 +27,8 @@
                 "id": "[if(bool('true'), resourceId(parameters('storageResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), json('null'))]"
             },
             "keyVaultSecretId": "[concat()]", // this is actually a uri Microsoft.Network/applicationGateways sslCertificates - created with reference() and concat /secrets/secretname
-            "storageAccountSubscriptionId": "[subscription().subscriptionId]" // Microsoft.Sql/servers/auditSettings asks for a subscriptionId
+            "storageAccountSubscriptionId": "[subscription().subscriptionId]", // Microsoft.Sql/servers/auditSettings asks for a subscriptionId
+            "roleAssignmentGuid": "[ guid ('some seed')]" // variables that are used for roleAssignment GUIDs (or any other guid) ends in "id" and should be exempted if the function is used
         }
     ]
 }
