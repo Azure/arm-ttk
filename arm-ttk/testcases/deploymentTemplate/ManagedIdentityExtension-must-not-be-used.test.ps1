@@ -1,6 +1,12 @@
-﻿param(
+﻿<#
+.Synopsis
+    Ensures that the ManagedIdentityExtension is not used.
+.Description
+    Ensures that the ManagedIdentityExtension is not anywhere within template resources.
+#>
+param(
 [Parameter(Mandatory=$true,Position=0)]
-[string]
+[PSObject]
 $TemplateObject
 )
 
