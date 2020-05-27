@@ -14,29 +14,38 @@ param(
     $TemplateText
 )
 
+$findVariableInTemplate = {
+    # Create a Regex to find the variable
+    param(
+        [Parameter(Mandatory,Position=0,ValueFromPipeline)]
+        [string]$Name
+    )
+    process {
+        [Regex]::new(@"
+            variables   # the variables keyword
+            \s{0,}      # optional whitespace
+            \(          # opening parenthesis
+            \s{0,}      # more optional whitespace
+            '           # a single quote
+            $name       # the variable name
+            '           # either a single quote
+            \s{0,}      # more optional whitespace
+            \)          # closing parenthesis
+"@,
+        # The Regex needs to be case-insensitive
+        'Multiline,IgnoreCase,IgnorePatternWhitespace'
+        ).Matches($TemplateText) | 
+            Add-Member NoteProperty Name $Name -Force -PassThru
+    }
+}
+
 $exprStrOrQuote = [Regex]::new('(?<!\\)[\[\"]', 'RightToLeft')
 foreach ($variable in $TemplateObject.variables.psobject.properties) {
     
     # TODO: if the variable name is "copy": we need to loop through the array and pull each var and check individually
     
-    if ($variable.name -ne 'copy' ) {
-        # Create a Regex to find the variable
-        $findVariable = [Regex]::new(@"
-variables            # the variables keyword
-\s{0,}               # optional whitespace
-\(                   # opening parenthesis
-\s{0,}               # more optional whitespace
-'                    # a single quote
-$($Variable.Name)    # the variable name
-'                    # either a single quote
-\s{0,}               # more optional whitespace
-\)                   # closing parenthesis
-"@,
-    # The Regex needs to be case-insensitive
-'Multiline,IgnoreCase,IgnorePatternWhitespace'
-)
-
-        $foundRefs = @($findVariable.Matches($TemplateText))
+    if ($variable.name -ne 'copy' -and -not $variable.value.copy) {        
+        $foundRefs = @(& $findVariableInTemplate $variable.Name)
         if (-not $foundRefs) {
             Write-Error -Message "Unreferenced variable: $($Variable.Name)" -ErrorId Variables.Must.Be.Referenced -TargetObject $variable
         } else {
@@ -48,24 +57,14 @@ $($Variable.Name)    # the variable name
             }
         }        
     } else {
-        foreach ($copyItem in $variable.value) {
-            # Create a Regex to find the variable
-            $findVariable = [Regex]::new(@"
-variables            # the variables keyword
-\s{0,}               # optional whitespace
-\(                   # opening parenthesis
-\s{0,}               # more optional whitespace
-'                    # a single quote
-$($copyItem.Name)    # the variable name
-'                    # either a single quote
-\s{0,}               # more optional whitespace
-\)                   # closing parenthesis
-"@,
-    # The Regex needs to be case-insensitive
-'Multiline,IgnoreCase,IgnorePatternWhitespace'
-)
-        
-            $foundRefs = @($findVariable.Matches($TemplateText))
+        $copyItemList = 
+            if ($variable.Name -eq 'copy') {
+                $variable.value
+            } else {
+                $variable.value.copy
+            }
+        foreach ($copyItem in $copyItemList) {           
+            $foundRefs = @(& $findVariableInTemplate $copyItem.Name)
             if (-not $foundRefs) {
                 Write-Error -Message "Unreferenced variable: $($copyItem.Name)" -ErrorId Variables.Must.Be.Referenced -TargetObject $copyItem
             } else {
