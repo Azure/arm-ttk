@@ -5,20 +5,6 @@
         "containsListKeys": {
             "type": "string",
             "value": "[listKeys('storageAccountName','2017-10-01').keys[0].value]"
-        },
-        "ContainsListComma": {
-            "type": "string",
-            "value": "[concat('foo',ListKeys('storageAccountName','2017-10-01'))]"
-        },
-        "containsListKeysConcat": {
-            "type": "string",
-            "value": "[concat('connection string blah=', listKeys ( 'storageAccountName','2017-10-01').keys[0].value)]"
-        },
-        "containsListInSecretObject": {
-            "type": "object",
-            "value": {
-                "key": "[trim(listKeys('storageAccountName','2017-10-01').keys[0].value)]"
-            }
         }
     }
 }

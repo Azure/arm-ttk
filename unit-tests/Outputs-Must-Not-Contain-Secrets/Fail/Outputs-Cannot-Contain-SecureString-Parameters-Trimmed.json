@@ -2,14 +2,14 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "SecureStringParam2": {
+        "SecureStringParam": {
             "type": "secureString"
         }
     },
-    "outputs": {       
-        "ContainsParamSecureString": {
+    "outputs": {
+        "ContainsParamSecureStringTrim": {
             "type": "string",
-            "value": "[ parameters ('SecureStringParam2') ]"
+            "value": "[ trim ( parameters ( 'SecureStringParam' ) )]"
         }
     }
 }
