@@ -1,0 +1,10 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "outputs": {        
+        "NotContainsListUDF": {
+            "type": "string",
+            "value": "[mylistUDF()]" //TODO since this doesn't have leading separator, it should not be flagged
+        }
+    }
+}
