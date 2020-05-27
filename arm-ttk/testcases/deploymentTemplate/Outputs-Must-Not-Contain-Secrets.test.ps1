@@ -30,11 +30,11 @@ This test should flag using runtime functions that list secrets or secure parame
 
     $isListFunc = [Regex]::new(@'
 \s{0,}
-(?>
-    \[|
-    \(|
-    ,
-)
+(?>        # we don't want to flag a UDF that might be called "myListOfIps" so we need to check the char preceeding list*()
+    \[|    # bracket
+    \(|    # paren
+    ,      # comma
+)          # and the (?>  ) syntax says this is not included in the match because we need to check for expressions explicitly below
 \s{0,}
 list\w{1,}
 \s{0,}
