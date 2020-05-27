@@ -1,0 +1,11 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "parameters": {
+        "usedInConcat": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "foo": "[concat(parameters('usedInConcat'), 'bar')]"
+    }
+}
