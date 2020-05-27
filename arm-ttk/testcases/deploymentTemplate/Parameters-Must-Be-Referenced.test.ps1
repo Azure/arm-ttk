@@ -44,7 +44,7 @@ $($Parameter.Name)   # the parameter name
         foreach ($fr in $foundRefs) { # Walk thru each reference
             $foundQuote =$exprStrOrQuote.Match($TemplateText, $fr.Index) # make sure we hit a [ before a quote
             if ($foundQuote.Value -eq '"') { # if we don't, error
-                Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject $parameter
+                Write-Error -Message "Parameter reference is not contained within an expression: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced.In.Expression -TargetObject $parameter
             }
         }
     }
