@@ -1,0 +1,11 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "fail0": {
+            "type": "string",
+            "defaultValue": "[resourceId(resourceGroup().name, 'Microsoft.Storage/storageAccounts', 'foo')]"
+        }
+    },
+    "resources": []
+}

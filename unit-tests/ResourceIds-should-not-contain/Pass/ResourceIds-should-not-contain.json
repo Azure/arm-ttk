@@ -1,0 +1,37 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+    },
+    "variables": {
+        "pass0": "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg')]",
+        "pass1": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'default')]",
+        "pass2": "[tenantResourceId('Microsoft.Network/networkSecurityGroups', 'nsg')]",
+        "pass3": "[subscriptionResourceId('Microsoft.Network/networkSecurityGroups', 'nsg')]",
+        "pass4": "[extensionResourceId(resourceId('Microsoft.Network/networkSecurityGroups', 'nsg'), 'Microsoft.Resource/someProvider', 'someResource')]",
+        "pass5": "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg')]",
+        "pass6": " [ resourceId ( 'Microsoft.Network/networkSecurityGroups', 'nsg' ) ]"
+
+    },
+    "resources": [
+    ],
+    "outputs": {
+        "pass0": {
+            "type": "string",
+            "value": "[ reference('/providers/Microsoft.Authorization/type/name', '2020-01-01', 'Full').someproperty]"
+        },
+        "pass1": {
+            "type": "string",
+            "value": "[listAdminKeys ('Microsoft.Network/networkSecurityGroups', 'nsg')]"
+        },
+        "pass2": {
+
+            "type": "string",
+            "value": "[concat(reference(resourceId('Microsoft.Network/networkSecurityGroups', 'nsg')).something, 'suffix')]"
+        },
+        "pass3": {
+            "type": "string",
+            "value": "[ concat(reference(subscriptionResourceId('Microsoft.Network/networkSecurityGroups', 'nsg')).something, 'suffix')]"
+        }
+    }
+}

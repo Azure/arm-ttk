@@ -1,0 +1,35 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+    },
+    "variables": {
+        "someVar": "test"
+    },
+    "resources": [
+        {
+            "name": "fail",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-10-01",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('someVar'))]",
+                "[concat('Microsoft.Network/virtualNetworks/', variables('someVar'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('someVar'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "fail": {
+                                "id": "[ resourceId ( resourceGroup().name , 'Microsoft.Network/publicIpAddresses', variables('someVar'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {
+    }
+}
