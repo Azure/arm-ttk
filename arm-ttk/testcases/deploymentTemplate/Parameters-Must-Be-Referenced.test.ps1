@@ -16,13 +16,6 @@ param(
     $TemplateText
 )
 
-# We need the -TemplateText, but without parameters, so 
-$TemplateObjectCopy = [PSObject]::new() # create a shallow copy
-foreach ($prop in $TemplateObject.psobject.properties) { # of every property 
-    if ($prop.Name -eq 'Parameters') { continue } # except 'Parameters'.
-    $TemplateObjectCopy.psobject.Members.Add($prop)    
-}
-
 $exprStrOrQuote = [Regex]::new('(?<!\\)[\[\"]', 'RightToLeft')
 foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
     # If the parameter name starts with two underscores,
