@@ -16,6 +16,7 @@ param(
 )
 
 # Check for any functions as parameters - PowerShell handles empty differently in objects so check the JSON source (i.e. text)
+# note this regex allows for any chars to preceed the function to check for nesting, but it will also flag UDFs as written (which are not common)
 $items = @([Regex]::Matches($TemplateText, "\s{0,}\[.*resourceId\s{0,}\(\s{0,}resourceGroup\(")) +            # resourceId(resourceGroup(
          @([Regex]::Matches($TemplateText, "\s{0,}\[.*resourceId\s{0,}\(\s{0,}subscription\(")) +             # resourceId(subscription(
          @([Regex]::Matches($TemplateText, "\s{0,}\[.*resourceId\s{0,}\(\s{0,}concat\s{0,}\(")) +             # resourceId(concat(
