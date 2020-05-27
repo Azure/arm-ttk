@@ -52,7 +52,7 @@ foreach ($variable in $TemplateObject.variables.psobject.properties) {
             foreach ($fr in $foundRefs) {
                 $foundQuote =$exprStrOrQuote.Match($TemplateText, $fr.Index)                
                 if ($foundQuote.Value -eq '"') {
-                    Write-Error -Message "Unreferenced variable: $($Variable.Name)" -ErrorId Variables.Must.Be.Referenced -TargetObject $variable
+                        Write-Error -Message "Variable reference is not contained within an expression: $($copyItem.Name)" -ErrorId Variables.Must.Be.Referenced.In.Expression -TargetObject $copyItem
                 }
             }
         }        
@@ -71,7 +71,7 @@ foreach ($variable in $TemplateObject.variables.psobject.properties) {
                 foreach ($fr in $foundRefs) {
                     $foundQuote = $exprStrOrQuote.Match($TemplateText, $fr.Index)
                     if ($foundQuote.Value -eq '"') {
-                        Write-Error -Message "Unreferenced variable: $($copyItem.Name)" -ErrorId Variables.Must.Be.Referenced -TargetObject $copyItem
+                        Write-Error -Message "Variable reference is not contained within an expression: $($copyItem.Name)" -ErrorId Variables.Must.Be.Referenced.In.Expression -TargetObject $copyItem
                     }
                 }
             }
