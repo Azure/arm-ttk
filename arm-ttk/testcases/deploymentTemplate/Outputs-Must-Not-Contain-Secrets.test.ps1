@@ -28,22 +28,35 @@ This test should flag using runtime functions that list secrets or secure parame
 
 #>
 
+    $isListFunc = [Regex]::new(@'
+\s{0,}
+(?>        # we don't want to flag a UDF that might be called "myListOfIps" so we need to check the char preceeding list*()
+    \[|    # bracket
+    \(|    # paren
+    ,      # comma
+)          # and the (?>  ) syntax says this is not included in the match because we need to check for expressions explicitly below
+\s{0,}
+list\w{1,}
+\s{0,}
+\(
+'@, 'Multiline,IgnoreCase,IgnorePatternWhitespace')
+
+$exprStrOrQuote = [Regex]::new('(?<!\\)[\[\"]', 'RightToLeft')
+
 #look at each output value property
 foreach ($output in $TemplateObject.outputs.psobject.properties) {
 
     $outputText = $output.value | ConvertTo-Json # search the entire output object to cover output copy scenarios
 
-    <#    regex:
-      TODO - any number of non-alphanumeric chars (comma, space, paren, etc) (this ensures it's the start of a list* function and not a UDF with the name "list")
-      DONE - literal match of "list"
-      DONE - any number of alpha-numerica chars followed by 0 or more whitepace
-      DONE - literal match of open paren "("
-#>
-
-    # TODO avoid [[ doesn't work here like it does below
-    # TODO avoid UDFs, current regex will flag "myListKeys()" which would be ok, but current regex will match it
-    if ($outputText -match "\s{0,}\[.*?\W{0,}list\w{1,}\s{0,}\(") {
-        Write-Error -Message "Output contains secret: $($output.Name)" -ErrorId Output.Contains.Secret -TargetObject $output
+    if ($isListFunc.IsMatch($outputText)) {
+        
+        foreach ($m in $isListFunc.Matches($outputText)) {
+            # Go back and find if it starts with a [ or a "
+            $preceededBy = $exprStrOrQuote.Match($outputText, $m.Index)
+            if ($preceededBy.Value -eq '[') {  # If it starts with a [, it's a real ref
+                Write-Error -Message "Output contains secret: $($output.Name)" -ErrorId Output.Contains.Secret -TargetObject $output   
+            }
+        }
     }
     if ($output.Name -like "*password*"){
         Write-Error -Message "Output name suggests secret: $($output.Name)" -ErrorId Output.Contains.Secret.Name -TargetObject $output
@@ -56,26 +69,37 @@ foreach ($parameterProp in $templateObject.parameters.psobject.properties) {
     $name = $parameterProp.Name
     # If the parameter is a secureString or secureObject it shouldn't be in the outputs:
     if ($parameter.Type -eq 'securestring' -or $parameter.Type -eq 'secureobject') { 
+
+        # Create a Regex to find the parameter
+        $findParam = [Regex]::new(@"
+parameters           # the parameters keyword
+\s{0,}               # optional whitespace
+\(                   # opening parenthesis
+\s{0,}               # more optional whitespace
+'                    # a single quote
+$name                # the parameter name
+'                    # a single quote
+\s{0,}               # more optional whitespace
+\)                   # closing parenthesis
+"@,
+    # The Regex needs to be case-insensitive
+'Multiline,IgnoreCase,IgnorePatternWhitespace'
+)
         
         foreach ($output in $TemplateObject.outputs.psobject.properties) {
 
-            $outputText = $output.Value | ConvertTo-Json
-            <#
-            - begins with "[
-            - any number of chars
-            - 0 or more whitespace
-            - parameters
-            - 0 or more whitespace
-            - (
-            - 0 or more whitespace
-            - '
-            - name of the parameter
+            $outputText = $output.Value | ConvertTo-Json -Depth 100
+            $outputText = $outputText -replace # and replace 
+                '\\u0027', "'" # unicode-single quotes with single quotes (in case we are not on core).
 
-            An expression could be: "[ concat ( parameters ( 'test' ), ...)]"
-            #>
-
-            if ($outputText -match "`"\s{0,}\[.*?parameters\s{0,}\(\s{0,}'$($Name)'") { 
-                Write-Error -Message "Output contains $($parameterProp.Value.Type) parameter: $($output.Name)" -ErrorId Output.Contains.SecureParameter -TargetObject $output
+            $matched = $($findParam.Match($outputText))
+            if ($matched.Success) {
+                
+                $matchIndex = $findParam.Match($outputText).Index
+                $preceededBy = $exprStrOrQuote.Match($outputText, $matchIndex).Value
+                if ($preceededBy -eq '[') {
+                    Write-Error -Message "Output contains $($parameterProp.Value.Type) parameter: $($output.Name)" -ErrorId Output.Contains.SecureParameter -TargetObject $output
+                }
             }
         }        
     }
