@@ -6,7 +6,7 @@
     "outputs": {
         "fail": {
             "type": "string",
-            "value": "[concat ( listAdminKeys ('Microsoft.Network/networkSecurityGroups', 'nsg') )]"
+            "value": "[concat(listAdminKeys (concat('Microsoft.Network/networkSecurityGroups', 'nsg'), '2020-01-01') )]"
         }
     }
 }
