@@ -1,7 +1,10 @@
 
 # Azure Resource Manager Template Toolkit (arm-ttk)
 
-The code in this repository can be used for analyzing and testing [Azure Resource Manager Templates](https://docs.microsoft.com/en-us/azure/templates/).  The tests will check a template or set of templates for coding best practices.  There are some checks for simple syntactical errors but the intent is not to re-implement tests or checks that are provided by the platform (e.g. the /validate api).  More instruction can be found [here](/arm-ttk/README.md).
+The code in this repository can be used for analyzing and testing [Azure Resource Manager Templates](https://docs.microsoft.com/en-us/azure/templates/).  The tests will check a template or set of templates for coding best practices.  There are some checks for simple syntactical errors but the intent is not to re-implement tests or checks that are provided by the platform (e.g. the /validate api).  
+
+## Using the TTK
+More instruction can be found [here](/arm-ttk/README.md).
 
 ## Philosophy
 
