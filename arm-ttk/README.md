@@ -42,11 +42,11 @@ You can then test a particular path by using:
 
     Test-AzTemplate -TemplatePath $TemplateFileOrFolder
 
-### Running Tests from the Command Line
+## Running Tests from the Command Line
 
 You can use a BASH file or Command Script to run on the command line.  To do so, simply call Test-AzTemplate.sh (or .cmd).  This will pass the arguments down to the PowerShell script.  To get help, pass a -?
 
-### Inspecting Test Results
+## Inspecting Test Results
 
 By default, tests are run in Pester, which displays output in a colorized format, but does not return individual failures to the pipeline.  
 To inspect the results, use the -NoPester flag and assign the results to a variable (you must be running in PowerShell):
@@ -64,3 +64,11 @@ Many test failures will return a TargetObject, for instance, the exact property 
         Select-Object -ExpandProperty TargetObject
 
 Please note that not all test cases will return a target object.  If no target object is returned, the target should be clear from the text of the error.
+
+## Running Tests in Azure DevOps Pipelines
+
+To run the tests in an Azure DevOps pipeline the tests first need to be installed on the build machine.  Currently this can be done by cloning the repo or downloading from the latest build from [https://aka.ms/arm-ttk-latest](https://aka.ms/arm-ttk-latest) which is the location used by the Azure QuickStarts repo.
+
+There is an extension published in the marketplace for running the TTK in a pipeline, more detail can be found [here](https://marketplace.visualstudio.com/items?itemName=Sam-Cogan.ARMTTKExtension) and the source is in [github](https://github.com/sam-cogan/arm-ttk-extension).
+
+To create your own tasks, see the pipleline we use for the QuickStart repo - the step for downloading the TTK is [here](https://github.com/Azure/azure-quickstart-templates/blob/master/test/pipeline/pipeline.import.fork.json#L136-L160) and running the tests [here](https://github.com/Azure/azure-quickstart-templates/blob/master/test/pipeline/pipeline.import.fork.json#L286-L310).  If these line numbers don't look correct, the file has probably been updated, just [zoom out](https://github.com/Azure/azure-quickstart-templates/blob/master/test/pipeline/pipeline.import.fork.json).
