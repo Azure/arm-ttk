@@ -15,7 +15,7 @@ $TemplateObject
 )
 
 # First, find all objects with an ID property in the MainTemplate.
-$ids = $TemplateObject  | Find-JsonContent -Key *id <#-Value *#> -Like
+$ids = $TemplateObject  | Find-JsonContent -Key *id -Like
 
 
 # If the "Parameters" property or "Outputs" property is in the lineage, skip check
@@ -27,10 +27,17 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     $myIdFieldName = $id.PropertyName
     $myId = $id.$myIdFieldName        
 
-    if ($myIdFieldName -eq 'tenantId') { # We're checking resource ids, not tenant IDs
+    # these properties are exempt, since they are not actually resourceIds
+    $exceptions = @(
+        "tenantId",
+        "workerSizeId", # Microsoft.Web/serverFarms
+        "serverFarmId", # Microsoft.Web/sites
+        "keyVaultSecretId" # Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
+    )
+
+    if ($exceptions -contains $myIdFieldName) { # We're checking resource ids, not tenant IDs
         continue
     }
-
     if ($id.JsonPath -match '^(parameters|outputs)') {
         continue
     }
@@ -56,7 +63,21 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     }
     $expandedId = Expand-AzTemplate -Expression $myId -InputObject $TemplateObject -Exclude Parameters # then expand it.
     
-    # Check that it uses the ResourceID or a param or var - can remove variables once Expand-Template does full eval of nested vars
+    # these are allowed for resourceIds
+    $allowedExpressions = @(
+        "extensionResourceId",
+        "resourceId",
+        "subscriptionResourceId",
+        "tenantResourceId",
+        "if",
+        "parameters",
+        "reference",
+        "variables",
+        "subscription",
+        "guid"
+    )
+
+    # Check that it uses one of the allowed expressions - can remove variables once Expand-Template does full eval of nested vars
     # REGEX
     # - 0 or more whitespace
     # - [ to make sure it's an expression
@@ -66,15 +87,13 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     # - 0 or more whitepace
     # - single quote on parameters and variables (resourceId first parameters may not be a literal string)
     #
+    $exprMatch = "\s{0,}\[\s{0,}($($allowedExpressions -join '|' ))\s{0,}\(\s{0,}"
+
     if ($expandedId -is [string] -and ` #if it happens to be an object property, skip it
-        $expandedId -notmatch "\s{0,}\[\s{0,}(extensionResourceId|resourceId)\s{0,}\(\s{0,}"  -and ` # this is an "or" scenario since extensionResourceId should contain resourceId and would provide non-whitespace before the function name
-        $expandedId -notmatch "\s{0,}\[\s{0,}subscriptionResourceId\s{0,}\(\s{0,}'" -and `
-        $expandedId -notmatch "\s{0,}\[\s{0,}tenantResourceId\s{0,}\(\s{0,}'" -and `
-        $expandedId -notmatch "\s{0,}\[\s{0,}if\s{0,}\(\s{0,}" -and `
-        $expandedId -notmatch "\s{0,}\[\s{0,}parameters\s{0,}\(\s{0,}'" -and `
-        $expandedId -notmatch "\s{0,}\[\s{0,}reference\s{0,}\(\s{0,}'" -and `
-        $expandedId -notmatch "\s{0,}\[\s{0,}variables\s{0,}\(\s{0,}'" ){
+        $expandedId -notmatch $exprMatch  ){
             Write-Error "Property: `"$($id.propertyName)`" must use one of the following expressions for an resourceId property:
-             (resourceId(), subscriptionResourceId(), tenantResourceId(), if(), extensionResourceId(), parameters(), variables())" -TargetObject $id -ErrorId ResourceId.Should.Contain.Proper.Expression
+            $($allowedExpressions -join ',')" `
+             -TargetObject $id -ErrorId ResourceId.Should.Contain.Proper.Expression
     }
 }
+
