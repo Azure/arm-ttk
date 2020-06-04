@@ -1,4 +1,4 @@
-﻿<#
+<#
 .Synopsis
     Ensures that parameters are referenced
 .Description

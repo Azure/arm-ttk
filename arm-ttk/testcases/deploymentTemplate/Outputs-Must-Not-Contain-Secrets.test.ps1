@@ -29,7 +29,6 @@ This test should flag using runtime functions that list secrets or secure parame
 #>
 
     $isListFunc = [Regex]::new(@'
-\s{0,}
 (?>        # we don't want to flag a UDF that might be called "myListOfIps" so we need to check the char preceeding list*()
     \[|    # bracket
     \(|    # paren
@@ -47,12 +46,11 @@ $exprStrOrQuote = [Regex]::new('(?<!\\)[\[\"]', 'RightToLeft')
 foreach ($output in $TemplateObject.outputs.psobject.properties) {
 
     $outputText = $output.value | ConvertTo-Json # search the entire output object to cover output copy scenarios
-
     if ($isListFunc.IsMatch($outputText)) {
         
         foreach ($m in $isListFunc.Matches($outputText)) {
             # Go back and find if it starts with a [ or a "
-            $preceededBy = $exprStrOrQuote.Match($outputText, $m.Index)
+            $preceededBy = $exprStrOrQuote.Match($outputText, $m.Index + 1)
             if ($preceededBy.Value -eq '[') {  # If it starts with a [, it's a real ref
                 Write-Error -Message "Output contains secret: $($output.Name)" -ErrorId Output.Contains.Secret -TargetObject $output   
             }
