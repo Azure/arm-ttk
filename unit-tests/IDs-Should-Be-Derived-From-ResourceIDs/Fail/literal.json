@@ -1,0 +1,9 @@
+﻿{
+    "resources": [
+        {
+            "fail3": {
+                "id": "/subscriptions/literal"
+            }
+        }
+    ]
+}

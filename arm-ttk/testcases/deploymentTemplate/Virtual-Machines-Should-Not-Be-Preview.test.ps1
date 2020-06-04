@@ -26,8 +26,9 @@ foreach ($resource in $templateObject.resources) {
         # If we couldn't find the reference on the .virtualmachineprofile, just look for a .storageprofile
         $imageReference = $resource.properties.storageProfile.imageReference
     }
+
     if (-not $imageReference) {
-        Write-Error "Virtual machine resource $($resource.Name) has no image to reference" -TargetObject $resource -ErrorId VM.Missing.Image
+        Write-Output "Virtual machine resource $($resource.Name) has no image to reference" # VMSS scale up does not have a imageRef by design
     }
 
     if ($imageReference -like '*-preview' -or $imageReference.version -like '*-preview') {

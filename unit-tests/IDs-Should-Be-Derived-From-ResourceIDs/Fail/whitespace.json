@@ -1,0 +1,9 @@
+﻿{
+    "resources": [
+        {
+            "someWhiteSpace": {
+                "id": " [ concat( variables('id'))]"
+            }
+        }
+    ]
+}

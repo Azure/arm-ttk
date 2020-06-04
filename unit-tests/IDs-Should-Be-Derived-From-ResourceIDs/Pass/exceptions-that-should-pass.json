@@ -1,0 +1,34 @@
+﻿{
+    "resources": [
+        {
+            "id": "[resourceId('Microsoft.Storage/storageAccounts', 'name')]", //TODO this throws off the error message since we pull the parent's name (in this case 'variables')
+            "pass1": {
+                "id": "[ resourceId ( 'Microsoft.Network/applicationGateways/httpListeners', 'appGW', 'appGatewayHttpListener')]"
+            },
+            "pass2": {
+                "id": "[parameters ('appGatewayBackendPool')]"
+            },
+            "pass3": {
+                "id": "[variables('id')]"
+            },
+            "pass4": {
+                "id": "[subscriptionResourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+            },
+            "pass5": {
+                "id": "[ tenantResourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+            },
+            "pass6": {
+                "id": "[extensionResourceId( resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), 'Microsoft.Resources/type', 'resourceName')]"
+            },
+            "pass7": {
+                "id": "[resourceId(parameters('storageResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+            },
+            "pass8": {
+                "id": "[if(bool('true'), resourceId(parameters('storageResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), json('null'))]"
+            },
+            "keyVaultSecretId": "[concat()]", // this is actually a uri Microsoft.Network/applicationGateways sslCertificates - created with reference() and concat /secrets/secretname
+            "storageAccountSubscriptionId": "[subscription().subscriptionId]", // Microsoft.Sql/servers/auditSettings asks for a subscriptionId
+            "roleAssignmentGuid": "[ guid ('some seed')]" // variables that are used for roleAssignment GUIDs (or any other guid) ends in "id" and should be exempted if the function is used
+        }
+    ]
+}

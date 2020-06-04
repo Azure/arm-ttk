@@ -1,0 +1,9 @@
+﻿{
+    "resources": [
+        {
+            "fail0": {
+                "id": "" //this causes the test to fail, but is probably worth flagging
+            }
+        }
+    ]
+}

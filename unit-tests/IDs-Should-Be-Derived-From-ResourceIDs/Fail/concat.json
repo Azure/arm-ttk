@@ -1,0 +1,9 @@
+﻿{
+    "resources": [
+        {
+            "fail4": {
+                "resourceId": "[concat( variables('id'))]" //technicall it works, but not a best practice
+            }
+        }
+    ]
+}

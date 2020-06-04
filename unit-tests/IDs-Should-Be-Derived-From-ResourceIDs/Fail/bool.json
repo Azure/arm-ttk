@@ -1,0 +1,9 @@
+﻿{
+    "resources": [
+        {
+            "fail1": {
+                "Someid": true
+            }
+        }
+    ]
+}

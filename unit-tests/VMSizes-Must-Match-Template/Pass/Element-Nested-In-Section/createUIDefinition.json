@@ -1,0 +1,45 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [],
+        "steps": [
+            {
+                "label": "Resources",
+                "name": "resources",
+                "bladeTitle": "Resources",
+                "bladeSubtitle": "Subtitle",
+                "subLabel": {
+                    "preValidation": "Configure Azure Resources",
+                    "postValidation": "Done"
+                },
+                "elements": [
+                    {
+                        "label": "Virtual Machine",
+                        "name": "vm",
+                        "type": "Microsoft.Common.Section",
+                        "elements": [
+                            {
+                                "label": "Size",
+                                "name": "size",
+                                "toolTip": "Some tooltip",
+                                "type": "Microsoft.Compute.SizeSelector",
+                                "osPlatform": "Linux",
+                                "count": 1,
+                                "recommendedSizes": [
+                                    "Standard_B1s",
+                                    "Standard_B1ms"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "outputs": {
+            "location": "[location()]",
+            "vmsize": "[steps('resources').vm.size]"
+        }
+    }
+}

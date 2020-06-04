@@ -1,0 +1,50 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "foo": {
+            "type": "string",
+            "defaultValue": ""
+        }
+    },
+    "variables": {
+        "emptyArray": "[json('[]')]",
+        "emptyObject": "[json('{}')]",
+        "emptyString": "[json('\"\"')]",
+        "extraEmpty": "[json(' [ ] ')]",
+        "PropertiesThatCanBeEmpty": {
+            "resources": [ //nested (top level test below)
+            ],
+            "outputs": "",
+            "variables": {
+            },
+            "parameters": [
+            ],
+            "functions": null,
+            "properties": [
+            ],
+            "defaultValue": "
+            ",
+            "accessPolicies": [
+            ],
+            "value": null
+        },
+        "someLongString": "this case replicates putting 'code' inside of a string, found one like this byte[] in quickstarts",
+        "identityExpression": {
+            "type": "UserAssigned",
+            "userAssignedIdentities": {
+                "[variables('identityID')]": {
+                }
+            }
+        },
+        "identityLiteral": {
+            "type": "UserAssigned",
+            "userAssignedIdentities": {
+                " /subscriptions/guid/providers/blah/blah/blah": {
+                }
+            }
+        }
+    },
+    "resources": [
+    ]
+}
