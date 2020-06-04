@@ -123,7 +123,7 @@
                             $propertyNames -match $key
                         } else {
                             $key
-                        }) -join ','
+                        })
                     $property += $matchingKeys
                     . $OutputMatch $in
                 }
