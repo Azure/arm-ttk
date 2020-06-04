@@ -50,7 +50,7 @@ foreach ($output in $TemplateObject.outputs.psobject.properties) {
         
         foreach ($m in $isListFunc.Matches($outputText)) {
             # Go back and find if it starts with a [ or a "
-            $preceededBy = $exprStrOrQuote.Match($outputText, $m.Index + 1)
+            $preceededBy = $exprStrOrQuote.Match($outputText, $m.Index + 1) # add 1 to index since the match has to include "list" plus at least one other char
             if ($preceededBy.Value -eq '[') {  # If it starts with a [, it's a real ref
                 Write-Error -Message "Output contains secret: $($output.Name)" -ErrorId Output.Contains.Secret -TargetObject $output   
             }
