@@ -49,11 +49,11 @@ You can use a BASH file or Command Script to run on the command line.  To do so,
 ## Inspecting Test Results
 
 By default, tests are run in Pester, which displays output in a colorized format, but does not return individual failures to the pipeline.  
-To inspect the results, use the -NoPester flag and assign the results to a variable (you must be running in PowerShell):
+To inspect the results, assign the results to a variable:
 
-    $TestResults = Test-AzTemplate -TemplatePath $TemplateFileOrFolder -NoPester
+    $TestResults = Test-AzTemplate -TemplatePath $TemplateFileOrFolder
 
-To see failures, use Where-Object to filter the results
+To see each failure in that variable, use Where-Object to filter the results
 
     $TestFailures =  $TestResults | Where-Object { -not $_.Passed }
 
