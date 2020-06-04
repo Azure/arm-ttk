@@ -34,7 +34,8 @@ $PropertiesThatCanBeEmpty = 'resources',
                             'accessPolicies',  # keyVault requires this
                             'value', # Microsoft.Resources/deployments - passing empty strings to a nested deployment
                             'promotionCode', # Microsoft.OperationsManagement/soltuions/plan object
-                            'inputs' # Microsoft.Portal/dashboard
+                            'inputs', # Microsoft.Portal/dashboard
+                            'notEquals' # Microsoft.Authorization/policyDefinitions policyRule
 
 if ($emptyItems) {
     foreach ($emptyItem in $emptyItems) {
