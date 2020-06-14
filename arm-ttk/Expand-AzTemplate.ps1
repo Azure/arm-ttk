@@ -183,6 +183,7 @@
                 @(Get-ChildItem -Path $templateFolder.FullName -Recurse |
                     Where-Object { -not $_.PSIsContainer } |
                     ForEach-Object {
+                        if ($resolvedTemplatePath -like '*.json' -and $_.FullName -ne $resolvedTemplatePath) { return }
 
                         $fileInfo = $_
                         if ($fileInfo.DirectoryName -eq '__macosx') {
