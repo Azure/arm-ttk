@@ -1,0 +1,8 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "variables": {
+    "var": "[variables(concat('imageOS'), parameters('osType'))]"
+  }
+}
+
+
