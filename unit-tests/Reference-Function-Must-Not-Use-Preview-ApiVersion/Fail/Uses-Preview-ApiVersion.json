@@ -1,0 +1,9 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "variables": {
+        "foo": {
+            "default": "[reference('Microsoft.Storage/storageAccounts/','2018-02-01-preview')]"
+        }
+    }
+}
+
