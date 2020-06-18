@@ -10,28 +10,15 @@ param(
 $TemplateObject
 )
 
-#? Should this be using Find-JsonContent?
+$storageProfiles = Find-JsonContent -Key storageProfile -InputObject $TemplateObject
 
-foreach ($resource in $templateObject.resources) {
-    # This is a PowerShell trick to simplify multiple -ors
-    # -notcontains checks that a list (on the left side) doesn't contain a value (on the right side)
-    # So this test will ignore resources that aren't /virtualmachines or /virtualmachineassets
-    if ('microsoft.compute/virtualmachinescalesets', 
-        'microsoft.compute/virtualmachines' -notcontains $resource.type) {
-        continue
-    }
-    # Check for the VMSS property and if it's not there, check the VM property
-    $imageReference = $resource.virtualmachineprofile.storageProfile.imageReference
-    if (-not $imageReference) { 
-        # If we couldn't find the reference on the .virtualmachineprofile, just look for a .storageprofile
-        $imageReference = $resource.properties.storageProfile.imageReference
+foreach ($sp in $storageProfiles) {
+    $storageProfile = $sp.StorageProfile
+    if (-not $storageProfile.imageReference) {
+        Write-Output "Virtual machine resource '$($sp.ParentObject.Name)' has no image to reference" -TargetObject $sp # VMSS scale up does not have a imageRef by design
     }
 
-    if (-not $imageReference) {
-        Write-Output "Virtual machine resource $($resource.Name) has no image to reference" # VMSS scale up does not have a imageRef by design
-    }
-
-    if ($imageReference -like '*-preview' -or $imageReference.version -like '*-preview') {
-        Write-Error "Virtual machine resource $($resource.Name) must not use a preview image" -TargetObject $ResourceType -ErrorId VM.Using.Preview.Image
+    if ($storageProfile.imageReference -like '*-preview' -or $storageProfile.imageReference.version -like '*-preview') {
+        Write-Error "Virtual machine resource '$($sp.ParentObject.Name)' must not use a preview image" -TargetObject $sp -ErrorId VM.Using.Preview.Image
     }
 }
