@@ -1,7 +1,8 @@
 ﻿<#
 .Synopsis
-
+    Ensures Deployment Templates do not use hardcoded URLs
 .Description
+    Ensures Deployment Templates do not use Hardcoded URLs found in the AllEnvironments cache.
 #>
 param(
 # The template text.
