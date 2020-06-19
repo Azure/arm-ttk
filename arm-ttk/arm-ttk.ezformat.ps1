@@ -14,13 +14,15 @@ Write-FormatView -Action {
         $global:_LastFile = ''
         $global:_LastHistoryId = $h.id
     }
+
+    $CanUseColor = $host.UI.SupportsVirtualTerminal -and -not $ENV:AGENT_ID
     
 
     if ($global:_LastFile -ne $testOut.File.FullPath) {
         $msg = "Validating $($testOut.File.FullPath | Split-Path | split-Path -Leaf)\$($testOut.File.Name)"
-        if ($host.UI.SupportsVirtualTerminal) {
+        if ($CanUseColor) {
             . $SetOutputStyle -ForegroundColor Magenta        
-            $msg
+            $msg + [Environment]::NewLine
             . $clearOutputStyle
         } else {
             Write-Host -ForegroundColor Magenta -NoNewline $msg
@@ -29,10 +31,10 @@ Write-FormatView -Action {
     }
 
     if ($global:_LastGroup -ne $testOut.Group) {
-        if ($host.UI.SupportsVirtualTerminal) {
+        if ($CanUseColor) {
             . $SetOutputStyle -ForegroundColor Magenta
             $global:_LastGroup = $testOut.Group
-            "  $($testOut.Group)" 
+            "  $($testOut.Group)" + [Environment]::NewLine
             . $clearoutputStyle
         } else {
             Write-Host "  $($testOut.Group)" -ForegroundColor Magenta
@@ -57,15 +59,15 @@ Write-FormatView -Action {
     
 
     if ($errorCount) {
-        $foregroundColor = 'Red'
+        $foregroundColor = if ($CanUseColor) { 'Error' } else { 'Red' }
         $statusChar = '-'        
     } elseif ($warningCount) {
-        $foregroundColor = 'Yellow'
+        $foregroundColor = if ($CanUseColor) { 'Warning' } else { 'Yellow' } 
         $statusChar = '?'        
     }
     
     $statusLine = "    [$statusChar] $($testOut.Name) ($([Math]::Round($testOut.Timespan.TotalMilliseconds)) ms)"
-    if ($host.UI.SupportsVirtualTerminal) {
+    if ($CanUseColor) {
         . $setOutputStyle -ForegroundColor $foregroundColor
         $statusLine
         . $clearOutputStyle
@@ -89,10 +91,9 @@ Write-FormatView -Action {
                     $msg += (" Index:" + $line.TargetObject.Index)
                 }
 
-
-                if ($host.UI.SupportsVirtualTerminal) {
-                    . $setOutputStyle -ForegroundColor Red
-                    $msg
+                if ($CanUseColor) {
+                    . $setOutputStyle -ForegroundColor Error
+                    $msg + [Environment]::NewLine
                     . $ClearOutputStyle
                 } else {
                     Write-Host -ForegroundColor Red $msg
@@ -100,9 +101,9 @@ Write-FormatView -Action {
             }
             elseif ($line -is [Management.Automation.WarningRecord]) {
                 $msg = "$azoWarnStatus$(' ' * $indent)$line"
-                if ($host.UI.SupportsVirtualTerminal) {
-                    . $setOutputStyle -ForegroundColor Yellow
-                    $msg
+                if ($CanUseColor) {
+                    . $setOutputStyle -ForegroundColor Warning
+                    $msg + [Environment]::NewLine
                     . $clearOutputStyle
                 } else {
                     Write-Host -ForegroundColor Yellow $msg 
@@ -110,7 +111,7 @@ Write-FormatView -Action {
             }
             elseif ($line -is [string]) {
                 $msg = "$(' ' * $indent)$line"
-                if ($host.UI.SupportsVirtualTerminal) {
+                if ($CanUseColor) {
                     $msg
                 } else {
                     Write-Host $msg
@@ -120,8 +121,8 @@ Write-FormatView -Action {
                 $line | 
                     Out-String -Width ($Host.UI.RawUI.BufferSize.Width - $indent) |
                     & { process {
-                        if ($host.UI.SupportsVirtualTerminal) {
-                            "$(' ' * $indent)$_"
+                        if ($CanUseColor) {
+                            "$(' ' * $indent)$_" + [Environment]::NewLine
                         } else {
                             Write-Host "$(' ' * $indent)$_"
                         }
