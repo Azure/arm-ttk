@@ -23,7 +23,7 @@ $emptyItems = @([Regex]::Matches($TemplateText, "${colon}\{\s{0,}\}")) + # Empty
 
 $lineBreaks = [Regex]::Matches($TemplateText, "`n|$([Environment]::NewLine)")
 
-$PropertiesThatCanBeEmpty = @('resources','defaultValue')
+$PropertiesThatCanBeEmpty = @('basics','defaultValue', 'steps')
 
 if ($emptyItems) {
     foreach ($emptyItem in $emptyItems) {
