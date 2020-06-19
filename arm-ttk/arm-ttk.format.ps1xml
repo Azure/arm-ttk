@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-16"?>
+<!-- Generated with EZOut 1.8.3: Install-Module EZOut or https://github.com/StartAutomating/EZOut -->
 <Configuration>
   <ViewDefinitions>
     <View>
@@ -11,10 +12,35 @@
           <CustomEntry>
             <CustomItem>
               <ExpressionBinding>
-                <ScriptBlock>
-    $h = Get-History -Count 1
+                <ScriptBlock>$moduleName = 'arm-ttk'
+do {
+    $lm = Get-Module -Name $moduleName -ErrorAction Ignore
+    if (-not $lm) { continue } 
+    if ($lm.FormatPartsLoaded) { break }
+    $wholeScript = @(foreach ($formatFilePath in $lm.exportedFormatFiles) {         
+        foreach ($partNodeName in Select-Xml -LiteralPath $formatFilePath -XPath "/Configuration/Controls/Control/Name[starts-with(., '$')]") {
+            $ParentNode = $partNodeName.Node.ParentNode
+            "$($ParentNode.Name)={
+$($ParentNode.CustomControl.CustomEntries.CustomEntry.CustomItem.ExpressionBinding.ScriptBlock)}"
+        }
+    }) -join [Environment]::NewLine
+    New-Module -Name "${ModuleName}.format.ps1xml" -ScriptBlock ([ScriptBlock]::Create(($wholeScript + ';Export-ModuleMember -Variable *'))) |
+        Import-Module -Global
+    $onRemove = [ScriptBlock]::Create("Remove-Module '${ModuleName}.format.ps1xml'")
+    
+    if (-not $lm.OnRemove) {
+        $lm.OnRemove = $onRemove
+    } else {
+        $lm.OnRemove = [ScriptBlock]::Create($onRemove.ToString() + ''  + [Environment]::NewLine + $lm.OnRemove)
+    }
+    $lm | Add-Member NoteProperty FormatPartsLoaded $true -Force
+
+} while ($false)
+
+
+    $h = $MyInvocation.HistoryId
     $testOut = $_
-    if ($global:_LastHistoryId -ne $h.id) {
+    @(if ($global:_LastHistoryId -ne $h.id) {
         # New scoppe
         $global:_LastGroup = ''
         $global:_LastFile = ''
@@ -23,14 +49,26 @@
     
 
     if ($global:_LastFile -ne $testOut.File.FullPath) {
-        Write-Host -ForegroundColor Magenta "Validating $($testOut.File.FullPath | Split-Path | split-Path -Leaf)\$($testOut.File.Name)" 
-
-        $global:_LastFile = $testOut.File.FullPath    
+        $msg = "Validating $($testOut.File.FullPath | Split-Path | split-Path -Leaf)\$($testOut.File.Name)"
+        if ($host.UI.SupportsVirtualTerminal) {
+            . ${arm-ttk_SetOutputStyle} -ForegroundColor Magenta        
+            $msg
+            . ${arm-ttk_clearOutputStyle}
+        } else {
+            Write-Host -ForegroundColor Magenta -NoNewline $msg
+        }
+        $global:_LastFile = $testOut.File.FullPath
     }
 
     if ($global:_LastGroup -ne $testOut.Group) {
-        $global:_LastGroup = $testOut.Group
-        Write-Host -ForegroundColor Magenta "  $($testOut.Group)" 
+        if ($host.UI.SupportsVirtualTerminal) {
+            . ${arm-ttk_SetOutputStyle} -ForegroundColor Magenta
+            $global:_LastGroup = $testOut.Group
+            "  $($testOut.Group)" 
+            . ${arm-ttk_clearOutputStyle}
+        } else {
+            Write-Host "  $($testOut.Group)" -ForegroundColor Magenta
+        }
     }
     $errorCount = $testOut.Errors.Count
     $warningCount = $testOut.Warnings.Count
@@ -59,33 +97,70 @@
     }
     
     $statusLine = "    [$statusChar] $($testOut.Name) ($([Math]::Round($testOut.Timespan.TotalMilliseconds)) ms)"
-    Write-Host $statusLine -ForegroundColor $foregroundColor -NoNewline
+    if ($host.UI.SupportsVirtualTerminal) {
+        . ${arm-ttk_SetOutputStyle} -ForegroundColor $foregroundColor
+        $statusLine
+        . ${arm-ttk_clearOutputStyle}
+    } else {
+        Write-Host $statusLine -NoNewline -ForegroundColor $foregroundColor
+    }
 
     $azoErrorStatus = if ($ENV:Agent_ID) { "##vso[task.logissue type=error;]"} else { '' }
-    
+    $azoWarnStatus  = if ($ENV:Agent_ID) { "##vso[task.logissue type=warning;]"} else { '' }
     $indent = 8
     if ($testOut.AllOutput) {
-        Write-Host " " # end of line
-         
+        if (-not $host.UI.SupportsVirtualTerminal) {
+            Write-Host ' '
+        } else {
+            [Environment]::NewLine
+        } 
         foreach ($line in $testOut.AllOutput) {
             if ($line -is [Management.Automation.ErrorRecord] -or $line -is [Exception]) {
-                Write-Host "$azoErrorStatus$(' ' * $indent)$line" -foregroundColor Red
+                $msg = "$azoErrorStatus$(' ' * $indent)$line"
+                if ($line.TargetObject -is [Text.RegularExpressions.Match]) {
+                    $msg += (" Index:" + $line.TargetObject.Index)
+                }
+
+
+                if ($host.UI.SupportsVirtualTerminal) {
+                    . ${arm-ttk_SetOutputStyle} -ForegroundColor Red
+                    $msg
+                    . ${arm-ttk_clearOutputStyle}
+                } else {
+                    Write-Host -ForegroundColor Red $msg
+                }
             }
             elseif ($line -is [Management.Automation.WarningRecord]) {
-                Write-Host "$azoWarnStatus$(' ' * $indent)$line" -foregroundColor Yellow
+                $msg = "$azoWarnStatus$(' ' * $indent)$line"
+                if ($host.UI.SupportsVirtualTerminal) {
+                    . ${arm-ttk_SetOutputStyle} -ForegroundColor Yellow
+                    $msg
+                    . ${arm-ttk_clearOutputStyle}
+                } else {
+                    Write-Host -ForegroundColor Yellow $msg 
+                }
             }
             elseif ($line -is [string]) {
-                Write-Host "$(' ' * $indent)$line"
-            } 
+                $msg = "$(' ' * $indent)$line"
+                if ($host.UI.SupportsVirtualTerminal) {
+                    $msg
+                } else {
+                    Write-Host $msg
+                }
+            }
             else {
                 $line | 
                     Out-String -Width ($Host.UI.RawUI.BufferSize.Width - $indent) |
                     &amp; { process {
-                        Write-Host "$(' ' * $indent)$_"
+                        if ($host.UI.SupportsVirtualTerminal) {
+                            "$(' ' * $indent)$_"
+                        } else {
+                            Write-Host "$(' ' * $indent)$_"
+                        }
                     } } 
             }
         }
-    }    
+    }) -join ''
 </ScriptBlock>
               </ExpressionBinding>
             </CustomItem>
@@ -94,4 +169,267 @@
       </CustomControl>
     </View>
   </ViewDefinitions>
+  <Controls>
+    <Control>
+      <Name>${arm-ttk_SetOutputStyle}</Name>
+      <CustomControl>
+        <CustomEntries>
+          <CustomEntry>
+            <CustomItem>
+              <ExpressionBinding>
+                <ScriptBlock>&lt;#
+.Synopsis
+    Adds style to a format output
+.Description
+    Adds style information to a format output, including:
+
+    * ForegroundColor
+    * BackgroundColor
+    * Bold
+    * Underline
+.Notes
+    Stylized Output works in two contexts at present:
+    * Rich consoles (Windows Terminal, PowerShell.exe, Pwsh.exe) (when $host.UI.SupportsVirtualTerminal)
+    * Web pages (Based off the presence of a $Request variable, or when $host.UI.SupportsHTML (you must add this property to $host.UI))
+
+    IsFormatPart: true
+#&gt;
+param(
+[string]$ForegroundColor,
+[string]$BackgroundColor,
+[switch]$Bold,
+[switch]$Underline,
+[switch]$Invert
+)
+
+$canUseANSI = $host.UI.SupportsVirtualTerminal
+$canUseHTML = $Request -or $host.UI.SupportsHTML
+if (-not ($canUseANSI -or $canUseHTML)) { return }
+
+$knownStreams = @{
+    Output='';Error='BrightRed';Warning='BrightYellow';
+    Verbose='BrightCyan';Debug='Yellow';Progress='Cyan';
+    Success='BrightGreen';Failure='Red';Default=''}
+$standardColors = 'Black', 'Red', 'Green', 'Yellow', 'Blue','Magenta', 'Cyan', 'White'
+$brightColors   = 'BrightBlack', 'BrightRed', 'BrightGreen', 'BrightYellow', 'BrightBlue','BrightMagenta', 'BrightCyan', 'BrightWhite'
+$n =0
+$cssClasses = @()
+$styleAttributes =
+    @(:nextColor foreach ($hc in $ForegroundColor,$BackgroundColor) {
+        $n++
+        if (-not $hc) { continue }
+        if ($hc[0] -eq [char]0x1b) {
+            if ($canUseANSI) { 
+                $hc; continue
+            }
+        }
+
+        $ansiStartPoint = if ($n -eq 1) { 30 } else { 40 } 
+        if ($knownStreams.ContainsKey($hc)) {
+            $i = $brightColors.IndexOf($knownStreams[$hc])
+            if ($canUseHTML) {
+                $cssClasses += $hc
+            } else {
+                if ($i -ge 0 -and $canUseANSI) {
+                    '' + [char]0x1b + "[1;$($ansiStartPoint + $i)m"
+                } else {
+                    $i = $standardColors.IndexOf($knownStreams[$hc])
+                    if ($i -ge 0 -and $canUseANSI) {
+                        '' + [char]0x1b + "[1;$($ansiStartPoint + $i)m"
+                    } elseif ($i -le 0 -and $canUseANSI) {                        
+                        '' + [char]0x1b + "[$($ansistartpoint + 8):5m"
+                    }
+                }
+            }
+            continue nextColor
+        }
+        elseif ($standardColors -contains $hc) {
+            for ($i = 0; $i -lt $standardColors.Count;$i++) {
+                if ($standardColors[$i] -eq $hc) {
+                    if ($canUseANSI -and -not $canUseHTML) {
+                        '' + [char]0x1b + "[$($ansiStartPoint + $i)m"
+                    } else {
+                        $cssClasses += $standardColors[$i]
+                    }
+                    continue nextColor
+                }
+            }
+        } elseif ($brightColors -contains $hc) {
+            for ($i = 0; $i -lt $brightColors.Count;$i++) {
+                if ($brightColors[$i] -eq $hc) {
+                    if ($canUseANSI -and -not $canUseHTML) {
+                        '' + [char]0x1b + "[1;$($ansiStartPoint + $i)m"
+                    } else {
+                        $cssClasses += $standardColors[$i]
+                    }
+                    continue nextColor
+                }
+            }
+        }
+
+
+        if ($hc -and -not $hc.StartsWith('#')) { 
+            $placesToLook=
+                @(if ($hc.Contains('.')) {
+                    $module, $setting = $hc -split '\.', 2
+                    $theModule = Get-Module $module
+                    $theModule.PrivateData.Color,
+                        $theModule.PrivateData.Colors,
+                        $theModule.PrivateData.Colour,
+                        $theModule.PrivateData.Colours,
+                        $theModule.PrivateData.EZOut,
+                        $global:PSColors,
+                        $global:PSColours
+                } else {
+                    $setting = $hc
+                    $moduleColorSetting = $theModule.PrivateData.PSColors.$setting
+                })
+
+            foreach ($place in $placesToLook) {
+                if (-not $place) { continue }
+                foreach ($propName in $setting -split '\.') {
+                    $place = $place.$propName
+                    if (-not $place) { break }
+                }
+                if ($place -and "$place".StartsWith('#') -and 4,7 -contains "$place".Length) {
+                    $hc = $place
+                    continue
+                }
+            }
+            if (-not $hc.StartsWith -or -not $hc.StartsWith('#')) {
+                continue
+            }
+        }
+        $r,$g,$b = if ($hc.Length -eq 7) {
+            [int]::Parse($hc[1..2]-join'', 'HexNumber')
+            [int]::Parse($hc[3..4]-join '', 'HexNumber')
+            [int]::Parse($hc[5..6] -join'', 'HexNumber')
+        }elseif ($hc.Length -eq 4) {
+            [int]::Parse($hc[1], 'HexNumber') * 16
+            [int]::Parse($hc[2], 'HexNumber') * 16
+            [int]::Parse($hc[3], 'HexNumber') * 16
+        }
+
+        if ($canUseHTML) {
+            if ($n -eq 1) { "color:$hc" }
+            elseif ($n -eq 2) { "background-color:$hc"} 
+        }
+        elseif ($canUseANSI) {
+            if ($n -eq 1) { [char]0x1b+"[38;2;$r;$g;${b}m" }
+            elseif ($n -eq 2) { [char]0x1b+"[48;2;$r;$g;${b}m" }
+        }
+        
+    })
+
+
+if ($Bold) {
+    $styleAttributes += 
+        if ($canUseHTML) {
+            "font-weight:bold"
+        }
+        elseif ($canUseANSI) 
+        {
+            [char]0x1b + "[1m"
+        }
+}
+
+if ($Underline) {
+    $styleAttributes += 
+        if ($canUseHTML) {
+            "text-decoration:underline"
+        } elseif ($canUseANSI) {
+            [char]0x1b + "[4m"
+        }
+}
+
+if ($Invert) {
+    $styleAttributes += 
+        if ($canUseHTML) {
+            "filter:invert(100%)"
+        } elseif ($canUseANSI) {
+            [char]0x1b + "[7m"            
+        }
+}
+
+if ($canUseHTML) {
+   
+    "&lt;span$(
+        if ($styleAttributes) { " style='$($styleAttributes -join ';')'"}
+    )$(
+        if ($cssClasses) { " class='$($cssClasses -join ' ')'"}
+    )&gt;"
+} elseif ($canUseANSI) {
+    $styleAttributes -join ''
+}</ScriptBlock>
+              </ExpressionBinding>
+            </CustomItem>
+          </CustomEntry>
+        </CustomEntries>
+      </CustomControl>
+    </Control>
+    <Control>
+      <Name>${arm-ttk_clearOutputStyle}</Name>
+      <CustomControl>
+        <CustomEntries>
+          <CustomEntry>
+            <CustomItem>
+              <ExpressionBinding>
+                <ScriptBlock>&lt;#
+.Synopsis
+    Clears the output style
+.Description
+    Clears ANSI output style or closes the most recent span element.
+
+    ANSI stylization can be toggled off individually (for instance, to stop applying an -Underline but leave the color unchanged)
+.Notes
+    IsFormatPart: true
+#&gt;
+param(
+# If set, will explicitly clear ANSI Bold
+[switch]
+$Bold,
+# If set, will explicitly clear ANSI Underline
+[switch]
+$Underline,
+# If set, will explicitly clear ANSI Invert
+[switch]
+$Invert,
+# If set, will explicitly clear ANSI Foreground Color
+[switch]
+$ForegroundColor,
+# If set, will explicitly clear ANSI Background Color
+[switch]
+$BackgroundColor
+)
+@(if ($request -or $host.UI.SupportsHTML) {
+    "&lt;/span&gt;"
+} elseif ($Host.UI.SupportsVirtualTerminal) {
+    if ($Underline) {
+        [char]0x1b + "[24m"
+    }
+    if ($Bold) {        
+        [char]0x1b + "[21m"
+    }
+    if ($Invert) {
+        [char]0x1b + '[27m'
+    }
+    if ($ForegroundColor) {
+        [char]0x1b + '[39m'
+    }
+    if ($BackgroundColor) {
+        [char]0x1b + '[49m'
+    }
+
+    if (-not ($Underline -or $Bold -or $Invert -or $ForegroundColor -or $BackgroundColor)) {
+        [char]0x1b + '[0m'
+    }
+    
+}) -join ''</ScriptBlock>
+              </ExpressionBinding>
+            </CustomItem>
+          </CustomEntry>
+        </CustomEntries>
+      </CustomControl>
+    </Control>
+  </Controls>
 </Configuration>
