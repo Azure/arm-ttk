@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-16"?>
-<!-- Generated with EZOut 1.8.3: Install-Module EZOut or https://github.com/StartAutomating/EZOut -->
+<!-- Generated with EZOut 1.8.3.1: Install-Module EZOut or https://github.com/StartAutomating/EZOut -->
 <Configuration>
   <ViewDefinitions>
     <View>
@@ -46,13 +46,15 @@ $($ParentNode.CustomControl.CustomEntries.CustomEntry.CustomItem.ExpressionBindi
         $global:_LastFile = ''
         $global:_LastHistoryId = $h.id
     }
+
+    $CanUseColor = $host.UI.SupportsVirtualTerminal -and -not $ENV:AGENT_ID
     
 
     if ($global:_LastFile -ne $testOut.File.FullPath) {
         $msg = "Validating $($testOut.File.FullPath | Split-Path | split-Path -Leaf)\$($testOut.File.Name)"
-        if ($host.UI.SupportsVirtualTerminal) {
+        if ($CanUseColor) {
             . ${arm-ttk_SetOutputStyle} -ForegroundColor Magenta        
-            $msg
+            $msg + [Environment]::NewLine
             . ${arm-ttk_clearOutputStyle}
         } else {
             Write-Host -ForegroundColor Magenta -NoNewline $msg
@@ -61,10 +63,10 @@ $($ParentNode.CustomControl.CustomEntries.CustomEntry.CustomItem.ExpressionBindi
     }
 
     if ($global:_LastGroup -ne $testOut.Group) {
-        if ($host.UI.SupportsVirtualTerminal) {
+        if ($CanUseColor) {
             . ${arm-ttk_SetOutputStyle} -ForegroundColor Magenta
             $global:_LastGroup = $testOut.Group
-            "  $($testOut.Group)" 
+            "  $($testOut.Group)" + [Environment]::NewLine
             . ${arm-ttk_clearOutputStyle}
         } else {
             Write-Host "  $($testOut.Group)" -ForegroundColor Magenta
@@ -89,15 +91,15 @@ $($ParentNode.CustomControl.CustomEntries.CustomEntry.CustomItem.ExpressionBindi
     
 
     if ($errorCount) {
-        $foregroundColor = 'Red'
+        $foregroundColor = if ($CanUseColor) { 'Error' } else { 'Red' }
         $statusChar = '-'        
     } elseif ($warningCount) {
-        $foregroundColor = 'Yellow'
+        $foregroundColor = if ($CanUseColor) { 'Warning' } else { 'Yellow' } 
         $statusChar = '?'        
     }
     
     $statusLine = "    [$statusChar] $($testOut.Name) ($([Math]::Round($testOut.Timespan.TotalMilliseconds)) ms)"
-    if ($host.UI.SupportsVirtualTerminal) {
+    if ($CanUseColor) {
         . ${arm-ttk_SetOutputStyle} -ForegroundColor $foregroundColor
         $statusLine
         . ${arm-ttk_clearOutputStyle}
@@ -121,10 +123,9 @@ $($ParentNode.CustomControl.CustomEntries.CustomEntry.CustomItem.ExpressionBindi
                     $msg += (" Index:" + $line.TargetObject.Index)
                 }
 
-
-                if ($host.UI.SupportsVirtualTerminal) {
-                    . ${arm-ttk_SetOutputStyle} -ForegroundColor Red
-                    $msg
+                if ($CanUseColor) {
+                    . ${arm-ttk_SetOutputStyle} -ForegroundColor Error
+                    $msg + [Environment]::NewLine
                     . ${arm-ttk_clearOutputStyle}
                 } else {
                     Write-Host -ForegroundColor Red $msg
@@ -132,9 +133,9 @@ $($ParentNode.CustomControl.CustomEntries.CustomEntry.CustomItem.ExpressionBindi
             }
             elseif ($line -is [Management.Automation.WarningRecord]) {
                 $msg = "$azoWarnStatus$(' ' * $indent)$line"
-                if ($host.UI.SupportsVirtualTerminal) {
-                    . ${arm-ttk_SetOutputStyle} -ForegroundColor Yellow
-                    $msg
+                if ($CanUseColor) {
+                    . ${arm-ttk_SetOutputStyle} -ForegroundColor Warning
+                    $msg + [Environment]::NewLine
                     . ${arm-ttk_clearOutputStyle}
                 } else {
                     Write-Host -ForegroundColor Yellow $msg 
@@ -142,7 +143,7 @@ $($ParentNode.CustomControl.CustomEntries.CustomEntry.CustomItem.ExpressionBindi
             }
             elseif ($line -is [string]) {
                 $msg = "$(' ' * $indent)$line"
-                if ($host.UI.SupportsVirtualTerminal) {
+                if ($CanUseColor) {
                     $msg
                 } else {
                     Write-Host $msg
@@ -152,8 +153,8 @@ $($ParentNode.CustomControl.CustomEntries.CustomEntry.CustomItem.ExpressionBindi
                 $line | 
                     Out-String -Width ($Host.UI.RawUI.BufferSize.Width - $indent) |
                     &amp; { process {
-                        if ($host.UI.SupportsVirtualTerminal) {
-                            "$(' ' * $indent)$_"
+                        if ($CanUseColor) {
+                            "$(' ' * $indent)$_" + [Environment]::NewLine
                         } else {
                             Write-Host "$(' ' * $indent)$_"
                         }
