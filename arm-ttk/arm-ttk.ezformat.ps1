@@ -6,13 +6,14 @@ $myName = 'arm-ttk'
 
 
 Write-FormatView -Action {
-    $h = $MyInvocation.HistoryId
     $testOut = $_
-    @(if ($global:_LastHistoryId -ne $h.id) {
+
+    $h = $MyInvocation.HistoryId
+    @(if ($global:_LastHistoryId -ne $h) {
         # New scoppe
         $global:_LastGroup = ''
         $global:_LastFile = ''
-        $global:_LastHistoryId = $h.id
+        $global:_LastHistoryId = $h
     }
 
     $CanUseColor = $host.UI.SupportsVirtualTerminal -and -not $ENV:AGENT_ID
@@ -31,9 +32,9 @@ Write-FormatView -Action {
     }
 
     if ($global:_LastGroup -ne $testOut.Group) {
+        $global:_LastGroup = $testOut.Group
         if ($CanUseColor) {
             . $SetOutputStyle -ForegroundColor Magenta
-            $global:_LastGroup = $testOut.Group
             "  $($testOut.Group)" + [Environment]::NewLine
             . $clearoutputStyle
         } else {
