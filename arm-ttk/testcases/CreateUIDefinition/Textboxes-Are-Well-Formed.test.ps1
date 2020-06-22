@@ -1,4 +1,10 @@
-﻿param(
+﻿<#
+.Synopsis
+    Ensures that TextBox controls are well formed.
+.Description
+    Ensures that TextBox controls are well formed, including having a validation Regular Expression.
+#>
+param(
 # The contents of CreateUIDefintion, converted from JSON.
 [Parameter(Mandatory=$true,Position=0)]
 [PSObject]
@@ -32,5 +38,5 @@ foreach ($textbox in $allTextBoxes) { # Then we walk over each textbox.
     }
     if (-not $textbox.constraints.validationMessage) { # If there's not a validation message
         Write-Error "Textbox $($textbox.Name) is missing constraints.validationMessage" -TargetObject $textbox #error.
-    }        
+    }
 }
