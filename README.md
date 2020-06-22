@@ -4,7 +4,7 @@
 The code in this repository can be used for analyzing and testing [Azure Resource Manager Templates](https://docs.microsoft.com/en-us/azure/templates/).  The tests will check a template or set of templates for coding best practices.  There are some checks for simple syntactical errors but the intent is not to re-implement tests or checks that are provided by the platform (e.g. the /validate api).  
 
 ## Using the TTK
-For detailed instruction on how to use the arm-ttk, see this [readme](/arm-ttk/README.md).
+For detailed instruction on how to use the arm-ttk, see this [readme](/arm-ttk/README.md).  More information can be found in the [documentation](http://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/test-toolkit).
 
 ## Philosophy
 
