@@ -164,18 +164,29 @@
             $TemplateText = [IO.File]::ReadAllText($resolvedTemplatePath)
             #*$TemplateObject (the template text, converted from JSON)
             $TemplateObject = Import-Json -FilePath $TemplateFullPath
-            #*$CreateUIDefinitionFullPath (the path to CreateUIDefinition.json)
-            $createUiDefinitionFullPath = Join-Path -childPath 'createUiDefinition.json' -Path $templateFolder
-            if (Test-Path $createUiDefinitionFullPath) {
-                #*$CreateUIDefinitionText (the text contents of CreateUIDefinition.json)
+
+            if ($resolvedTemplatePath -like '*.json' -and 
+                $TemplateObject.'$schema' -like '*CreateUIDefinition*') {
+                $createUiDefinitionFullPath = "$resolvedTemplatePath"
                 $createUIDefinitionText = [IO.File]::ReadAllText($createUiDefinitionFullPath)
-                #*$CreateUIDefinitionObject (the createuidefinition text, converted from json)
-                $createUIDefinitionObject =  Import-Json -FilePath $createUiDefinitionFullPath
-                #*$HasCreateUIDefinition (indicates if a CreateUIDefinition.json file exists)
+                $createUIDefinitionObject = Import-Json -FilePath $createUiDefinitionFullPath
                 $HasCreateUIDefinition = $true
+                $isMainTemplate = $false
+                $templateFile =  $TemplateText = $templateObject = $TemplateFullPath = $templateFileName = $null
             } else {
-                $HasCreateUIDefinition = $false
-                $createUiDefinitionFullPath = $null
+                #*$CreateUIDefinitionFullPath (the path to CreateUIDefinition.json)
+                $createUiDefinitionFullPath = Join-Path -childPath 'createUiDefinition.json' -Path $templateFolder
+                if (Test-Path $createUiDefinitionFullPath) {
+                    #*$CreateUIDefinitionText (the text contents of CreateUIDefinition.json)
+                    $createUIDefinitionText = [IO.File]::ReadAllText($createUiDefinitionFullPath)
+                    #*$CreateUIDefinitionObject (the createuidefinition text, converted from json)
+                    $createUIDefinitionObject =  Import-Json -FilePath $createUiDefinitionFullPath
+                    #*$HasCreateUIDefinition (indicates if a CreateUIDefinition.json file exists)
+                    $HasCreateUIDefinition = $true
+                } else {
+                    $HasCreateUIDefinition = $false
+                    $createUiDefinitionFullPath = $null
+                }
             }
 
             #*$FolderFiles (a list of objects of each file in the directory)
