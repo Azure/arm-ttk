@@ -1,6 +1,6 @@
 ﻿function Test-AzTemplate
 {
-[Alias('Test-AzureRMTemplate')] # Added for backward compat with MP
+    [Alias('Test-AzureRMTemplate')] # Added for backward compat with MP
     <#
     .Synopsis
 Tests an Azure Resource Manager Template
@@ -91,6 +91,9 @@ Each test script has access to a set of well-known variables:
     $TestGroup = [Ordered]@{},
 
     # Any additional parameters to pass to each test.
+    # This can be used to supply custom information to validate.
+    # For example, passing -TestParameter @{testDate=[DateTime]::Now.AddYears(-1)} 
+    # will pass a a custom value to any test with the parameter $TestDate.
     # If the parameter does not exist for a given test case, it will be ignored.
     [Collections.IDictionary]
     [Alias('TestParameters')]
@@ -184,11 +187,22 @@ Each test script has access to a set of well-known variables:
                 }
             }
 
-            if (-not $Pester) {
-                & $TheTest @testInput 2>&1 3>&1
-            } else {
-                & $TheTest @testInput
-            }
+            :IfNotMissingMandatory do {
+                foreach ($tcp in $testCommandParameters.GetEnumerator()) {
+                    foreach ($attr in $tcp.Value.Attributes) {
+                        if ($attr.Mandatory -and -not $testInput[$tcp.Key]) {
+                            Write-Warning "Skipped because $($tcp.Key) was missing"
+                            break IfNotMissingMandatory
+                        }
+                    }
+                }
+
+                if (-not $Pester) {
+                    & $TheTest @testInput 2>&1 3>&1
+                } else {
+                    & $TheTest @testInput
+                }
+            } while ($false)
         }
 
         #*Test-Group (executes a group of tests)
