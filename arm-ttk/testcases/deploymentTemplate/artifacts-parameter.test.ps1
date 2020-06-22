@@ -23,7 +23,7 @@ $artifactslocationSasTokenParameter = $templateObject.parameters._artifactsLocat
 #if there is no _artifactsLocationParameter skip the tests
 if ($artifactslocationParameter -ne $null) {
     if ($artifactslocationParameter.type -ne "string") {
-        Write-Error "The _artifactsLocation in `"$TemplateFileName`" parameter must be a 'string' type in the parameter delcaration `"$($artifactslocationParameter.type)`"" -ErrorId ArtifactsLocation.Parameter.TypeMisMatch -TargetObject $artifactslocationParameter
+        Write-Error "The _artifactsLocation in `"$TemplateFileName`" parameter must be a 'string' type in the parameter declaration `"$($artifactslocationParameter.type)`"" -ErrorId ArtifactsLocation.Parameter.TypeMisMatch -TargetObject $artifactslocationParameter
     }
     # is the sasToken present
     if ($artifactslocationSasTokenParameter -eq $null) {
