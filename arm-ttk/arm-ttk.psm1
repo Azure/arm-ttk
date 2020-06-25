@@ -13,4 +13,8 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
 
 . $PSScriptRoot\Format-AzTemplate.ps1
 #endregion Template Functions
+
+#region Cache Functions
+. $psScriptRoot\Update-TTKCache.ps1
+#endregion Cache Functions
 Set-Alias Sort-AzTemplate Format-AzTemplate
