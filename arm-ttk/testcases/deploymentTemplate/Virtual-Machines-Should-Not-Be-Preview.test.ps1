@@ -14,11 +14,15 @@ $storageProfiles = Find-JsonContent -Key storageProfile -InputObject $TemplateOb
 
 foreach ($sp in $storageProfiles) {
     $storageProfile = $sp.StorageProfile
+    if ($storageProfile -is [string] -and $storageProfile -match '^\s{0,}\[') {
+        $expanded = Expand-AzTemplate -Expression $storageProfile -InputObject $TemplateObject
+        $storageProfile = $expanded
+    }
     if (-not $storageProfile.imageReference) {
-        Write-Output "Virtual machine resource '$($sp.ParentObject.Name)' has no image to reference" -TargetObject $sp # VMSS scale up does not have a imageRef by design
+        Write-Error "StorageProfile for resource '$($sp.ParentObject.Name)' must not use a preview version" -TargetObject $sp -ErrorId VM.Using.Preview.Image
     }
 
     if ($storageProfile.imageReference -like '*-preview' -or $storageProfile.imageReference.version -like '*-preview') {
-        Write-Error "Virtual machine resource '$($sp.ParentObject.Name)' must not use a preview image" -TargetObject $sp -ErrorId VM.Using.Preview.Image
+        Write-Error "StorageProfile for resource '$($sp.ParentObject.Name)' must not use a preview version" -TargetObject $sp -ErrorId VM.Using.Preview.Image
     }
 }
