@@ -18,6 +18,9 @@ $uniqueHosts = # Walk thru all environments
     @(foreach ($envData in $AllEnvironments) {
         foreach ($prop in $envData.PSObject.properties){ # and each property
             $uriValue = $prop.Value -as [uri] # that is a URI
+            if (-not $uriValue -and $prop.Name -like '*Suffix' -and $prop.Value -like '*.*.*') {
+                $uriValue = ("https://" + $prop.Value + "/") -as [uri]
+            }
             if ($uriValue.DnsSafeHost) { # with a host.
                 $uriValue.DnsSafeHost # Pick out that host.
             }
