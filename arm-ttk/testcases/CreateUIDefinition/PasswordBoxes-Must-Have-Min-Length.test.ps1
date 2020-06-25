@@ -26,8 +26,7 @@ foreach ($pwb in $passwordBoxes) { # Loop over each password box
         Write-Error "PasswordBox '$($pwb.name)' is missing constraints" -TargetObject $pwb
         continue
     }
-    if (-not $pwb.constraints.regex) {
-        Write-Error "PasswordBox '$($pwb.Name)' is missing constraints.regex" -TargetObject $pwb
+    if (-not $pwb.constraints.regex) { # If there is no regex, the default will meet the complexity requirements.
         continue
     }
 
