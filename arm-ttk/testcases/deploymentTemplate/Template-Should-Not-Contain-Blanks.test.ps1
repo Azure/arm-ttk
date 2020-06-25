@@ -35,7 +35,8 @@ $PropertiesThatCanBeEmpty = 'resources',
                             'value', # Microsoft.Resources/deployments - passing empty strings to a nested deployment
                             'promotionCode', # Microsoft.OperationsManagement/soltuions/plan object
                             'inputs', # Microsoft.Portal/dashboard
-                            'notEquals' # Microsoft.Authorization/policyDefinitions policyRule
+                            'notEquals', # Microsoft.Authorization/policyDefinitions policyRule'
+                            'clientId' # Microsoft.ContainerService/managedClusters.properties.servicePrincipalProfile
 
 if ($emptyItems) {
     foreach ($emptyItem in $emptyItems) {
