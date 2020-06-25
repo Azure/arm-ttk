@@ -3,7 +3,7 @@
 Files in this directory should match two patterns:
 
 1. *.cache.json     - These files contain cached data in unminified JSON.
-2. *.init.cache.ps1 - These files initialize a .cache.json file.
+2. *.init.cache.ps1 - These files refresh a .cache.json file.
 
 For example, AllResources.cache.json is created with AllResources.init.cache.json.
 
