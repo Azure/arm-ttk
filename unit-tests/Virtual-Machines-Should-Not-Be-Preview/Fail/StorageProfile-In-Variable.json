@@ -1,0 +1,23 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "variables": {
+        "storage": {
+            "imageReference": {
+                "publisher": "Canonical",
+                "version": "latest-preview",
+                "offer": "UbuntuServer",
+                "sku": "16.04-LTS"
+            }
+        } 
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "test",
+            "apiVersion": "2019-12-01",
+            "properties": {
+                "storageProfile": "[Variables('storage')]"
+            }
+        }
+    ]
+}
