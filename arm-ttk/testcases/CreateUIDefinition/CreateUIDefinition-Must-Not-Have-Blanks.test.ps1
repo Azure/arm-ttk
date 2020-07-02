@@ -14,24 +14,20 @@ param(
 $CreateUIDefinitionText
 )
 
-# test is broken so turning it off for now...
-Write-Warning "Skipping Test..."
-break
-
 $colon = "(?<=:)\s{0,}" # this a back reference for a colon followed by 0 to more whitespace
 
-$emptyItems = @([Regex]::Matches($TemplateText, "${colon}\{\s{0,}\}")) + # Empty objects
-              @([Regex]::Matches($TemplateText, "${colon}\[\s{0,}\]")) + # empty arrays
-              @([Regex]::Matches($TemplateText, "${colon}`"\s{0,}`"")) + # empty strings
-              @([Regex]::Matches($TemplateText, "${colon}null"))
+$emptyItems = @([Regex]::Matches($CreateUIDefinitionText, "${colon}\{\s{0,}\}")) + # Empty objects
+              @([Regex]::Matches($CreateUIDefinitionText, "${colon}\[\s{0,}\]")) + # empty arrays
+              @([Regex]::Matches($CreateUIDefinitionText, "${colon}`"\s{0,}`"")) + # empty strings
+              @([Regex]::Matches($CreateUIDefinitionText, "${colon}null"))
 
-$lineBreaks = [Regex]::Matches($TemplateText, "`n|$([Environment]::NewLine)")
+$lineBreaks = [Regex]::Matches($CreateUIDefinitionText, "`n|$([Environment]::NewLine)")
 
 $PropertiesThatCanBeEmpty = @('basics','defaultValue', 'steps')
 
 if ($emptyItems) {
     foreach ($emptyItem in $emptyItems) {
-        $nearbyContext = [Regex]::new('"(?<PropertyName>[^"]{1,})"\s{0,}:', "RightToLeft").Match($TemplateText, $emptyItem.Index)
+        $nearbyContext = [Regex]::new('"(?<PropertyName>[^"]{1,})"\s{0,}:', "RightToLeft").Match($CreateUIDefinitionText, $emptyItem.Index)
         if ($nearbyContext -and $nearbyContext.Success) {
             $emptyPropertyName = $nearbyContext.Groups["PropertyName"].Value
             # exceptions
