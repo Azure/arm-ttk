@@ -74,7 +74,12 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         "reference",
         "variables",
         "subscription",
-        "guid"
+        "guid",
+        "servicePrincipalClientId",
+        "clientId",
+        "appId",
+        "tenantId",
+        "objectId"
     )
 
     # Check that it uses one of the allowed expressions - can remove variables once Expand-Template does full eval of nested vars
