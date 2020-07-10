@@ -1,4 +1,4 @@
-﻿#requires -Module EZOut
+#requires -Module EZOut
 #                 https://github.com/StartAutomating/EZOut
 #              OR Install-Module EZOut   
 $myRoot = $MyInvocation.MyCommand.ScriptBlock.File | Split-Path
@@ -76,11 +76,11 @@ Write-FormatView -Action {
         Write-Host $statusLine -NoNewline -ForegroundColor $foregroundColor
     }
 
-    $azoErrorStatus = if ($ENV:Agent_ID) { "##vso[task.logissue type=error;]"} else { '' }
-    $azoWarnStatus  = if ($ENV:Agent_ID) { "##vso[task.logissue type=warning;]"} else { '' }
+    $azoErrorStatus = if ($ENV:Agent_ID) { "##[error]"} else { '' }
+    $azoWarnStatus  = if ($ENV:Agent_ID) { "##[warning]"} else { '' }
     $indent = 8
     if ($testOut.AllOutput) {
-        if (-not $host.UI.SupportsVirtualTerminal) {
+        if (-not $CanUseColor) {
             Write-Host ' '
         } else {
             [Environment]::NewLine
