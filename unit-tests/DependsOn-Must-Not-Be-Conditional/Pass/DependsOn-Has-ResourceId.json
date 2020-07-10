@@ -1,0 +1,8 @@
+﻿{
+    "$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "resources":  [
+        {            
+            "dependsOn":  "[resourceId('Microsoft.Storage/storageAccounts', concat('foo', copyIndex()))]"
+        }
+    ]
+}
