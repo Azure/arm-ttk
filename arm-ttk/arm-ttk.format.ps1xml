@@ -112,7 +112,7 @@ $($ParentNode.CustomControl.CustomEntries.CustomEntry.CustomItem.ExpressionBindi
     $azoWarnStatus  = if ($ENV:Agent_ID) { "##vso[task.logissue type=warning;]"} else { '' }
     $indent = 8
     if ($testOut.AllOutput) {
-        if (-not $host.UI.SupportsVirtualTerminal) {
+        if (-not $CanUseColor) {
             Write-Host ' '
         } else {
             [Environment]::NewLine
