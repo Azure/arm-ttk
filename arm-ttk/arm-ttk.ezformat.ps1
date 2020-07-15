@@ -1,4 +1,4 @@
-﻿#requires -Module EZOut
+#requires -Module EZOut
 #                 https://github.com/StartAutomating/EZOut
 #              OR Install-Module EZOut   
 $myRoot = $MyInvocation.MyCommand.ScriptBlock.File | Split-Path
