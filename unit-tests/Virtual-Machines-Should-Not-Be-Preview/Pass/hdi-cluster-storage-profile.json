@@ -1,0 +1,25 @@
+{
+   "$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+   "contentVersion":"1.0.0.0",
+   // this case is taken from https://github.com/Azure/azure-quickstart-templates/blob/master/101-machine-learning-compute-attach-hdi/prereqs/prereq.azuredeploy.json
+   "resources":[
+      {
+         "name":"test",
+         "type":"Microsoft.HDInsight/clusters",
+         "location":"test",
+         "apiVersion":"2018-06-01-preview",
+         "properties":{
+            "storageProfile":{
+               "storageaccounts":[
+                  {
+                     "name":"[replace(replace(concat(reference(resourceId('Microsoft.Storage/storageAccounts', 'foo')).primaryEndpoints.blob),'https:',''),'/','')]",
+                     "isDefault":true,
+                     "container":"test",
+                     "key":"[listKeys(resourceId('Microsoft.Storage/storageAccounts', 'foo'), '2019-06-01').keys[0].value]"
+                  }
+               ]
+            }
+         }
+      }
+   ]
+}
