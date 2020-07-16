@@ -1,6 +1,7 @@
 [
   {
     "Name": "AzureCloud",
+    "Type": "Built-in",
     "EnableAdfsAuthentication": false,
     "OnPremise": false,
     "ActiveDirectoryServiceEndpointResourceId": "https://management.core.windows.net/",
@@ -25,17 +26,26 @@
     "AzureOperationalInsightsEndpoint": "https://api.loganalytics.io/v1",
     "AzureAnalysisServicesEndpointSuffix": "asazure.windows.net",
     "AnalysisServicesEndpointResourceId": "https://region.asazure.windows.net",
+    "AzureAttestationServiceEndpointSuffix": "attest.azure.net",
+    "AzureAttestationServiceEndpointResourceId": "https://attest.azure.net",
+    "AzureSynapseAnalyticsEndpointSuffix": "dev.azuresynapse.net",
+    "AzureSynapseAnalyticsEndpointResourceId": "https://dev.azuresynapse.net",
     "VersionProfiles": [],
     "ExtendedProperties": {
       "OperationalInsightsEndpoint": "https://api.loganalytics.io/v1",
       "OperationalInsightsEndpointResourceId": "https://api.loganalytics.io",
       "AzureAnalysisServicesEndpointSuffix": "asazure.windows.net",
-      "AnalysisServicesEndpointResourceId": "https://region.asazure.windows.net"
+      "AnalysisServicesEndpointResourceId": "https://region.asazure.windows.net",
+      "AzureAttestationServiceEndpointSuffix": "attest.azure.net",
+      "AzureAttestationServiceEndpointResourceId": "https://attest.azure.net",
+      "AzureSynapseAnalyticsEndpointSuffix": "dev.azuresynapse.net",
+      "AzureSynapseAnalyticsEndpointResourceId": "https://dev.azuresynapse.net"
     },
     "BatchEndpointResourceId": "https://batch.core.windows.net/"
   },
   {
     "Name": "AzureGermanCloud",
+    "Type": "Built-in",
     "EnableAdfsAuthentication": false,
     "OnPremise": false,
     "ActiveDirectoryServiceEndpointResourceId": "https://management.core.cloudapi.de/",
@@ -60,6 +70,10 @@
     "AzureOperationalInsightsEndpoint": null,
     "AzureAnalysisServicesEndpointSuffix": "asazure.cloudapi.de",
     "AnalysisServicesEndpointResourceId": "https://region.asazure.cloudapi.de",
+    "AzureAttestationServiceEndpointSuffix": null,
+    "AzureAttestationServiceEndpointResourceId": null,
+    "AzureSynapseAnalyticsEndpointSuffix": null,
+    "AzureSynapseAnalyticsEndpointResourceId": null,
     "VersionProfiles": [],
     "ExtendedProperties": {
       "AzureAnalysisServicesEndpointSuffix": "asazure.cloudapi.de",
@@ -69,6 +83,7 @@
   },
   {
     "Name": "AzureUSGovernment",
+    "Type": "Built-in",
     "EnableAdfsAuthentication": false,
     "OnPremise": false,
     "ActiveDirectoryServiceEndpointResourceId": "https://management.core.usgovcloudapi.net/",
@@ -93,6 +108,10 @@
     "AzureOperationalInsightsEndpoint": "https://api.loganalytics.us/v1",
     "AzureAnalysisServicesEndpointSuffix": "asazure.usgovcloudapi.net",
     "AnalysisServicesEndpointResourceId": "https://region.asazure.usgovcloudapi.net",
+    "AzureAttestationServiceEndpointSuffix": null,
+    "AzureAttestationServiceEndpointResourceId": null,
+    "AzureSynapseAnalyticsEndpointSuffix": null,
+    "AzureSynapseAnalyticsEndpointResourceId": null,
     "VersionProfiles": [],
     "ExtendedProperties": {
       "OperationalInsightsEndpoint": "https://api.loganalytics.us/v1",
@@ -104,6 +123,7 @@
   },
   {
     "Name": "AzureChinaCloud",
+    "Type": "Built-in",
     "EnableAdfsAuthentication": false,
     "OnPremise": false,
     "ActiveDirectoryServiceEndpointResourceId": "https://management.core.chinacloudapi.cn/",
@@ -128,10 +148,16 @@
     "AzureOperationalInsightsEndpoint": null,
     "AzureAnalysisServicesEndpointSuffix": "asazure.chinacloudapi.cn",
     "AnalysisServicesEndpointResourceId": "https://region.asazure.chinacloudapi.cn",
+    "AzureAttestationServiceEndpointSuffix": null,
+    "AzureAttestationServiceEndpointResourceId": null,
+    "AzureSynapseAnalyticsEndpointSuffix": "dev.azuresynapse.azure.cn",
+    "AzureSynapseAnalyticsEndpointResourceId": "https://dev.azuresynapse.net",
     "VersionProfiles": [],
     "ExtendedProperties": {
       "AzureAnalysisServicesEndpointSuffix": "asazure.chinacloudapi.cn",
-      "AnalysisServicesEndpointResourceId": "https://region.asazure.chinacloudapi.cn"
+      "AnalysisServicesEndpointResourceId": "https://region.asazure.chinacloudapi.cn",
+      "AzureSynapseAnalyticsEndpointSuffix": "dev.azuresynapse.azure.cn",
+      "AzureSynapseAnalyticsEndpointResourceId": "https://dev.azuresynapse.net"
     },
     "BatchEndpointResourceId": "https://batch.chinacloudapi.cn/"
   }
