@@ -10,7 +10,7 @@ param(
 $TemplateObject
 )
 
-$storageProfiles = Find-JsonContent -Key storageProfile -InputObject $TemplateObject
+$storageProfiles = Find-JsonContent -Key storageProfile -InputObject $TemplateObject | Where-Object {$_.ParentObject.type -eq "Microsoft.Compute/virtualMachines" -or $_.ParentObject.type -eq "Microsoft.Compute/virtualMachineScaleSets"}
 
 foreach ($sp in $storageProfiles) {
     $storageProfile = $sp.StorageProfile
