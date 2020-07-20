@@ -24,12 +24,12 @@ $emptyItems = @([Regex]::Matches($TemplateText, "${colon}\{\s{0,}\}")) + # Empty
 $lineBreaks = [Regex]::Matches($TemplateText, "`n|$([Environment]::NewLine)")
 
 # Some properties can be empty for readability
-$PropertiesThatCanBeEmpty = 'resources', 
-                            'outputs', 
-                            'variables', 
-                            'parameters', 
-                            'functions', 
-                            'properties', 
+$PropertiesThatCanBeEmpty = 'resources',
+                            'outputs',
+                            'variables',
+                            'parameters',
+                            'functions',
+                            'properties',
                             'defaultValue', # enables optional parameters
                             'accessPolicies',  # keyVault requires this
                             'value', # Microsoft.Resources/deployments - passing empty strings to a nested deployment
@@ -37,6 +37,7 @@ $PropertiesThatCanBeEmpty = 'resources',
                             'inputs', # Microsoft.Portal/dashboard
                             'notEquals', # Microsoft.Authorization/policyDefinitions policyRule'
                             'clientId' # Microsoft.ContainerService/managedClusters.properties.servicePrincipalProfile
+                            'allowedCallerIpAddresses' # Microsoft.Logic/workflows Access Control
 
 if ($emptyItems) {
     foreach ($emptyItem in $emptyItems) {
