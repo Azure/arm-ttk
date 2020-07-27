@@ -8,7 +8,6 @@
 [Parameter(Mandatory=$true)]
 [string]$TemplateFileName,
 
-[Parameter(Mandatory=$true)]
 [switch]$IsMainTemplate
 )
 
