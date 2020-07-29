@@ -36,7 +36,7 @@ $PropertiesThatCanBeEmpty = 'resources',
                             'promotionCode', # Microsoft.OperationsManagement/soltuions/plan object
                             'inputs', # Microsoft.Portal/dashboard
                             'notEquals', # Microsoft.Authorization/policyDefinitions policyRule'
-                            'clientId' # Microsoft.ContainerService/managedClusters.properties.servicePrincipalProfile
+                            'clientId', # Microsoft.ContainerService/managedClusters.properties.servicePrincipalProfile
                             'allowedCallerIpAddresses' # Microsoft.Logic/workflows Access Control
 
 if ($emptyItems) {
