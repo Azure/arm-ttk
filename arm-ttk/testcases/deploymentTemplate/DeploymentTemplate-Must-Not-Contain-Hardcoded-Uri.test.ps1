@@ -9,28 +9,39 @@ param(
 [string]
 $TemplateText,
 
-# The cached date of all environments (contained in /cache/AllEnvironments.cache.json)
-[PSObject[]]
-$AllEnvironments
+# The list of hosts that are not allowed.
+[string[]]
+$DisallowedHosts = 
+    @(
+        "management.core.windows.net",
+        "gallery.azure.com",
+        "management.core.windows.net",
+        "management.azure.com",
+        "database.windows.net",
+        "core.windows.net",
+        "login.microsoftonline.com",
+        "graph.windows.net",
+        "graph.windows.net",
+        "trafficmanager.net",
+        "vault.azure.net",
+        "datalake.azure.net",
+        "azuredatalakestore.net",
+        "azuredatalakeanalytics.net",
+        "vault.azure.net",
+        "api.loganalytics.io",
+        "api.loganalytics.iov1",
+        "asazure.windows.net",
+        "region.asazure.windows.net",
+        "api.loganalytics.iov1",
+        "api.loganalytics.io",
+        "asazure.windows.net",
+        "region.asazure.windows.net",
+        "batch.core.windows.net"
+    )
 )
 
-$uniqueHosts = # Walk thru all environments
-    @(foreach ($envData in $AllEnvironments) {
-        foreach ($prop in $envData.PSObject.properties){ # and each property
-            $uriValue = $prop.Value -as [uri] # that is a URI
-            if (-not $uriValue -and $prop.Name -like '*Suffix' -and $prop.Value -like '*.*.*') {
-                $uriValue = ("https://" + $prop.Value + "/") -as [uri]
-            }
-            if ($uriValue.DnsSafeHost) { # with a host.
-                $uriValue.DnsSafeHost # Pick out that host.
-            }
-        }
-    }) | Select-Object -Unique # and return each unique item
-
-
-
 $HardcodedHostFinder = # Create a regex to find any reference
-    [Regex]::new(($uniqueHosts -join '|' -replace '\.', '\.'), 'IgnoreCase')
+    [Regex]::new(($DisallowedHosts -join '|' -replace '\.', '\.'), 'IgnoreCase')
 
 $preceededBySchema = # The exception to the rule is a schema reference, 
     [Regex]::new('https://schema\.', 'IgnoreCase,RightToLeft') # so make a regex to look back for the rest of it.
