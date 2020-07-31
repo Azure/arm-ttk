@@ -20,6 +20,11 @@ This will run the full suite of applicable tests on your template.  To run a spe
     Test-AzTemplate -TemplatePath $thePathToYourTemplate -Test "Resources Should Have Location" -File MyNestedTemplate.json 
     # This will run the specific test, 'Resources Should have Location', but only on MyNestedTemplate.json        
 
+You can also skip tests any tests:
+
+    Test-AzTemplate -TemplatePath $thePathToYourTemplate -Skip apiVersions-Should-Be-Recent 
+    # This will exclude the tests indicated by the -Skip parameter from the test run and results     
+
 ## Running Tests on Linux
 
 Before you run the tests on Linux, you'll need to [install PowerShell Core](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-6).
