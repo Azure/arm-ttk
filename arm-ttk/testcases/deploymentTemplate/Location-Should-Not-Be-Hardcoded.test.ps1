@@ -31,8 +31,11 @@ if($locationParameter -ne $null -and $locationParameter.type -ne "string"){
 # there must be a parameter named "location"
 # if that parameter has a defaultValue, it must be the expression [resourceGroup().location] 
 if ($IsMainTemplate){ 
-    if($locationParameter.defaultValue -and "$($locationParameter.defaultvalue)".Trim() -ne '[resourceGroup().location]') {
-    Write-Error "The defaultValue of the location parameter in the main template must not be a specific location. The default value must be [resourceGroup().location]. It is `"$($locationParameter.defaultValue)`"" -ErrorId Location.Parameter.Hardcoded -TargetObject $parameter
+    if($locationParameter.defaultValue -and 
+      "$($locationParameter.defaultvalue)".Trim() -ne '[resourceGroup().location]' -and 
+      "$($locationParameter.defaultvalue)".Trim() -ne 'global') {
+            Write-Error "The defaultValue of the location parameter in the main template must not be a specific location. `
+                         The default value must be [resourceGroup().location] or 'global'. It is `"$($locationParameter.defaultValue)`"" -ErrorId Location.Parameter.Hardcoded -TargetObject $parameter
 }
 # In all other templates:
 # if the parameter named "location" exists, it must not have a defaultValue property

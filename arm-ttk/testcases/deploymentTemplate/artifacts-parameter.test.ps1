@@ -22,7 +22,7 @@ $artifactslocationSasTokenParameter = $templateObject.parameters._artifactsLocat
 
 #if there is no _artifactsLocationParameter skip the tests
 if ($artifactslocationParameter -ne $null) {
-    if ($artifactslocationParameter.type -ne "string") {
+    if ($artifactslocationParameter.type -ne "string" -and $artifactslocationParameter.type -ne "secureString" ) {
         Write-Error "The _artifactsLocation in `"$TemplateFileName`" parameter must be a 'string' type in the parameter declaration `"$($artifactslocationParameter.type)`"" -ErrorId ArtifactsLocation.Parameter.TypeMisMatch -TargetObject $artifactslocationParameter
     }
     # is the sasToken present
@@ -40,18 +40,21 @@ if ($artifactslocationParameter -ne $null) {
             Write-Error "The _artifactsLocation parameter in `"$TemplateFileName`" must have a defaultValue in the main template" -ErrorId ArtifactsLocation.Parameter.DefaultValue.Missing -TargetObject $artifactslocationParameter
         }
         else {
-            # it must be one of two values
-            $allowedDefaultValues = @("[deployment().properties.templateLink.uri]")
+            # it must be take one of two approaches:
+            # 1 - using the raw repo path in the quickstart repo (this only applies for quickstarts)
+            # 2 - using some form of deployment().properties.templateLink (note no uri property is required) but does not have to be exactly that
             if ([string]::IsNullOrWhiteSpace($SampleName)) {
                 #if the sample folder is blank add a placeholder so manual inspection is possible
                 $SampleName = "100-blank-template"
                 Write-Warning "ENV:SAMPLE_NAME is empty - using placeholder for manual verification: $SampleName"
             }
-            $allowedDefaultValues += "$RawRepoPath$SampleName/"
+            $QuickStartPath += "$RawRepoPath$SampleName/"
             # example: https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/101-automation-configuration/
-            if (!($allowedDefaultValues -contains $artifactslocationParameter.defaultValue)) {
-                Write-Error "The _artifactsLocation in `"$TemplateFileName`" has an incorrect defaultValue, found: $($artifactsLocationParameter.defaultValue)" -ErrorId ArtifactsLocation.Parameter.DefaultValue.Incorrect -TargetObject $artifactslocationParameter
-                Write-Error "Must be one of: $allowedDefaultValues"
+            # deploym
+            if (!($artifactslocationParameter.defaultValue -eq $QuickStartPath -or 
+                  $artifactsLocationParameter.defaultValue -like "*deployment().properties.templateLink*")) {
+                    Write-Error "The _artifactsLocation in `"$TemplateFileName`" has an incorrect defaultValue, found: $($artifactsLocationParameter.defaultValue)" -ErrorId ArtifactsLocation.Parameter.DefaultValue.Incorrect -TargetObject $artifactslocationParameter
+                    Write-Error "Must be one of: $QuickStartPath or deployment().properties.templateLink.uri"
             }
         }
         if ( !($artifactslocationSasTokenParameter.defaultValue) -and $artifactslocationSasTokenParameter.defaultValue -ne "") {
