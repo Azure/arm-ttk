@@ -162,7 +162,7 @@ $(if ($ttkError.FullyQualifiedErrorID -notlike 'Microsoft.PowerShell*') {
     }
 }
 
-
+<#
 # Get a list of a directories beneath this file location
 $MyRoot = $MyInvocation.MyCommand.ScriptBlock.File | Split-Path
 $testDirectories = $MyRoot | 
@@ -194,6 +194,7 @@ foreach ($td in $testDirectories) {
 
     Pop-Location
 }
+#>
 
 describe 'Format-AzTemplate' {
     it 'Sorts the format of an Azure Resource Manager Template' {
