@@ -33,8 +33,6 @@ jobs:
           Install-Module -Name Pester -Repository PSGallery -Force -Scope CurrentUser -MaximumVersion $PesterMaxVersion -SkipPublisherCheck -AllowClobber
           Import-Module Pester -Force -PassThru -MaximumVersion $PesterMaxVersion} @Parameters
         shell: pwsh
-        env: 
-          PesterMaxVersion: ${{secrets.PesterMaxVersion}}
       - name: Check out repository
         uses: actions/checkout@v2
       - name: RunPester
@@ -82,8 +80,5 @@ jobs:
           }
           } @Parameters
         shell: pwsh
-        env: 
-          PesterMaxVersion: ${{secrets.PesterMaxVersion}}
-          ModulePath: ${{secrets.ModulePath}}
 env: 
   ModulePath: .\arm-ttk\arm-ttk.psd1
