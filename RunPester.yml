@@ -1,0 +1,89 @@
+
+name: RunPester
+on: 
+- workflow_dispatch
+- pull_request
+- push
+jobs: 
+  TestPowerShellOnLinux: 
+    runs-on: ubuntu-latest
+    steps: 
+      - name: InstallPester
+        run: |
+          $Parameters = @{}
+          $Parameters.PesterMaxVersion = ${env:PesterMaxVersion}
+          foreach ($k in @($parameters.Keys)) {
+              if ([String]::IsNullOrEmpty($parameters[$k])) {
+                  $parameters.Remove($k)
+              }
+          }
+          $Parameters | Out-Host
+          & {<#
+          .Synopsis
+              Installs Pester
+          .Description
+              Installs Pester
+          #>
+          param(
+          # The maximum pester version.  Defaults to 4.99.99.
+          [string]
+          $PesterMaxVersion = '4.99.99'
+          )
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          Install-Module -Name Pester -Repository PSGallery -Force -Scope CurrentUser -MaximumVersion $PesterMaxVersion -SkipPublisherCheck -AllowClobber
+          Import-Module Pester -Force -PassThru -MaximumVersion $PesterMaxVersion} @Parameters
+        shell: pwsh
+        env: 
+          PesterMaxVersion: ${{secrets.PesterMaxVersion}}
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: RunPester
+        run: |
+          $Parameters = @{}
+          $Parameters.ModulePath = ${env:ModulePath}
+          $Parameters.PesterMaxVersion = ${env:PesterMaxVersion}
+          foreach ($k in @($parameters.Keys)) {
+              if ([String]::IsNullOrEmpty($parameters[$k])) {
+                  $parameters.Remove($k)
+              }
+          }
+          $Parameters | Out-Host
+          & {<#
+          .Synopsis
+              Runs Pester
+          .Description
+              Runs Pester tests after importing a PowerShell module
+          #>
+          param(
+          # The module path.  If not provided, will default to the second half of the repository ID.
+          [string]
+          $ModulePath,
+          # The Pester max version.  By default, this is pinned to 4.99.99.
+          [string]
+          $PesterMaxVersion = '4.99.99'
+          )
+          
+          $orgName, $moduleName = $env:GITHUB_REPOSITORY -split "/"
+          if (-not $ModulePath) {
+              $orgName, $moduleName = $env:GITHUB_REPOSITORY -split "/"
+              $ModulePath = ".\$moduleName.psd1"
+          }
+          $importedPester = Import-Module Pester -Force -PassThru -MaximumVersion $PesterMaxVersion
+          $importedModule = Import-Module $ModulePath -Force -PassThru
+          $importedPester, $importedModule | Out-Host
+          
+          
+          $result = 
+              Invoke-Pester -PassThru -Verbose -OutputFile ".\$moduleName.TestResults.xml" -OutputFormat NUnitXml `
+                  -CodeCoverage "$($importedModule | Split-Path)\*-*.ps1" -CodeCoverageOutputFile ".\$moduleName.Coverage.xml"
+          
+          if ($result.FailedCount -gt 0) {
+              throw "$($result.FailedCount) tests failed."
+          }
+          } @Parameters
+        shell: pwsh
+        env: 
+          PesterMaxVersion: ${{secrets.PesterMaxVersion}}
+          ModulePath: ${{secrets.ModulePath}}
+env: 
+  ModulePath: .\arm-ttk\arm-ttk.psd1
