@@ -162,39 +162,43 @@ $(if ($ttkError.FullyQualifiedErrorID -notlike 'Microsoft.PowerShell*') {
     }
 }
 
-<#
-# Get a list of a directories beneath this file location
-$MyRoot = $MyInvocation.MyCommand.ScriptBlock.File | Split-Path
-$testDirectories = $MyRoot | 
-    Get-ChildItem -Directory
+function Test-TTK{
+    param(
+    [Parameter(Mandatory)]
+    [string]
+    $Path
+    )
 
-foreach ($td in $testDirectories) {
-    if ('Pass','Fail','Common' -contains $td.Name ) { continue } # skip some well-known names
-    Push-Location $td.FullName
-    
-    describe "$($td.Name)" {
+    $directoryName = $Path | Split-Path -Leaf
+    Push-Location $Path
+
+    describe $directoryName {
         $failDirectory = Get-ChildItem -Filter Fail -ErrorAction Ignore
 
         if ($failDirectory) { # If the fail directory is present, run fail
             context 'Fail' { 
-                Test-TTKFail -Name $td.Name -Path $failDirectory.FullName
+                Test-TTKFail -Name $directoryName -Path $failDirectory.FullName
             }
         }
 
         $passDirectory = Get-ChildItem -Filter Pass -ErrorAction Ignore
         if ($passDirectory) { # If the pass directory is present, run pass
             context 'Pass' {
-                Test-TTKPass -Name $td.Name -Path $passdirectory.FullName
+                Test-TTKPass -Name $directoryName -Path $passdirectory.FullName
                 
             }
-        }
-
-
+        }    
     }
 
     Pop-Location
+
+
 }
-#>
+
+
+
+$callstack = @(Get-PSCallStack)
+if ($callstack.Length -gt 2) { return }
 
 describe 'Format-AzTemplate' {
     it 'Sorts the format of an Azure Resource Manager Template' {
@@ -206,3 +210,12 @@ describe 'Format-AzTemplate' {
         @($formatted.psobject.properties)[0].name | should be '$schema'
     }
 }
+
+
+
+$PSScriptRoot | 
+    Get-ChildItem -Recurse -Filter *.tests.ps1 | 
+    Where-Object { $_.Name -ne $MyInvocation.InvocationName } |
+    ForEach-Object { 
+        & $_.FullName
+    }
