@@ -37,7 +37,6 @@ jobs:
         uses: actions/checkout@v2
       - name: RunPester
         run: |
-          #$env:SAMPLE_NAME = "sample-path-for-unit-tests-do-not-change"
           $errorActionPreference = "Continue"
           $Parameters = @{}
           $Parameters.ModulePath = ${env:ModulePath}
