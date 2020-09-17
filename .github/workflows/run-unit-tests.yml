@@ -37,7 +37,7 @@ jobs:
         uses: actions/checkout@v2
       - name: RunPester
         run: |
-          $env:SAMPLE_NAME = "sample-path-for-unit-tests-do-not-change"
+          #$env:SAMPLE_NAME = "sample-path-for-unit-tests-do-not-change"
           $errorActionPreference = "Continue"
           $Parameters = @{}
           $Parameters.ModulePath = ${env:ModulePath}
@@ -84,4 +84,4 @@ jobs:
         shell: pwsh
 env: 
   ModulePath: .\arm-ttk\arm-ttk.psd1
-
+  SAMPLE_NAME: sample-path-for-unit-tests-do-not-change
