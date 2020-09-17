@@ -83,4 +83,4 @@ jobs:
         shell: pwsh
 env: 
   ModulePath: .\arm-ttk\arm-ttk.psd1
-  SAMPLE_NAME: sample-path-for-unit-tests
+  SAMPLE_NAME: sample-path-for-unit-tests-do-not-change
