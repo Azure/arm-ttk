@@ -1,9 +1,9 @@
 ﻿{
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "resources": [
         {
             "fail3": {
-                "id": "/subscriptions/literal"
+                "someId": "/subscriptions/literal"
             }
         }
     ]

@@ -3,7 +3,7 @@
     "resources": [
         {
             "fail1": {
-                "Someid": true
+                "someId": true
             }
         }
     ]

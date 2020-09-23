@@ -3,7 +3,7 @@
     "resources": [
         {
             "someWhiteSpace": {
-                "id": " [ concat( variables('id'))]"
+                "someId": " [ concat( variables('id'))]"
             }
         }
     ]
