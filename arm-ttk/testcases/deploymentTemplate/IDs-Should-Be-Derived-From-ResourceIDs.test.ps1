@@ -43,6 +43,11 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     if ($id.JsonPath -match '^(parameters|outputs)') {
         continue
     }
+	
+	#ID inside a workflow/logic app should be skipped
+	if ($id.JsonPath -match 'resources\[\d{1,2}\]\.properties\[\d{1,2}\]\.definition\[\d{1,2}\]') {
+        continue
+    }
 
     if ($myId -isnot [string] -and ($myId -as [float] -eq $null)) {
         if (-not $myId.Value) {
