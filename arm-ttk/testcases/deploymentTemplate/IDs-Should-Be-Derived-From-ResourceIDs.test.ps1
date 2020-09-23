@@ -15,7 +15,7 @@ $TemplateObject
 )
 
 # First, find all objects with an ID property in the MainTemplate.
-$ids = $TemplateObject  | Find-JsonContent -Key *id -Like
+$ids = $TemplateObject  | Find-JsonContent -Key "(.+)id" -Match
 
 
 # If the "Parameters" property or "Outputs" property is in the lineage, skip check
