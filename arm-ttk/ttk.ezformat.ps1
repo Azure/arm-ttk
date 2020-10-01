@@ -1,6 +1,6 @@
-﻿#requires -Module EZOut
+#requires -Module EZOut
 #                 https://github.com/StartAutomating/EZOut
-#              OR Install-Module EZOut
+#              OR Install-Module EZOut   
 $myRoot = $MyInvocation.MyCommand.ScriptBlock.File | Split-Path
 $myName = 'arm-ttk'
 
@@ -15,13 +15,13 @@ Write-FormatView -Action {
         $global:_LastHistoryId = $h
     }
 
-    $CanUseColor = $host.UI.SupportsVirtualTerminal -and -not $ENV:AGENT_ID
-
+    $CanUseColor = $host.UI.SupportsVirtualTerminal -and -not $ENV:AGENT_ID -and -not $env:GITHUB_RUN_ID
+    
 
     if ($global:_LastFile -ne $testOut.File.FullPath) {
         $msg = "Validating $($testOut.File.FullPath | Split-Path | split-Path -Leaf)\$($testOut.File.Name)"
         if ($CanUseColor) {
-            . $SetOutputStyle -ForegroundColor Magenta
+            . $SetOutputStyle -ForegroundColor Magenta        
             $msg + [Environment]::NewLine
             . $clearOutputStyle
         } else {
@@ -45,7 +45,7 @@ Write-FormatView -Action {
     $foregroundColor = 'Green'
     $statusChar = '+'
 
-
+    
     $errorLines = @(
         foreach ($_ in $testOut.Errors) {
             "$_"
@@ -56,16 +56,16 @@ Write-FormatView -Action {
         }
     )
 
-
+    
 
     if ($errorCount) {
         $foregroundColor = if ($CanUseColor) { 'Error' } else { 'Red' }
-        $statusChar = '-'
+        $statusChar = '-'        
     } elseif ($warningCount) {
-        $foregroundColor = if ($CanUseColor) { 'Warning' } else { 'Yellow' }
-        $statusChar = '?'
+        $foregroundColor = if ($CanUseColor) { 'Warning' } else { 'Yellow' } 
+        $statusChar = '?'        
     }
-
+    
     $statusLine = "    [$statusChar] $($testOut.Name) ($([Math]::Round($testOut.Timespan.TotalMilliseconds)) ms)"
     if ($CanUseColor) {
         . $setOutputStyle -ForegroundColor $foregroundColor
@@ -75,15 +75,21 @@ Write-FormatView -Action {
         Write-Host $statusLine -NoNewline -ForegroundColor $foregroundColor
     }
 
-    $azoErrorStatus = if ($ENV:Agent_ID) { "##[error]"} else { '' }
-    $azoWarnStatus  = if ($ENV:Agent_ID) { "##[warning]"} else { '' }
+    $azoErrorStatus = 
+        if ($ENV:Agent_ID) { "##[error]"} 
+        elseif ($env:GITHUB_RUN_ID) {"::error::" }
+        else { '' }
+    $azoWarnStatus  = 
+        if ($ENV:Agent_ID) { "##[warning]"} 
+        elseif ($env:GITHUB_RUN_ID) {"::warning::" }
+        else { '' }
     $indent = 8
     if ($testOut.AllOutput) {
         if (-not $CanUseColor) {
             Write-Host ' '
         } else {
             [Environment]::NewLine
-        }
+        } 
         foreach ($line in $testOut.AllOutput) {
             if ($line -is [Management.Automation.ErrorRecord] -or $line -is [Exception]) {
                 $msg = "$azoErrorStatus$(' ' * $indent)$line"
@@ -106,7 +112,7 @@ Write-FormatView -Action {
                     $msg + [Environment]::NewLine
                     . $clearOutputStyle
                 } else {
-                    Write-Host -ForegroundColor Yellow $msg
+                    Write-Host -ForegroundColor Yellow $msg 
                 }
             }
             elseif ($line -is [string]) {
@@ -118,7 +124,7 @@ Write-FormatView -Action {
                 }
             }
             else {
-                $line |
+                $line | 
                     Out-String -Width ($Host.UI.RawUI.BufferSize.Width - $indent) |
                     & { process {
                         if ($CanUseColor) {
@@ -126,10 +132,10 @@ Write-FormatView -Action {
                         } else {
                             Write-Host "$(' ' * $indent)$_"
                         }
-                    } }
+                    } } 
             }
         }
     }) -join ''
-} -TypeName 'Template.Validation.Test.Result' |
-    Out-FormatData |
+} -TypeName 'Template.Validation.Test.Result'  |
+    Out-FormatData -ModuleName arm-ttk |
     Set-Content -Path (Join-Path $myRoot "$myName.format.ps1xml") -Encoding UTF8
