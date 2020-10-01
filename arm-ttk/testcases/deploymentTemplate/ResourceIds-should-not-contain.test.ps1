@@ -17,17 +17,19 @@ param(
 
 $exprStrOrQuote = [Regex]::new('(?<!\\)[\[\"]', 'RightToLeft') # use this to go backwards from a match below and ensure we are in an expression
 
+$disallowed = '(>' + (@('concat', 'format' -join '|')) + ')'
+
 # Check for any functions as parameters - PowerShell handles empty differently in objects so check the JSON source (i.e. text)
 # note this regex allows for any chars to preceed the function to check for nesting, but it will also flag UDFs as written (which are not common)
-$items = @([Regex]::Matches($TemplateText, "resourceId\s{0,}\(\s{0,}resourceGroup\(")) +            # resourceId(resourceGroup(
-         @([Regex]::Matches($TemplateText, "resourceId\s{0,}\(\s{0,}subscription\(")) +             # resourceId(subscription(
-         @([Regex]::Matches($TemplateText, "resourceId\s{0,}\(\s{0,}concat\s{0,}\(")) +             # resourceId(concat(
-         @([Regex]::Matches($TemplateText, "tenantResourceId\s{0,}\(\s{0,}concat\s{0,}\(")) +       # tenantResourceId(concat(
-         @([Regex]::Matches($TemplateText, "extensionResourceId\s{0,}\(\s{0,}concat\s{0,}\(")) +    # extensionResourceId(concat(
-         @([Regex]::Matches($TemplateText, "subscriptionResourceId\s{0,}\(\s{0,}subscription\(")) + # subscriptionResourceId(subscription(
-         @([Regex]::Matches($TemplateText, "subscriptionResourceId\s{0,}\(\s{0,}concat\s{0,}\(")) + # subscriptionResourceId(concat(
-         @([Regex]::Matches($TemplateText, "reference\s{0,}\(\s{0,}concat\s{0,}\(")) +              # reference(concat(
-         @([Regex]::Matches($TemplateText, "\s{0,}(?>\[|\(|,)\s{0,}list\w{1,}\s{0,}\(\s{0,}concat\s{0,}\("))  # list*(concat( - the preceeding part of the expression ensures that we don't find a UDF named something like myListOfSomething     
+$items = @([Regex]::Matches($TemplateText, "resourceId\s{0,}\(\s{0,}resourceGroup\(")) +                 # resourceId(resourceGroup(
+         @([Regex]::Matches($TemplateText, "resourceId\s{0,}\(\s{0,}subscription\(")) +                  # resourceId(subscription(
+         @([Regex]::Matches($TemplateText, "resourceId\s{0,}\(\s{0,}$disallowed\s{0,}\(")) +             # resourceId(concat( (or format)
+         @([Regex]::Matches($TemplateText, "tenantResourceId\s{0,}\(\s{0,}$disallowed\s{0,}\(")) +       # tenantResourceId(concat(
+         @([Regex]::Matches($TemplateText, "extensionResourceId\s{0,}\(\s{0,}$disallowed\s{0,}\(")) +    # extensionResourceId(concat(
+         @([Regex]::Matches($TemplateText, "subscriptionResourceId\s{0,}\(\s{0,}subscription\(")) +      # subscriptionResourceId(subscription(
+         @([Regex]::Matches($TemplateText, "subscriptionResourceId\s{0,}\(\s{0,}$disallowed\s{0,}\(")) + # subscriptionResourceId(concat(
+         @([Regex]::Matches($TemplateText, "reference\s{0,}\(\s{0,}$disallowed\s{0,}\(")) +              # reference(concat(
+         @([Regex]::Matches($TemplateText, "\s{0,}(?>\[|\(|,)\s{0,}list\w{1,}\s{0,}\(\s{0,}$disallowed\s{0,}\("))  # list*(concat( - the preceeding part of the expression ensures that we don't find a UDF named something like myListOfSomething     
 
 
 $lineBreaks = [Regex]::Matches($TemplateText, "`n|$([Environment]::NewLine)")
