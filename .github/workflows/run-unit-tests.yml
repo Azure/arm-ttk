@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - name: InstallPester
+        shell: pwsh
         run: |
           $Parameters = @{}
           $Parameters.PesterMaxVersion = ${env:PesterMaxVersion}
@@ -17,7 +18,7 @@ jobs:
                   $parameters.Remove($k)
               }
           }
-          $Parameters | Out-Host
+          Write-Host "::debug:: InstallPester $(@(foreach ($p in $Parameters.GetEnumerator()) {'-' + $p.Key + ' ' + $p.Value}) -join ' ')"
           & {<#
           .Synopsis
               Installs Pester
@@ -32,12 +33,11 @@ jobs:
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           Install-Module -Name Pester -Repository PSGallery -Force -Scope CurrentUser -MaximumVersion $PesterMaxVersion -SkipPublisherCheck -AllowClobber
           Import-Module Pester -Force -PassThru -MaximumVersion $PesterMaxVersion} @Parameters
-        shell: pwsh
       - name: Check out repository
         uses: actions/checkout@v2
       - name: RunPester
+        shell: pwsh
         run: |
-          $errorActionPreference = "Continue"
           $Parameters = @{}
           $Parameters.ModulePath = ${env:ModulePath}
           $Parameters.PesterMaxVersion = ${env:PesterMaxVersion}
@@ -46,7 +46,7 @@ jobs:
                   $parameters.Remove($k)
               }
           }
-          $Parameters | Out-Host
+          Write-Host "::debug:: RunPester $(@(foreach ($p in $Parameters.GetEnumerator()) {'-' + $p.Key + ' ' + $p.Value}) -join ' ')"
           & {<#
           .Synopsis
               Runs Pester
@@ -63,10 +63,7 @@ jobs:
           )
           
           $orgName, $moduleName = $env:GITHUB_REPOSITORY -split "/"
-          if (-not $ModulePath) {
-              $orgName, $moduleName = $env:GITHUB_REPOSITORY -split "/"
-              $ModulePath = ".\$moduleName.psd1"
-          }
+          if (-not $ModulePath) { $ModulePath = ".\$moduleName.psd1" }
           $importedPester = Import-Module Pester -Force -PassThru -MaximumVersion $PesterMaxVersion
           $importedModule = Import-Module $ModulePath -Force -PassThru
           $importedPester, $importedModule | Out-Host
@@ -77,10 +74,17 @@ jobs:
                   -CodeCoverage "$($importedModule | Split-Path)\*-*.ps1" -CodeCoverageOutputFile ".\$moduleName.Coverage.xml"
           
           if ($result.FailedCount -gt 0) {
+              foreach ($r in $result.TestResult) {
+                  if (-not $r.Passed) {
+                      "::error::$($r.describe, $r.context, $r.name -join ' ') $($r.FailureMessage)"
+                  }
+              }
+          
               throw "$($result.FailedCount) tests failed."
           }
           } @Parameters
-        shell: pwsh
-env: 
-  ModulePath: .\arm-ttk\arm-ttk.psd1
-  SAMPLE_NAME: sample-path-for-unit-tests-do-not-change
+      - name: PublishTestResults
+        uses: actions/upload-artifact@v2
+        with: 
+          name: PesterResults
+          path: '**.TestResults.xml'
