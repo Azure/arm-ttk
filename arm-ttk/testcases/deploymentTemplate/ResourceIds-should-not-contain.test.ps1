@@ -27,7 +27,7 @@ $items = @([Regex]::Matches($TemplateText, "resourceId\s{0,}\(\s{0,}resourceGrou
          @([Regex]::Matches($TemplateText, "subscriptionResourceId\s{0,}\(\s{0,}subscription\(")) + # subscriptionResourceId(subscription(
          @([Regex]::Matches($TemplateText, "subscriptionResourceId\s{0,}\(\s{0,}concat\s{0,}\(")) + # subscriptionResourceId(concat(
          @([Regex]::Matches($TemplateText, "reference\s{0,}\(\s{0,}concat\s{0,}\(")) +              # reference(concat(
-         @([Regex]::Matches($TemplateText, "\s{0,}(?>\[|\(|,)\s{0,}list\w{1,}\s{0,}\(\s{0,}concat\s{0,}\("))  # list*(concat( - the preceeding part of the expression ensures that we don't find a UDF named something like myListOfSomething     
+         @([Regex]::Matches($TemplateText, "(?<=\s{0,}(?>\[|\(|,))\s{0,}list\w{1,}\s{0,}\(\s{0,}concat\s{0,}\("))  # list*(concat( - the preceeding part of the expression ensures that we don't find a UDF named something like myListOfSomething     
 
 
 $lineBreaks = [Regex]::Matches($TemplateText, "`n|$([Environment]::NewLine)")
