@@ -18,10 +18,12 @@ foreach ($sp in $storageProfiles) {
         $expanded = Expand-AzTemplate -Expression $storageProfile -InputObject $TemplateObject
         $storageProfile = $expanded
     }
+    <#
+    removing this for now, it's not a valid error and throws when the imageRef is using an explicit disk - also not sure why it's here
     if (-not $storageProfile.imageReference) {
         Write-Error "StorageProfile for resource '$($sp.ParentObject.Name)' must not use a preview version" -TargetObject $sp -ErrorId VM.Using.Preview.Image
-    }
-
+    }   
+    #>
     if ($storageProfile.imageReference -like '*-preview' -or $storageProfile.imageReference.version -like '*-preview') {
         Write-Error "StorageProfile for resource '$($sp.ParentObject.Name)' must not use a preview version" -TargetObject $sp -ErrorId VM.Using.Preview.Image
     }
