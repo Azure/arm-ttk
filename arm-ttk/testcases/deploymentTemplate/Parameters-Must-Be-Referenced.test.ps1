@@ -29,7 +29,7 @@ parameters           # the parameters keyword
 \(                   # opening parenthesis
 \s{0,}               # more optional whitespace
 '                    # a single quote
-$($Parameter.Name)   # the parameter name
+$($Parameter.Name -replace '\s', '\s')   # the parameter name
 '                    # a single quote
 \s{0,}               # more optional whitespace
 \)                   # closing parenthesis
