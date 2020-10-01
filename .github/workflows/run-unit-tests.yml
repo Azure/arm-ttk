@@ -88,3 +88,5 @@ jobs:
         with: 
           name: PesterResults
           path: '**.TestResults.xml'
+env: 
+  modulePath: ./arm-ttk/arm-ttk.psd1
