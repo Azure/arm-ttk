@@ -16,10 +16,13 @@ $CreateUIDefinitionText
 
 $colon = "(?<=:)\s{0,}" # this a back reference for a colon followed by 0 to more whitespace
 
-$emptyItems = @([Regex]::Matches($CreateUIDefinitionText, "${colon}\{\s{0,}\}")) + # Empty objects
-              @([Regex]::Matches($CreateUIDefinitionText, "${colon}\[\s{0,}\]")) + # empty arrays
-              @([Regex]::Matches($CreateUIDefinitionText, "${colon}`"\s{0,}`"")) + # empty strings
-              @([Regex]::Matches($CreateUIDefinitionText, "${colon}null"))
+$emptyItems = 
+    @([Regex]::Matches($CreateUIDefinitionText, "${colon}\{\s{0,}\}")) + # Empty objects
+    @([Regex]::Matches($CreateUIDefinitionText, "${colon}\[\s{0,}\]")) + # empty arrays
+    @([Regex]::Matches($CreateUIDefinitionText, "${colon}`"\s{0,}`"")) + # empty strings
+    @([Regex]::Matches($CreateUIDefinitionText, "${colon}\[\s{0,}\{\s{0,}\}\s{0,}\]")) + # empty arrays containing empty objects 
+    @([Regex]::Matches($CreateUIDefinitionText, "${colon}\[\s{0,}`"\s{0,}`"\s{0,}\]")) + # empty arrays containing empty objects  
+    @([Regex]::Matches($CreateUIDefinitionText, "${colon}null"))
 
 $lineBreaks = [Regex]::Matches($CreateUIDefinitionText, "`n|$([Environment]::NewLine)")
 
