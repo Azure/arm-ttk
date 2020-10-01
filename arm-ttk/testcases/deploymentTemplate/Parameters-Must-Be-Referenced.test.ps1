@@ -21,18 +21,18 @@ foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
     # If the parameter name starts with two underscores,
     if ($parameter.Name -like '__*') { continue } # skip it.
 
-
+    $escapedName = $Parameter.Name -replace '\s', '\s'
     # Create a Regex to find the parameter
     $findParam = [Regex]::new(@"
-parameters           # the parameters keyword
-\s{0,}               # optional whitespace
-\(                   # opening parenthesis
-\s{0,}               # more optional whitespace
-'                    # a single quote
-$($Parameter.Name -replace '\s', '\s')   # the parameter name
-'                    # a single quote
-\s{0,}               # more optional whitespace
-\)                   # closing parenthesis
+parameters    # the parameters keyword
+\s{0,}        # optional whitespace
+\(            # opening parenthesis
+\s{0,}        # more optional whitespace
+'             # a single quote
+$escapedName  # the parameter name
+'             # a single quote
+\s{0,}        # more optional whitespace
+\)            # closing parenthesis
 "@,
     # The Regex needs to be case-insensitive
 'Multiline,IgnoreCase,IgnorePatternWhitespace'
