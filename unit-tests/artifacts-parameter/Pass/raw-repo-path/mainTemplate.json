@@ -4,7 +4,7 @@
     "parameters": {
         "_artifactsLocation": {
             "type": "securestring", //this type is ok, so is the defaultValue (if you pass in the params)
-            "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/101-automation-configuration/"
+            "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/sample-path-for-unit-tests-do-not-change/"
         },
         "_artifactsLocationSasToken": {
             "type": "securestring",
