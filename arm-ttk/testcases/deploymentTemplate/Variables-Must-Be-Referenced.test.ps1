@@ -20,17 +20,21 @@ $findVariableInTemplate = {
         [Parameter(Mandatory,Position=0,ValueFromPipeline)]
         [string]$Name
     )
+    
     process {
+        
+        $escapedName = $name -replace '\s', '\s'
+        
         [Regex]::new(@"
-            variables   # the variables keyword
-            \s{0,}      # optional whitespace
-            \(          # opening parenthesis
-            \s{0,}      # more optional whitespace
-            '           # a single quote
-            $name       # the variable name
-            '           # either a single quote
-            \s{0,}      # more optional whitespace
-            \)          # closing parenthesis
+            variables    # the variables keyword
+            \s{0,}       # optional whitespace
+            \(           # opening parenthesis
+            \s{0,}       # more optional whitespace
+            '            # a single quote
+            $escapedName # the variable name
+            '            # either a single quote
+            \s{0,}       # more optional whitespace
+            \)           # closing parenthesis
 "@,
         # The Regex needs to be case-insensitive
         'Multiline,IgnoreCase,IgnorePatternWhitespace'
