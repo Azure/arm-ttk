@@ -289,7 +289,7 @@ Each test script has access to a set of well-known variables:
                                     $key; continue # (this handles CreateUIDefinition.json, even if no schema is present).
                                 }
                                 if ($key -eq 'DeploymentTemplate' -and # Otherwise, if we're checking the deploymentTemplate
-                                    'mainTemplate.json', 'azuredeploy.json', 'prereq.azuredeploy.json' -contains $fn) { # and the file name is something we _know_ will be an ARM template
+                                'mainTemplate.json', 'mainTemplate.jsonc','azuredeploy.json', 'azuredeploy.jsonc', 'prereq.azuredeploy.json', 'prereq.azuredeploy.jsonc' -contains $fn) { # and the file name is something we _know_ will be an ARM template
                                     $key; continue # then run the deployment tests regardless of schema.
                                 }
                             }
@@ -306,7 +306,7 @@ Each test script has access to a set of well-known variables:
 
                 if (-not $matchingGroups) { continue }
                 if ($fileInfo.Schema -like '*deploymentTemplate*') {
-                    $isMainTemplate = 'mainTemplate.json', 'azureDeploy.json', 'prereq.azuredeploy.json' -contains $fileInfo.Name
+                    $isMainTemplate = 'mainTemplate.json', 'mainTemplate.jsonc','azuredeploy.json', 'azuredeploy.jsonc', 'prereq.azuredeploy.json', 'prereq.azuredeploy.jsonc' -contains $fileInfo.Name
                     $templateFileName = $fileInfo.Name
                     $TemplateObject = $fileInfo.Object
                     $TemplateText = $fileInfo.Text
@@ -370,10 +370,10 @@ Each test script has access to a set of well-known variables:
         # If no template was passed,
         if ($PSCmdlet.ParameterSetName -eq 'NearbyTemplate') {
             # attempt to find one in the current directory and it's subdirectories
-            $possibleJsonFiles = @(Get-ChildItem -Filter *.json -Recurse |
+            $possibleJsonFiles = @(Get-ChildItem -Filter *.json* -Recurse |
                 Sort-Object Name -Descending | # (sort by name descending so that MainTemplate.json comes first).
                 Where-Object {
-                    'azureDeploy.json', 'mainTemplate.json' -contains $_.Name
+                    'azureDeploy.json', 'azureDeploy.jsonc', 'mainTemplate.json', 'mainTemplate.jsonc' -contains $_.Name
                 })
 
 

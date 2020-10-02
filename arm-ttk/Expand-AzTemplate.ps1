@@ -113,14 +113,14 @@
             # Now let's try to resolve the template path.
             $resolvedTemplatePath =
                 # If the template path doesn't appear to be a path to a json file,
-                if ($TemplatePath -notlike '*.json') {
+                if ($TemplatePath -notlike '*.json*') {
                     # see if it looks like a file
                     if ( test-path -path $templatePath -PathType leaf) {
                         $TemplatePath = $TemplatePath | Split-Path # if it does, reassign template path to it's directory.
                     }
                     # Then, go looking beneath that template path
                     $preferredJsonFile = $TemplatePath |
-                        Get-ChildItem -Filter *.json |
+                        Get-ChildItem -Filter *.json* |
                         # for a file named azuredeploy.json, prereq.azuredeploy.json or mainTemplate.json
                         Where-Object { 'azuredeploy.json', 'mainTemplate.json', 'prereq.azuredeploy.json' -contains $_.Name } |
                         Select-Object -First 1 -ExpandProperty Fullname
@@ -155,7 +155,7 @@
             #*$TemplateFileName (the name of the azure template file)
             $templateFileName = $TemplateFullPath | Split-Path -Leaf
             #*$IsMainTemplate (if the TemplateFileName is named mainTemplate.json)
-            $isMainTemplate = 'mainTemplate.json', 'azuredeploy.json', 'prereq.azuredeploy.json' -contains $templateFileName
+            $isMainTemplate = 'mainTemplate.json', 'mainTemplate.jsonc','azuredeploy.json', 'azuredeploy.jsonc', 'prereq.azuredeploy.json', 'prereq.azuredeploy.jsonc' -contains $templateFileName
             $templateFile = Get-Item -LiteralPath "$resolvedTemplatePath"
             $templateFolder = $templateFile.Directory
             #*$FolderName (the name of the root folder containing the template)
@@ -165,7 +165,7 @@
             #*$TemplateObject (the template text, converted from JSON)
             $TemplateObject = Import-Json -FilePath $TemplateFullPath
 
-            if ($resolvedTemplatePath -like '*.json' -and 
+            if ($resolvedTemplatePath -match '.json' -and 
                 $TemplateObject.'$schema' -like '*CreateUIDefinition*') {
                 $createUiDefinitionFullPath = "$resolvedTemplatePath"
                 $createUIDefinitionText = [IO.File]::ReadAllText($createUiDefinitionFullPath)
@@ -195,7 +195,7 @@
                     Where-Object { -not $_.PSIsContainer } |
                     ForEach-Object {
                         $fileInfo = $_
-                        if ($resolvedTemplatePath -like '*.json' -and -not $isMainTemplate -and 
+                        if ($resolvedTemplatePath -match '.json' -and -not $isMainTemplate -and 
                             $fileInfo.FullName -ne $resolvedTemplatePath) { return }
 
                         if ($fileInfo.DirectoryName -eq '__macosx') {
@@ -204,7 +204,7 @@
                         # All FolderFile objects will have the following properties:
 
 
-                        if ($fileInfo.Extension -eq '.json') {
+                        if ($fileInfo.Extension -match '.json') {
                             $fileObject = [Ordered]@{
                                 Name = $fileInfo.Name #*Name (the name of the file)
                                 Extension = $fileInfo.Extension #*Extension (the file extension)
