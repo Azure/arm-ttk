@@ -62,26 +62,28 @@ jobs:
           $PesterMaxVersion = '4.99.99'
           )
           
+          $global:ErrorActionPreference = 'continue'
+          $global:ProgressPreference    = 'silentlycontinue'
+          
           $orgName, $moduleName = $env:GITHUB_REPOSITORY -split "/"
           if (-not $ModulePath) { $ModulePath = ".\$moduleName.psd1" }
           $importedPester = Import-Module Pester -Force -PassThru -MaximumVersion $PesterMaxVersion
           $importedModule = Import-Module $ModulePath -Force -PassThru
           $importedPester, $importedModule | Out-Host
           
-          $ErrorActionPreference = 'continue'
+          
           
           $result = 
               Invoke-Pester -PassThru -Verbose -OutputFile ".\$moduleName.TestResults.xml" -OutputFormat NUnitXml `
                   -CodeCoverage "$($importedModule | Split-Path)\*-*.ps1" -CodeCoverageOutputFile ".\$moduleName.Coverage.xml"
           
           if ($result.FailedCount -gt 0) {
+              "::error:: $($result.FailedCount) tests failed"
               foreach ($r in $result.TestResult) {
                   if (-not $r.Passed) {
                       "::error::$($r.describe, $r.context, $r.name -join ' ') $($r.FailureMessage)"
                   }
               }
-          
-              throw "$($result.FailedCount) tests failed."
           }
           } @Parameters
       - name: PublishTestResults
