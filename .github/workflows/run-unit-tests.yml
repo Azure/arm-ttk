@@ -68,6 +68,7 @@ jobs:
           $importedModule = Import-Module $ModulePath -Force -PassThru
           $importedPester, $importedModule | Out-Host
           
+          $ErrorActionPreference = 'continue'
           
           $result = 
               Invoke-Pester -PassThru -Verbose -OutputFile ".\$moduleName.TestResults.xml" -OutputFormat NUnitXml `
