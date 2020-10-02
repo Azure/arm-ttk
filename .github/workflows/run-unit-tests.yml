@@ -78,12 +78,13 @@ jobs:
                   -CodeCoverage "$($importedModule | Split-Path)\*-*.ps1" -CodeCoverageOutputFile ".\$moduleName.Coverage.xml"
           
           if ($result.FailedCount -gt 0) {
-              "::error:: $($result.FailedCount) tests failed"
+              "::debug:: $($result.FailedCount) tests failed"
               foreach ($r in $result.TestResult) {
                   if (-not $r.Passed) {
                       "::error::$($r.describe, $r.context, $r.name -join ' ') $($r.FailureMessage)"
                   }
               }
+              throw "::error:: $($result.FailedCount) tests failed"
           }
           } @Parameters
       - name: PublishTestResults
