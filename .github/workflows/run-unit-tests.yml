@@ -77,6 +77,9 @@ jobs:
               Invoke-Pester -PassThru -Verbose -OutputFile ".\$moduleName.TestResults.xml" -OutputFormat NUnitXml `
                   -CodeCoverage "$($importedModule | Split-Path)\*-*.ps1" -CodeCoverageOutputFile ".\$moduleName.Coverage.xml"
           
+          "::set-output name=TotalCount::$($result.TotalCount)",
+          "::set-output name=PassedCount::$($result.PassedCount)",
+          "::set-output name=FailedCount::$($result.FailedCount)" | Out-Host
           if ($result.FailedCount -gt 0) {
               "::debug:: $($result.FailedCount) tests failed"
               foreach ($r in $result.TestResult) {
@@ -84,7 +87,6 @@ jobs:
                       "::error::$($r.describe, $r.context, $r.name -join ' ') $($r.FailureMessage)"
                   }
               }
-              throw "::error:: $($result.FailedCount) tests failed"
           }
           } @Parameters
       - name: PublishTestResults
@@ -92,5 +94,30 @@ jobs:
         with: 
           name: PesterResults
           path: '**.TestResults.xml'
+      - name: TestPesterResult
+        shell: pwsh
+        run: |
+          if (-not $env:PassedCount) {
+              throw "Could not determine passed count"
+          }
+          
+          if (-not $env:TotalCount) {
+              throw "Could not determine passed count"
+          }
+          
+          if (-not $env:FailedCount) {
+              throw "Could not determine passed count"
+          }
+          
+          $failed = [int]$env:FailedCount
+          $total  = [int]$env:TotalCount
+          
+          if ($failed -lt $total) {
+              $msg = "::error::$($failed) Tests Failed (out of $total)"
+              $msg
+              throw $msg
+          }
+          
+          
 env: 
   ModulePath: .\arm-ttk\arm-ttk.psd1
