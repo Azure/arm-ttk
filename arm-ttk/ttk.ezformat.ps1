@@ -4,7 +4,6 @@
 $myRoot = $MyInvocation.MyCommand.ScriptBlock.File | Split-Path
 $myName = 'arm-ttk'
 
-
 Write-FormatView -Action {
     $testOut = $_
 
@@ -16,7 +15,7 @@ Write-FormatView -Action {
         $global:_LastHistoryId = $h
     }
 
-    $CanUseColor = $host.UI.SupportsVirtualTerminal -and -not $ENV:AGENT_ID
+    $CanUseColor = $host.UI.SupportsVirtualTerminal -and -not $ENV:AGENT_ID -and -not $env:GITHUB_RUN_ID
     
 
     if ($global:_LastFile -ne $testOut.File.FullPath) {
@@ -76,8 +75,14 @@ Write-FormatView -Action {
         Write-Host $statusLine -NoNewline -ForegroundColor $foregroundColor
     }
 
-    $azoErrorStatus = if ($ENV:Agent_ID) { "##[error]"} else { '' }
-    $azoWarnStatus  = if ($ENV:Agent_ID) { "##[warning]"} else { '' }
+    $azoErrorStatus = 
+        if ($ENV:Agent_ID) { "##[error]"} 
+        elseif ($env:GITHUB_RUN_ID) {"::error::" }
+        else { '' }
+    $azoWarnStatus  = 
+        if ($ENV:Agent_ID) { "##[warning]"} 
+        elseif ($env:GITHUB_RUN_ID) {"::warning::" }
+        else { '' }
     $indent = 8
     if ($testOut.AllOutput) {
         if (-not $CanUseColor) {
@@ -131,6 +136,6 @@ Write-FormatView -Action {
             }
         }
     }) -join ''
-} -TypeName 'Template.Validation.Test.Result' |
-    Out-FormatData |
+} -TypeName 'Template.Validation.Test.Result'  |
+    Out-FormatData -ModuleName arm-ttk |
     Set-Content -Path (Join-Path $myRoot "$myName.format.ps1xml") -Encoding UTF8
