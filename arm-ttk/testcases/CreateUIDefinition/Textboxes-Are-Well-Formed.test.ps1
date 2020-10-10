@@ -20,37 +20,33 @@ foreach ($textbox in $allTextBoxes) {
     # Then we walk over each textbox.
     if (-not $textbox.constraints) {
         # If constraints was missing or blank,
-        Write-Error "Textbox $($textbox.Name) is missing constraints" -TargetObject $textbox # error
+        Write-Error -Message "Textbox $($textbox.Name) is missing constraints" -ErrorId Textboxes.Are.Well.Formed.Missing.Constraints -TargetObject $textbox # error
         continue # and continue (since additional failures would be noise).
     }
-    $constraintWasRegexString = "";
+    $constraintRegexString = "";
     if ($textbox.constraints.validations) {
-        foreach ($validation in $textbox.constraints.validations) {
-            if ($validation.regex) {
-                $constraintWasRegexString = $validation.regex
-            }
-            if (-not $validation.message) {
-                # If there's not a validation message
-                Write-Error "Textbox $($textbox.Name) is missing validation message in constraints.validations items" -TargetObject $textbox #error.
+        $constraintRegexString = foreach ($validation in $textbox.constraints.validations) {
+            if ($validation.regex) { 
+                $validation.regex; break
             }
         }
     }
     elseif ($textbox.constraints.regex) {
-        $constraintWasRegexString = $textbox.constraints.regex
+        $constraintRegexString = $textbox.constraints.regex
         if (-not $textbox.constraints.validationMessage) {
             # If there's not a validation message
-            Write-Error "Textbox $($textbox.Name) is missing constraints.validationMessage" -TargetObject $textbox #error.
+            Write-Error -Message "Textbox $($textbox.Name) is missing constraints.validationMessage" -ErrorId Textboxes.Are.Well.Formed.Missing.Constraints.ValidationMessage -TargetObject $textbox #error.
         }
     }
-    if (-not $constraintWasRegexString ) {
+    if (-not $constraintRegexString ) {
         # If the constraint didn't have a regex,
-        Write-Error "Textbox $($textbox.Name) is missing constraints.regex or regex property in constraints.validations items" -TargetObject $textbox #error.
+        Write-Error -Message "Textbox $($textbox.Name) is missing constraints.regex or regex property in constraints.validations" -ErrorId Textboxes.Are.Well.Formed.Missing.Constraints.Regex -TargetObject $textbox #error.
     }
     else {
         try {
             # If it did,
-            $constraintWasRegex = [Regex]::new($constraintWasRegexString) # try to cast to a regex
-            $hasLengthConstraint = $lengthConstraintRegex.Match($constraintWasRegexString)
+            $constraintWasRegex = [Regex]::new($constraintRegexString) # try to cast to a regex
+            $hasLengthConstraint = $lengthConstraintRegex.Match($constraintRegexString)
     
             if (-not $hasLengthConstraint.Success) {
                 Write-Warning "TextBox '$($textBox.Name)' regex does not have a length constraint." 
@@ -58,7 +54,7 @@ foreach ($textbox in $allTextBoxes) {
         }
         catch {
             $err = $_ # if that fails, 
-            Write-Error "Textbox $($textbox.Name) regex is invalid: $($err)" -TargetObject $textbox #error.
+            Write-Error -Message "Textbox $($textbox.Name) regex is invalid: $($err)" -ErrorId Textboxes.Are.Well.Formed.Invalid.Constraints.Regex.Expressison -TargetObject $textbox #error.
         }
     }
 }
