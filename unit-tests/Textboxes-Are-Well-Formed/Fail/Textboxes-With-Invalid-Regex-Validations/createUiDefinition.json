@@ -5,14 +5,18 @@
     "parameters": {
         "basics": [
             {
-                "name": "TextBox1",
+                "name": "TextBox2",
                 "type": "Microsoft.Common.TextBox",
                 "label": "Textboxes With Invalid Regex",
                 "toolTip": "Textboxes with invalid regex.",
                 "constraints": {
                     "required": true,
-                    "regex": "^hel($",
-                    "validationMessage": "Textboxes with invalid regex in constraints.regex."
+                    "validations": [
+                        {
+                            "regex": "^hel($",
+                            "message": "Textboxes with invalid regex in constraints.validations."
+                        }
+                    ]
                 }
             }
         ],
