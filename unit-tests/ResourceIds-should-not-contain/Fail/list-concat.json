@@ -6,7 +6,7 @@
     "outputs": {
         "pass1": {
             "type": "string",
-            "value": "[listAdminKeys(concat('Microsoft.Network/networkSecurityGroups'), '2020-01-01')]"
+            "value": "[ listAdminKeys(concat('Microsoft.Network/networkSecurityGroups'), '2020-01-01')]"
         }
     }
 }
