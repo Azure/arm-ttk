@@ -16,7 +16,7 @@ param(
     $TemplateText
 )
 
-$exprStrOrQuote = [Regex]::new('(?<!\\)[\[\"]', 'RightToLeft')
+$exprStrOrQuote = [Regex]::new('(?<!\\)[\[\"@]', 'RightToLeft')
 foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
     # If the parameter name starts with two underscores,
     if ($parameter.Name -like '__*') { continue } # skip it.
