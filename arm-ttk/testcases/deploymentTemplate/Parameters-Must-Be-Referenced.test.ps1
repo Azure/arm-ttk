@@ -42,7 +42,7 @@ $escapedName  # the parameter name
         Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject $parameter
     } else {
         foreach ($fr in $foundRefs) { # Walk thru each reference
-            $foundQuote =$exprStrOrQuote.Match($TemplateText, $fr.Index + 1) # make sure we hit a [ before a quote
+            $foundQuote = $exprStrOrQuote.Match($TemplateText, $fr.Index + 1) # make sure we hit a [ before a quote
             if ($foundQuote.Value -eq '"') { # if we don't, error
                 Write-Error -Message "Parameter reference is not contained within an expression: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced.In.Expression -TargetObject $parameter
             }
