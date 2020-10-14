@@ -31,7 +31,7 @@
         },
         "pass3": {
             "type": "string",
-            "value": "[ concat(reference(subscriptionResourceId('Microsoft.Network/networkSecurityGroups', 'nsg')).something, 'suffix')]"
+            "value": "[ format('{0}', concat(reference(subscriptionResourceId('Microsoft.Network/networkSecurityGroups', 'nsg')).something, 'suffix'))]"
         }
     }
 }
