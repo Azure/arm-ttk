@@ -10,7 +10,11 @@ param(
 $TemplateObject
 )
 
-$storageProfiles = Find-JsonContent -Key storageProfile -InputObject $TemplateObject | Where-Object {$_.ParentObject.type -eq "Microsoft.Compute/virtualMachines" -or $_.ParentObject.type -eq "Microsoft.Compute/virtualMachineScaleSets"}
+$storageProfiles = Find-JsonContent -Key storageProfile -InputObject $TemplateObject | 
+    Where-Object {
+        $_.ParentObject.type -eq "Microsoft.Compute/virtualMachines" -or 
+        $_.ParentObject.type -eq "Microsoft.Compute/virtualMachineScaleSets"
+    }
 
 foreach ($sp in $storageProfiles) {
     $storageProfile = $sp.StorageProfile
@@ -18,12 +22,12 @@ foreach ($sp in $storageProfiles) {
         $expanded = Expand-AzTemplate -Expression $storageProfile -InputObject $TemplateObject
         $storageProfile = $expanded
     }
-    <#
-    removing this for now, it's not a valid error and throws when the imageRef is using an explicit disk - also not sure why it's here
-    if (-not $storageProfile.imageReference) {
-        Write-Error "StorageProfile for resource '$($sp.ParentObject.Name)' must not use a preview version" -TargetObject $sp -ErrorId VM.Using.Preview.Image
-    }   
-    #>
+    
+    # Re-adding this for now, but checking that it neither has an image reference or source virtual machine.
+    if (-not $storageProfile.imageReference -and -not $storageProfile.sourceVirtualMachine) {
+        Write-Error "StorageProfile for resource '$($sp.ParentObject.Name)' is missing" -TargetObject $sp -ErrorId VM.Missing.Storage.Profile
+    }
+    
     if ($storageProfile.imageReference -like '*-preview' -or $storageProfile.imageReference.version -like '*-preview') {
         Write-Error "StorageProfile for resource '$($sp.ParentObject.Name)' must not use a preview version" -TargetObject $sp -ErrorId VM.Using.Preview.Image
     }
