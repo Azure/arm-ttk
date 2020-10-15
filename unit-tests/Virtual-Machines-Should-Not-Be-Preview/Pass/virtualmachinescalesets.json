@@ -1,0 +1,12 @@
+{
+    "properties": {
+        "virtualMachineProfile": {
+            "storageProfile": {
+                "imageReference": {
+                    "version": "string"
+                }
+            }
+        }
+    },
+    "type": "Microsoft.Compute/virtualMachineScaleSets"
+}
