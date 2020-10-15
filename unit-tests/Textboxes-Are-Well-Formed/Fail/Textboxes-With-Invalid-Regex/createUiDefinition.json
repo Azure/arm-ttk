@@ -1,0 +1,23 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {
+                "name": "TextBox1",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Textboxes With Invalid Regex",
+                "toolTip": "Textboxes with invalid regex.",
+                "constraints": {
+                    "required": true,
+                    "regex": "^hel($",
+                    "validationMessage": "Textboxes with invalid regex in constraints.regex."
+                }
+            }
+        ],
+        "outputs": {
+            "Location": "[location()]"
+        }
+    }
+}

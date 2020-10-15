@@ -1,0 +1,26 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {
+                "name": "TextBox1",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Validations-Without-Message",
+                "toolTip": "Validations without message.",
+                "constraints": {
+                    "required": true,
+                    "validations": [
+                        {
+                            "regex": "^[0-9]+$"
+                        }
+                    ]
+                }
+            }
+        ],
+        "outputs": {
+            "Location": "[location()]"
+        }
+    }
+}
