@@ -46,7 +46,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     }
 	
     #ID inside a Microsoft.Logic/workflows should be skipped
-    if ($id.JsonPath -match '\.properties\.definition') {
+    if ($id.JsonPath -match '\.properties(\[\d{1,2}\])?\.definition(\[\d{1,2}\])?\.') {
         continue
     }
 
@@ -102,9 +102,9 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     if ($expandedId -is [string] -and ` #if it happens to be an object property, skip it
         $expandedId -notmatch $exprMatch  ){
             Write-Error "Property: `"$($id.propertyName)`" must use one of the following expressions for an resourceId property:
-            $($allowedExpressions -join ',')" `
-             -TargetObject $id -ErrorId ResourceId.Should.Contain.Proper.Expression
-             Write-Error "Path: [$($id.JsonPath)]"
+            $($allowedExpressions -join ',')
+            Path: [$($id.JsonPath)]"`
+            -TargetObject $id -ErrorId ResourceId.Should.Contain.Proper.Expression
     }
 }
 
