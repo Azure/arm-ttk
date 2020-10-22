@@ -104,6 +104,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
             Write-Error "Property: `"$($id.propertyName)`" must use one of the following expressions for an resourceId property:
             $($allowedExpressions -join ',')" `
              -TargetObject $id -ErrorId ResourceId.Should.Contain.Proper.Expression
+             Write-Error "Path: `"$($id.JsonPath)`"
     }
 }
 
