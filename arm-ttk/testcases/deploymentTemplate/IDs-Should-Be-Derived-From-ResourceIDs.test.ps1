@@ -44,6 +44,11 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     if ($id.JsonPath -match '^(parameters|outputs)') {
         continue
     }
+	
+    #ID inside a Microsoft.Logic/workflows should be skipped
+    if ($id.JsonPath -match '\.properties\.definition') {
+        continue
+    }
 
     if ($myId -isnot [string] -and ($myId -as [float] -eq $null)) {
         if (-not $myId.Value) {
@@ -55,9 +60,6 @@ foreach ($id in $ids) { # Then loop over each object with an ID
             }
         }
     }
-
-    
-    
 
     # $myId = "$($id.id)".Trim() # Grab the actual ID,
     if (-not $myId) {
