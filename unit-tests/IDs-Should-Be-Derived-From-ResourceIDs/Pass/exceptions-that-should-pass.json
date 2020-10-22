@@ -1,5 +1,5 @@
 ﻿{
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "resources": [
         {
             "id": "[resourceId('Microsoft.Storage/storageAccounts', 'name')]", //TODO this throws off the error message since we pull the parent's name (in this case 'variables')
