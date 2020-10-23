@@ -11,8 +11,8 @@ $MainTemplateParameters
 )
 
 # test is broken so turning it off for now...
-Write-Warning "Skipping Test..."
-break
+#Write-Warning "Skipping Test..."
+#break
 
 # First, find all size selectors in CreateUIDefinition.
 $sizeSelectors = $CreateUIDefinitionObject | 
