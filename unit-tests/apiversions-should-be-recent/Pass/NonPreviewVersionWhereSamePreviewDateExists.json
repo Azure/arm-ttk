@@ -1,8 +1,8 @@
 {
     "$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "resources":  [
-        {
-      "apiVersion": "2017-12-01",
+    {
+      "apiVersion": "2017-12-01",  // there also exists a 2017-12-01-preview apiVersion...
       "type": "Microsoft.DBforMySQL/servers",
       "name": "[variables('databaseName')]",
       "location": "[parameters('location')]",
@@ -12,5 +12,6 @@
         "createMode": "Default",
         "sslEnforcement": "Disabled"
       }
-    }]
+    }
+    ]
 }
