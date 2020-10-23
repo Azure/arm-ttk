@@ -1,10 +1,10 @@
-function Format-AzTemplate
+﻿function Format-AzTemplate
 {
     <#
     .Synopsis
         Formats a resource manager template in the desired order.
     .Description
-        Sorts the content in a resource manager template.        
+        Sorts the content in a resource manager template.
     .Link
         https://github.com/Azure/azure-quickstart-templates/blob/master/1-CONTRIBUTION-GUIDE/best-practices.md
     #>
@@ -19,21 +19,21 @@ function Format-AzTemplate
     [PSObject]$TemplateObject)
 
     begin {
-        $topLevelPropertyOrder = 
-            '$schema','contentVersion', 'apiProfile', 
+        $topLevelPropertyOrder =
+            '$schema','contentVersion', 'apiProfile',
             'parameters','functions','variables',
             'resources', 'outputs'
 
-        $resourceOrder = 'comments', 'condition', 'type', 'apiVersion', 'name', 
+        $resourceOrder = 'comments', 'condition', 'type', 'apiVersion', 'name',
             'location', 'sku', 'kind', 'dependsOn', 'tags', 'copy'
 
         $sortProperties = {
-            param([Parameter(ValueFromPipeline=$true)]$in, [string[]]$order,[string[]]$LastOrder, [switch]$Recurse) 
+            param([Parameter(ValueFromPipeline=$true)]$in, [string[]]$order,[string[]]$LastOrder, [switch]$Recurse)
 
             process {
                 $newObject = [PSObject]::new() # create a new object to output.
                 if (-not $in) { return $null }
-                if ([string], [int], [float], [bool] -contains $in.GetType()) { return $in } 
+                if ([string], [int], [float], [bool] -contains $in.GetType()) { return $in }
                 if ($Recurse) {
                     $recurseSplat = @{} + $PSBoundParameters
                     $recurseSplat.Remove('In')
@@ -41,39 +41,39 @@ function Format-AzTemplate
                 foreach ($propName in $order) { # Walk thru the properties in the preferred order.
                     if ($in.$propName) { # If the object had that property
                         $newPropValue =
-                            if ($Recurse -and $in.$propName -is [Array]) { 
-                                $in.$propName | & $MyInvocation.MyCommand.ScriptBlock @recurseSplat
+                            if ($Recurse -and $in.$propName -is [Array]) {
+                                @($in.$propName | & $MyInvocation.MyCommand.ScriptBlock @recurseSplat)
                             } else {
                                 $in.$propName
                             }
                         $newProp = [Management.Automation.PSNoteProperty]::new($propName, $newPropValue)
-                        $newObject.psobject.properties.add($newProp) # add it to the new object 
+                        $newObject.psobject.properties.add($newProp) # add it to the new object
                         $in.psobject.properties.remove($propName) # and remove it from the original object.
-                        
+
                     }
                 }
                 if (@($in.psobject.properties).Count) { # If the template object had any properties left
                     foreach ($prop in $in.psobject.properties) { # add them to the new object in the order they were found.
-                        if ($LastOrder -contains $prop.Name) { continue } 
-                        $newProp = 
-                            [Management.Automation.PSNoteProperty]::new($prop.Name, $in.($prop.Name))                    
+                        if ($LastOrder -contains $prop.Name) { continue }
+                        $newProp =
+                            [Management.Automation.PSNoteProperty]::new($prop.Name, $in.($prop.Name))
                         $newObject.psobject.properties.add($newProp)
-                    } 
+                    }
                 }
                 if ($LastOrder) {
                     foreach ($propName in $LastOrder) {
                         if ($in.$propName) { # If the object had that property
                             $newPropValue =
-                                if ($Recurse -and $in.$propName -is [Array]) { 
+                                if ($Recurse -and $in.$propName -is [Array]) {
                                     $in.$propName | & $MyInvocation.MyCommand.ScriptBlock @recurseSplat
                                 } else {
                                     $in.$propName
                                 }
-                            $newProp = 
-                                [Management.Automation.PSNoteProperty]::new($propName, $newPropValue)                    
-                            $newObject.psobject.properties.add($newProp) # add it to the new object 
+                            $newProp =
+                                [Management.Automation.PSNoteProperty]::new($propName, $newPropValue)
+                            $newObject.psobject.properties.add($newProp) # add it to the new object
                             $in.psobject.properties.remove($propName) # and remove it from the original object.
-                            
+
                         }
                     }
                 }
@@ -88,7 +88,7 @@ function Format-AzTemplate
 
             if (-not $templateObject) { return } # If it was null, return.
 
-            Format-AzTemplate -TemplateObject $TemplateObject # Call ourself, passing in the contents of the file. 
+            Format-AzTemplate -TemplateObject $TemplateObject # Call ourself, passing in the contents of the file.
             return
         }
 
@@ -100,11 +100,11 @@ function Format-AzTemplate
             foreach ($prop in $templateObject.psobject.properties) {
                 $templateObjectCopy[$prop.Name] = $prop.Value
             }
-            $newTemplate = 
-                [PSCustomObject]$TemplateObjectCopy | 
-                    & $sortProperties -Order $topLevelPropertyOrder # sort the top-level properties.            
-            
-            if ($newTemplate.resources) { # If the template had resources, sort them 
+            $newTemplate =
+                [PSCustomObject]$TemplateObjectCopy |
+                    & $sortProperties -Order $topLevelPropertyOrder # sort the top-level properties.
+
+            if ($newTemplate.resources) { # If the template had resources, sort them
                 $newTemplate.resources =@(
                     $newTemplate.resources | & $sortProperties -Order $resourceOrder -LastOrder 'properties', 'resources' -Recurse
                 )
