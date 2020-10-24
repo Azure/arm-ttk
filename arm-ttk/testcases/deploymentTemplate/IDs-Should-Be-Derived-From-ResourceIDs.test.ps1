@@ -69,16 +69,18 @@ foreach ($id in $ids) { # Then loop over each object with an ID
 
      # Check that it uses one of the allowed expressions - can remove variables once Expand-Template does full eval of nested vars
     # REGEX
+    # - ^ starts with
     # - 0 or more whitespace
     # - @ 
     # - expression must be 
     #    - option 1: 
     #       - opening {
-    #       - any expression in betwwen
+    #       - any expression in between
     #       - closing }
     #    - option 2
     #       - alpha function name      
     #       - opening paren (
+    #       - any expression in between
     #       - closing paren )
     #  Examples
     #    Option 1  =>   @{coalesce(triggerOutputs().headers?['id'], guid())}
