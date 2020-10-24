@@ -44,11 +44,6 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     if ($id.JsonPath -match '^(parameters|outputs)') {
         continue
     }
-	
-    #ID inside a Microsoft.Logic/workflows should be skipped
-    if ($id.JsonPath -match '\.properties(\[\d{1,2}\])?\.definition(\[\d{1,2}\])?\.') {
-        continue
-    }
 
     if ($myId -isnot [string] -and ($myId -as [float] -eq $null)) {
         if (-not $myId.Value) {
@@ -67,7 +62,34 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         continue
     }
     $expandedId = Expand-AzTemplate -Expression $myId -InputObject $TemplateObject -Exclude Parameters # then expand it.
+
+    if ($expandedId -isnot [string]) { #if it happens to be an object property, skip it
+        continue
+    };
+
+     # Check that it uses one of the allowed expressions - can remove variables once Expand-Template does full eval of nested vars
+    # REGEX
+    # - 0 or more whitespace
+    # - @ 
+    # - expression must be 
+    #    - option 1: 
+    #       - opening {
+    #       - any expression in betwwen
+    #       - closing }
+    #    - option 2
+    #       - alpha function name      
+    #       - opening paren (
+    #       - closing paren )
+    #  Examples
+    #    Option 1  =>   @{coalesce(triggerOutputs().headers?['id'], guid())}
+    #    Option 2  =>   @body('Get_email_(V2)_-_Processing')?['id']
+
+    $exprMatch0 = "^\s{0,}@((\{.*\})|([a-bA-B]*\(.*\)))"
+    if ($expandedId -match $exprMatch0  ){
+        continue;
+    }
     
+
     # these are allowed for resourceIds
     $allowedExpressions = @(
         "extensionResourceId",
@@ -98,9 +120,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     # - single quote on parameters and variables (resourceId first parameters may not be a literal string)
     #
     $exprMatch = "\s{0,}\[\s{0,}($($allowedExpressions -join '|' ))\s{0,}\(\s{0,}"
-
-    if ($expandedId -is [string] -and ` #if it happens to be an object property, skip it
-        $expandedId -notmatch $exprMatch  ){
+    if ($expandedId -notmatch $exprMatch  ){
             Write-Error "Property: `"$($id.propertyName)`" must use one of the following expressions for an resourceId property:
             $($allowedExpressions -join ',')
             Path: [$($id.JsonPath)]"`

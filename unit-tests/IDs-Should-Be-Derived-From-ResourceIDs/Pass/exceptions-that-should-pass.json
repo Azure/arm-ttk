@@ -42,7 +42,8 @@
                    "manual": {
                       "correlation": {
                          "clientTrackingId": "@{coalesce(triggerOutputs().headers?['id'], guid())}"
-                      }
+                      },
+                      "emailId": "@body('Get_email_(V2)_-_Processing')?['id']"
                    }
                 }
             }
