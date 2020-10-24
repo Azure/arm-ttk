@@ -2,9 +2,10 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "resources": [
         {
-            "fail4": {
-                "resourceId": "[concat( variables('id'))]" //technicall it works, but not a best practice
-            }
+            "debugSetting": {
+                "logDetail": "none"
+            },
+            "type": "Microsoft.Resources/deployments"
         }
     ]
 }
