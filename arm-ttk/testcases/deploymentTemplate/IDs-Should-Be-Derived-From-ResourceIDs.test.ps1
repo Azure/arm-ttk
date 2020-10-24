@@ -84,7 +84,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     #    Option 1  =>   @{coalesce(triggerOutputs().headers?['id'], guid())}
     #    Option 2  =>   @body('Get_email_(V2)_-_Processing')?['id']
 
-    $exprMatch0 = "^\s{0,}@((\{.*\})|([a-bA-B]*\(.*\)))"
+    $exprMatch0 = "^\s{0,}@((\{.*\})|([\w0-9]+\(.+\)))"
     if ($expandedId -match $exprMatch0  ){
         continue;
     }
