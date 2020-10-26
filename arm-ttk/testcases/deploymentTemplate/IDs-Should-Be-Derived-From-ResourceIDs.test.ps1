@@ -31,11 +31,15 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     $exceptions = @(
         "tenantId",
         "workerSizeId", # Microsoft.Web/serverFarms
-        "serverFarmId", # Microsoft.Web/sites
         "keyVaultSecretId", # Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
         "keyId", # Microsoft.Cdn/profiles urlSigningKeys
         "subscriptionId", # Microsoft.Cdn/profiles urlSigningKeys
-        "StartingDeviceID" # SQLIaasVMExtension > settings/ServerConfigurationsManagementSettings/SQLStorageUpdateSettings
+        "StartingDeviceID", # SQLIaasVMExtension > settings/ServerConfigurationsManagementSettings/SQLStorageUpdateSettings
+        "servicePrincipalClientId", # common var name
+        "clientId", # Microsoft.BotService - common var name
+        "appId", # Microsoft.Insights
+        "tenantId", # Common Property name
+        "objectId" # Common Property name
     )
 
     if ($exceptions -contains $myIdFieldName) { # We're checking resource ids, not tenant IDs
@@ -77,12 +81,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         "reference",
         "variables",
         "subscription",
-        "guid",
-        "servicePrincipalClientId",
-        "clientId",
-        "appId",
-        "tenantId",
-        "objectId"
+        "guid"
     )
 
     # Check that it uses one of the allowed expressions - can remove variables once Expand-Template does full eval of nested vars
