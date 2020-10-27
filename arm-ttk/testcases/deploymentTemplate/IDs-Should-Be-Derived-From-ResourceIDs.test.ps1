@@ -30,12 +30,12 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     # these properties are exempt, since they are not actually resourceIds
     $exceptions = @(
         "tenantId",
-        "workerSizeId", # Microsoft.Web/serverFarms
-        "serverFarmId", # Microsoft.Web/sites
+        "workerSizeId",     # Microsoft.Web/serverFarms
+        "serverFarmId",     # Microsoft.Web/sites
         "keyVaultSecretId", # Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
-        "keyId", # Microsoft.Cdn/profiles urlSigningKeys
-        "subscriptionId", # Microsoft.Cdn/profiles urlSigningKeys
-        "StartingDeviceID" # SQLIaasVMExtension > settings/ServerConfigurationsManagementSettings/SQLStorageUpdateSettings
+        "keyId",            # Microsoft.Cdn/profiles urlSigningKeys
+        "subscriptionId",   # Microsoft.Cdn/profiles urlSigningKeys
+        "StartingDeviceID"  # SQLIaasVMExtension > settings/ServerConfigurationsManagementSettings/SQLStorageUpdateSettings
     )
 
     if ($exceptions -contains $myIdFieldName) { # We're checking resource ids, not tenant IDs
@@ -91,7 +91,6 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         continue;
     }
     
-
     # these are allowed for resourceIds
     $allowedExpressions = @(
         "extensionResourceId",

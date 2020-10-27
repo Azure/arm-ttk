@@ -30,24 +30,6 @@
             "keyVaultSecretId": "[concat()]", // this is actually a uri Microsoft.Network/applicationGateways sslCertificates - created with reference() and concat /secrets/secretname
             "storageAccountSubscriptionId": "[subscription().subscriptionId]", // Microsoft.Sql/servers/auditSettings asks for a subscriptionId
             "roleAssignmentGuid": "[ guid ('some seed')]" // variables that are used for roleAssignment GUIDs (or any other guid) ends in "id" and should be exempted if the function is used
-        },
-        {
-          "type": "Microsoft.Logic/workflows",
-          "apiVersion": "2019-05-01",
-          "properties": {
-            "definition": {
-                "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-                "contentVersion": "1.0.0.0",
-                "triggers": {
-                   "manual": {
-                      "correlation": {
-                         "clientTrackingId": "@{coalesce(triggerOutputs().headers?['id'], guid())}"
-                      },
-                      "emailId": "@body('Get_email_(V2)_-_Processing')?['id']"
-                   }
-                }
-            }
-          }
         }
     ]
 }
