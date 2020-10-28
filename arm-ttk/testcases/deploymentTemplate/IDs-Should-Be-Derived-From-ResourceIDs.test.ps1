@@ -67,7 +67,11 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         continue
     };
 
-     # Check that it uses one of the allowed expressions - can remove variables once Expand-Template does full eval of nested vars
+    # This sectiom evaluates valid expression syntax for the logic app expressions:
+    #   Ref: https://docs.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference
+    # If found, then it's skipped (success)
+    #
+    # Check that it uses one of the allowed expressions - can remove variables once Expand-Template does full eval of nested vars
     # REGEX
     # - ^ starts with
     # - 0 or more whitespace
@@ -82,10 +86,11 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     #       - opening paren (
     #       - any expression in between
     #       - closing paren )
-    #  Examples
-    #    Option 1  =>   @{coalesce(triggerOutputs().headers?['id'], guid())}
-    #    Option 2  =>   @body('Get_email_(V2)_-_Processing')?['id']
-
+    #  Valid expression examples
+    #    1  =>   @{coalesce(triggerOutputs().headers?['id'], guid())}
+    #    2  =>   @body('Get_email_(V2)_-_Processing')?['id']
+    #
+    
     $exprMatch0 = "^\s{0,}@((\{.*\})|([\w0-9]+\(.+\)))"
     if ($expandedId -match $exprMatch0  ){
         continue;
