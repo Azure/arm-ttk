@@ -1,0 +1,3 @@
+﻿# This matches a bracket or double quote
+(?<!\\) # As long as it is not preceeded by slashes
+[\[\"]  # match either a [ or a "
