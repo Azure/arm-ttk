@@ -7,8 +7,10 @@ These Regular Expressions can be used anywhere within arm-ttk.
 
 Regular Expressions definitions can be written in two formats:
 
+```
 *.regex.txt pattern files
 *.regex.ps1 pattern generators
+```
 
 These regular expressions can be used within arm-ttk by calling a PowerShell ScriptBlock that matches the name of the directory/file.
 
