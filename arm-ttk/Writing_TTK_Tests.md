@@ -9,7 +9,7 @@ We're going to write a test to make sure each parameter in our template is refer
 
 This test should defined in ./testcases/deploymentTemplate/Parameters-Must-Be-Referenced.ps1.
 
-Tests in /testcases/deploymentTemplate will run against any JSON object with a $schema like *deploymentTemplate*.
+Tests in /testcases/deploymentTemplate will run against any JSON object with a $schema like \*deploymentTemplate\*.
 
 
 ### Test Structure
@@ -28,8 +28,11 @@ You can run Get-Help ./testcases/deploymentTemplate/Parameters-Must-Be-Reference
 
 Next we have the test parameters.  These are used to bind to information from the Azure Resource Manager Template.
 
-The TemplateObject parameter will be passed the template data, converted from JSON.
-The TemplateText parameter will be passed the raw text of the template.
+The TemplateObject parameter will pass the template as an object, converted from JSON.
+The TemplateText parameter will pass the raw text of the template.
+
+You only need to pass the information needed for your test.
+
 ~~~PowerShell
 param(
     # The Template Object
