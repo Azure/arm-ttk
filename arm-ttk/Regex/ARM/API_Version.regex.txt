@@ -1,0 +1,10 @@
+﻿# Matches an Azure Resource Manager API version
+(?<Year>\d{4,4})    # A four digit year
+-                   # followed by a dash
+(?<Month>\d{2,2})   # Followed by a two digit month
+-                   # Followed by a dash
+(?<Day>\d{2,2})     # Followed by a two digit day
+(?:                 # Optionally followed by
+    -               # a dash
+    (?<Preview>\w+) # and a preview version word
+)?
