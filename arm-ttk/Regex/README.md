@@ -15,7 +15,7 @@ Regular Expressions definitions can be written in two formats:
 
 These regular expressions can be used within arm-ttk by calling a PowerShell ScriptBlock that derived from the name of the directory/file.
 
-For example, the expression ARM_Expression is defined in [/Regex/ARM/Expression.regex.txt](./ARM/Expression.regex.txt)
+For example, the expression ARM_Template_Expression is defined in [/Regex/ARM/Template_Expression.regex.txt](./ARM/Template_Expression.regex.txt)
 
 ### Using Patterns
 
@@ -24,13 +24,13 @@ For example, the expression ARM_Expression is defined in [/Regex/ARM/Expression.
 
 This expression can be used anywhere within arm-ttk.
 
-For instance, using the pattern ARM_Expression, we can find all matches for the expression within $templatetext:
+For instance, using the pattern ARM_Template_Expression, we can find all matches for the expression within $templatetext:
 
 ~~~PowerShell
-$templateText | & ${?<ARM_Expression>}
+$templateText | & ${?<ARM_Template_Expression>}
 ~~~
 
-ARM_Expression is defined in [/Regex/ARM/Expression.regex.txt](./ARM/Expression.regex.txt)
+ARM_Template_Expression is defined in [/Regex/ARM/Template_Expression.regex.txt](./ARM/Template_Expression.regex.txt)
 
 ### Writing Patterns
 
