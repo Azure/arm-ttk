@@ -22,7 +22,7 @@ $DisallowedHosts =
         "login.microsoftonline.com",
         "graph.windows.net",
         "graph.windows.net",
-        "trafficmanager.net",
+        # "trafficmanager.net", # Removing this as it cannot be found in the ARM function [Environment()]
         "vault.azure.net",
         "datalake.azure.net",
         "azuredatalakestore.net",
