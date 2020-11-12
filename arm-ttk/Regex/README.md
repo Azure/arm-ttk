@@ -32,6 +32,24 @@ $templateText | & ${?<ARM_Expression>}
 
 ARM_Expression is defined in [/Regex/ARM/Expression.regex.txt](./ARM/Expression.regex.txt)
 
+### Writing Patterns
+
+Pattern files are regular expressions defined in a .regex.txt file beneath [/Regex](.).
+
+
+All patterns will be created with the options IgnoreCase and IgnorePatternWhitespace.  
+This allows you to put comments in your RegEx 
+
+For instance, a simple commented RegEx to look for the guid() function would be:
+
+```
+guid # Match guid
+\s?  # optional whitespace
+\(   # Match open parenthesis
+\s?  # optional whitespace
+\)   # Match closing parenthesis
+```
+
 
 ### Using Generators
 
@@ -52,6 +70,44 @@ $templateText | & ${?<ARM_Parameter>}
 ~~~
 
 ARM_Parameter is defined in [/Regex/ARM/Expression.regex.ps1](./ARM/Parameter.regex.ps1)
+
+
+### Writing Generators
+
+Generators are defined in a .regex.ps1 file beneath [/Regex](.)
+
+Generators dynamically produce a regular expression based off of input.
+
+For example, the source for ARM_Parameter is:
+
+~~~PowerShell
+<#
+.Synopsis
+    Matches an ARM parameter
+.Description
+    Matches an Azure Resource Manager template parameter.
+#>
+param(
+# Match any parameter by default
+[string]
+$Parameter = '.+?' 
+)
+
+@"
+parameters                              # the parameters keyword
+\s{0,}                                  # optional whitespace
+\(                                      # opening parenthesis
+\s{0,}                                  # more optional whitespace
+'                                       # a single quote, followed by the parameter name
+(?<ParameterName>
+$($Parameter -replace '\s','\s')    
+)
+'                                       # a single quote
+\s{0,}                                  # more optional whitespace
+\)                                      # closing parenthesis
+"@
+~~~
+
 
 
 ---
