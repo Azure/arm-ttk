@@ -1,6 +1,13 @@
-﻿param(
+﻿<#
+.Synopsis
+    Matches an ARM parameter
+.Description
+    Matches an Azure Resource Manager template parameter.
+#>
+param(
+# Match any parameter by default
 [string]
-$Parameter = '.+?'
+$Parameter = '.+?' 
 )
 
 @"
