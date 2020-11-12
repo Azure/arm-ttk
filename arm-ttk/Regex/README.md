@@ -69,7 +69,7 @@ Generators need not require parameters.  To find all parameters referenced throu
 $templateText | & ${?<ARM_Parameter>}
 ~~~
 
-ARM_Parameter is defined in [/Regex/ARM/Expression.regex.ps1](./ARM/Parameter.regex.ps1)
+ARM_Parameter is defined in [/Regex/ARM/Parameter.regex.ps1](./ARM/Parameter.regex.ps1)
 
 
 ### Writing Generators
