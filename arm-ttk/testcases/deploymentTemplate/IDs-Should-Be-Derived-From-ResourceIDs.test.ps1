@@ -40,7 +40,8 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         "appId", # Microsoft.Insights
         "tenantId", # Common Property name
         "objectId", # Common Property name
-        "vlanId" # Unique Id to establish peering when setting up an ExpressRoute circuit
+        "vlanId", # Unique Id to establish peering when setting up an ExpressRoute circuit
+        "@@odata.id" # Common Property in Logic App HTTP Body field Arm-TTK Issue 232
     )
 
     if ($exceptions -contains $myIdFieldName) { # We're checking resource ids, not tenant IDs
