@@ -25,7 +25,7 @@ $ids = $TemplateObject  | Find-JsonContent -Key *id -Like
 
 foreach ($id in $ids) { # Then loop over each object with an ID
     $myIdFieldName = $id.PropertyName
-    $myId = $id.$myIdFieldName        
+    $myId = $id.$myIdFieldName
 
     # these properties are exempt, since they are not actually resourceIds
     $exceptions = @(
@@ -41,7 +41,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         "tenantId", # Common Property name
         "objectId", # Common Property name
         "vlanId", # Unique Id to establish peering when setting up an ExpressRoute circuit
-        "@@odata.id" # Common Property in Logic App HTTP Body field Arm-TTK Issue 232
+        "@@odata.id" # Common Property in Logic App HTTP Body field / Azure/Arm-TTK Issue #232
     )
 
     if ($exceptions -contains $myIdFieldName) { # We're checking resource ids, not tenant IDs
@@ -62,8 +62,8 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         }
     }
 
-    
-    
+
+
 
     # $myId = "$($id.id)".Trim() # Grab the actual ID,
     if (-not $myId) {
@@ -71,7 +71,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         continue
     }
     $expandedId = Expand-AzTemplate -Expression $myId -InputObject $TemplateObject -Exclude Parameters # then expand it.
-    
+
     # these are allowed for resourceIds
     $allowedExpressions = @(
         "extensionResourceId",
@@ -105,4 +105,3 @@ foreach ($id in $ids) { # Then loop over each object with an ID
              -TargetObject $id -ErrorId ResourceId.Should.Contain.Proper.Expression
     }
 }
-
