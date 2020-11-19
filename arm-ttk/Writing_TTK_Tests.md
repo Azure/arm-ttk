@@ -83,3 +83,7 @@ foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
     }
 }
 ~~~
+
+---
+
+To see how to write unit tests for your TTK tests, see [Writing TTK Unit Tests](Writing_TTK_Unit_Tests.md)
