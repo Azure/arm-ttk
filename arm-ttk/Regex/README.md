@@ -40,14 +40,14 @@ Pattern files are regular expressions defined in a .regex.txt file beneath [/Reg
 All patterns will be created with the options IgnoreCase and IgnorePatternWhitespace.  
 This allows you to put comments in your RegEx 
 
-For instance, a simple commented RegEx to look for the guid() function would be:
+For instance, a simple commented RegEx to look for the newGuid() function would be:
 
 ```
-guid # Match guid
-\s?  # optional whitespace
-\(   # Match open parenthesis
-\s?  # optional whitespace
-\)   # Match closing parenthesis
+newGuid # Match guid
+\s?     # optional whitespace
+\(      # Match open parenthesis
+\s?     # optional whitespace
+\)      # Match closing parenthesis
 ```
 
 
