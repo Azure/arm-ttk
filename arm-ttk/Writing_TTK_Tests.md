@@ -59,7 +59,7 @@ We can use PowerShell to loop over the parameter object properties.
 
 foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
     # If the parameter name starts with two underscores,
-    if ($parameter.Name -like '__*') { continue } # skip it.
+    if ($parameter.Name -like '__*') { continue } # skip it, this is a pattern we use to allow for ignoring a parameter being used
     
     # See if we found the parameter.  This uses the pattern generator defined in/Regex/ARM/Parameter.regex.ps1
 
