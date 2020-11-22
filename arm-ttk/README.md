@@ -8,8 +8,9 @@ This will run the full suite of applicable tests on your template.  To run a spe
 
     Test-AzTemplate -TemplatePath $thePathToYourTemplate -Test deploymentTemplate 
     # This will run deployment template tests on all appropriate files
-    <# There are currently three groups of tests:
+    <# There are currently four groups of tests:
         * deploymentTemplate (aka MainTemplateTests)
+        * deploymentParameters
         * createUIDefinition
         * all
     #>

@@ -23,7 +23,7 @@ foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
     # If the parameter name starts with two underscores,
     if ($parameter.Name -like '__*') { continue } # skip it.
 
-    $escapedName = $Parameter.Name -replace '\s', '\s'
+    $escapedName = $parameter.Name -replace '\s', '\s'
     # Create a Regex to find the parameter
 
     $foundRefs = $TemplateText | ?<ARM_Parameter> -Parameter $escapedName

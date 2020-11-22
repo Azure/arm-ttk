@@ -125,8 +125,8 @@ Each test script has access to a set of well-known variables:
         $builtInTestCases = @{}
         # Next we'll define some human-friendly built-in groups.
         $builtInGroups = @{
-            'all' = 'deploymentTemplate', 'createUIDefinition'
-            'mainTemplateTests' = 'deploymentTemplate'
+            'all' = 'deploymentTemplate', 'createUIDefinition', 'deploymentParameters'
+            'mainTemplateTests' = 'deploymentTemplate', 'deploymentParameters'
         }
 
 
@@ -293,9 +293,12 @@ Each test script has access to a set of well-known variables:
                                 if ($fn -match $key) { # check to see if it's name matches the key
                                     $key; continue # (this handles CreateUIDefinition.json, even if no schema is present).
                                 }
+                                if ($key -eq 'DeploymentParameters' -and # Otherwise, if we're checking the deploymentTemplate
+                                'maintemplate.parameters.json', 'azuredeploy.parameters.json', 'prereq.azuredeploy.parameters.json' -contains $fn) { # and the file name is something we _know_ will be an ARM template
+                                   $key; continue # then run the deployment tests regardless of schema.
+                                }
                                 if ($key -eq 'DeploymentTemplate' -and # Otherwise, if we're checking the deploymentTemplate
-                                    'mainTemplate.json', 'azuredeploy.json', 'prereq.azuredeploy.json' -contains $fn
-                                ) { # and the file name is something we _know_ will be an ARM template
+                                    'maintemplate.json', 'azuredeploy.json', 'prereq.azuredeploy.json' -contains $fn) { # and the file name is something we _know_ will be an ARM template
                                     $key; continue # then run the deployment tests regardless of schema.
                                 }
                             }
@@ -311,6 +314,13 @@ Each test script has access to a set of well-known variables:
                 }
 
                 if (-not $matchingGroups) { continue }
+                
+                if ($fileInfo.Schema -like '*deploymentParameters*') {
+                    $isMainTemplateParameters = 'maintemplate.parameters.json', 'azuredeploy.parameters.json', 'prereq.azuredeploy.parameters.json' -contains $fileInfo.Name
+                    $templateFileName = $fileInfo.Name
+                    $TemplateObject = $fileInfo.Object
+                    $TemplateText = $fileInfo.Text
+                }
                 if ($fileInfo.Schema -like '*deploymentTemplate*') {
                     $isMainTemplate = 
                         if ($MainTemplateFile) {
@@ -360,7 +370,6 @@ Each test script has access to a set of well-known variables:
                         Test-Group
                     } else {
                         context "$($fileInfo.Name)->$groupName" ${function:Test-Group}
-
                     }
                 }
             }
