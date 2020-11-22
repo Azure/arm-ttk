@@ -16,13 +16,37 @@ As for the type, number and  nature of the tests a test should check for somethi
 - Security practices for the language (outputting secrets in plain text)
 - Using the appropriate language construct for the task at hand (using environmental functions instead of hard-coding values)
 
-Not everthing is appropriate for a universal set of tests and not every test will apply to every scenario, so the framework allows for easy expansion and individual selection of tests.
+Not everything is appropriate for a universal set of tests and not every test will apply to every scenario, so the framework allows for easy expansion and individual selection of tests.
+
+## Running Unit Tests locally before request a PR
+
+Tests can be run directly in PowerShell, or run from the command line using a wrapper script.
+
+You can run all of the unit tests by using **.\arm-ttk.tests.ps1**.
+
+This will run the full suite of unit tests against the tests json files.
+
+use:
+
+    # set your location in the project directory:
+    Set-Location -Path "$(YourGithubProjectFolder)\arm-ttk\unit-tests"
+    <#
+      Run this to make sure arm-ttk was not previously loaded and where you might be using from another source; 
+      ie: from the official release or the master branch
+    #>
+    Remove-Module -Name arm-ttk
+    
+    # import the module from the current branch
+    Import-Module ..\arm-ttk\arm-ttk.psd1
+
+    # These are the same tests that run in the pipeline when doing a commit or a pull request (PR). 
+    .\arm-ttk.tests.ps1
 
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
 
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions provided by the bot. You will only need to do this once across all repos using our CLA.
+When you submit a pull request, a CLA bot will automatically determine whether you need to provide a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions provided by the bot. You will only need to do this once across all repositories using our CLA.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 
