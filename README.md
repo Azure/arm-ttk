@@ -30,14 +30,9 @@ use:
 
     # set your location in the project directory:
     Set-Location -Path "$(YourGithubProjectFolder)\arm-ttk\unit-tests"
-    <#
-      Run this to make sure arm-ttk was not previously loaded and where you might be using from another source; 
-      ie: from the official release or the master branch
-    #>
-    Remove-Module -Name arm-ttk
     
-    # import the module from the current branch
-    Import-Module ..\arm-ttk\arm-ttk.psd1
+    # import the module from the current branch, use -Force to make sure you have imported any code changes
+    Import-Module ..\arm-ttk\arm-ttk.psd1 -Force
 
     # These are the same tests that run in the pipeline when doing a commit or a pull request (PR). 
     .\arm-ttk.tests.ps1
