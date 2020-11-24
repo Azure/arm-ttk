@@ -62,8 +62,10 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         }
     }
 
-
-
+    # Skip this check if the property is within a logic app
+    if ( $id.ParentObject.type -imatch '^microsoft\.logic/workflows$' ) {
+        continue
+    }
 
     # $myId = "$($id.id)".Trim() # Grab the actual ID,
     if (-not $myId) {
