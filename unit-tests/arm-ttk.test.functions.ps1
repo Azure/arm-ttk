@@ -111,16 +111,16 @@ function Test-TTKFail {
             $ttkResults = Get-Item -Path $testFile.Fullname | 
                 Test-AzTemplate @ttkParams 
             if (-not $ttkResults) { throw "No Test Results" }
-            if (-not ($ttkResults | Where-Object {$_.Errors })) {
-                throw 'Errors were expected'
-            }
             if (Test-Path $targetTextPath) { # If we have a .should.be.txt
                 $targetText = [IO.File]::ReadAllText($targetTextPath).Trim() # read it
+                if (-not ($ttkResults | Where-Object {$_.Errors })) {
+                    throw "Errors were expected: $($targetText)"
+                }
                 foreach ($ttkResult in $ttkResults) {
                     foreach ($ttkError in $ttkResult.Errors) {
                         if ($ttkError.Message -ne $targetText -and $ttkError.FullyQualifiedErrorID -notlike "$targetText,*") {
                             throw "Unexpected Error:
-Expected '$($targetText)', got $($ttkError.Message)
+Expected [$($targetText)], got $($ttkError.Message)
 $(if ($ttkError.FullyQualifiedErrorID -notlike 'Microsoft.PowerShell*') {
     'ErrorID [' + $ttkError.FullyQualifiedErrorID.Split(',')[0] + ']'
 })"
@@ -128,8 +128,11 @@ $(if ($ttkError.FullyQualifiedErrorID -notlike 'Microsoft.PowerShell*') {
                     }   
                 }
             }
-            if (Test-Path $targetScriptPath) {
-                
+            if (-not ($ttkResults | Where-Object {$_.Errors })) {
+                throw "Errors were expected"
+            }
+
+            if (Test-Path $targetScriptPath) {                
                 & "$targetScriptPath" $ttkResults
             }
             
