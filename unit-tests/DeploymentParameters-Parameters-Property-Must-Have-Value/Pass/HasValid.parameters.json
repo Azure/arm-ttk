@@ -1,8 +1,28 @@
 ﻿{
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
     "parameters": {
-        "someKey" : {
-            "value" : "some data"
-        }
+      "someKey" : {
+        "value" : "some data"
+      },
+      "someObject" : {
+        "value" : {}
+      },
+      "someBool" : {
+        "value" : true
+      },
+      "someInt" : {
+        "value" : 1
+      },
+      "someReference" : {
+        "value" : "[reference('other').output.value]"
+      },
+      "someKeyVaultReference": {
+        "reference": {
+            "keyVault": {
+                "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/myvault"
+            },
+            "secretName": "ExamplePassword"
+        }  
+      }
     }
 }
