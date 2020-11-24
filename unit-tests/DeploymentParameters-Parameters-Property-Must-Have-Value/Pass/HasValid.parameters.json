@@ -1,5 +1,6 @@
 ﻿{
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
     "parameters": {
       "someKey" : {
         "value" : "some data"
@@ -18,10 +19,10 @@
       },
       "someKeyVaultReference": {
         "reference": {
-            "keyVault": {
-                "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/myvault"
-            },
-            "secretName": "ExamplePassword"
+          "keyVault": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/myvault"
+          },
+          "secretName": "ExamplePassword"
         }  
       }
     }
