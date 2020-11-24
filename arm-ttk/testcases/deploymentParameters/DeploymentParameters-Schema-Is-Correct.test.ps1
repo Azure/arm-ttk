@@ -23,8 +23,6 @@ if ($validSchemas -notcontains $templateSchema) {
     Write-Error  -ErrorId Parameters.Bad.Schema -Message "DeploymentParameters has an unexpected Schema.
     Found: $templateSchema
 It should be one of the following:
-$($validSchemas -join ([Environment]::NewLine))
-"
-    return
-    
+$($validSchemas -join ([Environment]::NewLine))"
+    return   
 }
