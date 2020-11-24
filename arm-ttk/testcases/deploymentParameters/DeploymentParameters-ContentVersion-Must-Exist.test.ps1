@@ -22,7 +22,7 @@ if ($TemplateObject.contentVersion -isnot [string]) {
     continue
 } 
 
-if ($TemplateObject.contentVersion -inotmatch '^(([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)$') {
+if ($TemplateObject.contentVersion -inotmatch '^([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)$') {
     Write-Warning -Message "Recommended that the 'contentVersion' should be a version string 
     Like:  1.0.0.0  -> but found: $($TemplateObject.contentVersion)"
     continue
