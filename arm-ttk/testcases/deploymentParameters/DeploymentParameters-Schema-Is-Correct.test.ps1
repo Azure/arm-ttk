@@ -2,7 +2,7 @@
 .Synopsis
     Determines that the DeploymentTemplate schema is correct
 .Description
-    Determines that the .$schema property of any DeploymentTemplate is correct
+    Determines that the .$schema property of any DeploymentParameters is correct
 #>
 param(
 [PSObject]$TemplateObject
@@ -11,7 +11,7 @@ param(
 $templateSchema = $TemplateObject.'$schema'
 
 if (-not $templateSchema) {
-    Write-Error 'DeploymentParameters Missing .$schema property' -ErrorId Template.Missing.Schema
+    Write-Error 'DeploymentParameters Missing .$schema property' -ErrorId Parameters.Missing.Schema
     return
 }
 
