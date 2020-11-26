@@ -1,4 +1,11 @@
-﻿param(
+﻿<#
+.Synopsis
+    TODO: summary of test
+.Description
+    TODO: describe this test
+#>
+
+param(
 [Parameter(Mandatory=$true,Position=0)]
 [PSObject]
 $TemplateObject
