@@ -1,5 +1,5 @@
 ﻿
-#region Irregular Engine [0.5.2] : https://github.com/StartAutomating/Irregular
+#region Irregular Engine [0.5.3] : https://github.com/StartAutomating/Irregular
 $ImportRegex = {
 
     <#
@@ -365,7 +365,7 @@ $ImportRegex = {
     }
 
 }
-$UseRegex = {
+function Use-ARMRegEx {
 
     <#
     .Synopsis
@@ -600,6 +600,9 @@ $UseRegex = {
         # If -Where or -If was provided, we need to recreate the script blocks for $_ to work.
         if ($Where) { $where = [ScriptBlock]::Create($Where) }
 
+        # In order for $_ to work correctly, 
+        # we need to recreate any script block parameters passed within dictionaries.
+        # Rather than write this three times, let's loop over each collection
         foreach ($coll in $if, $ReplaceIf, $Coerce) {
             if (-not $coll) { continue }
             foreach ($k in @($coll.Keys)) {
@@ -974,10 +977,8 @@ $UseRegex = {
     }
 
 }
-#endregion Irregular Engine [0.5.2] : https://github.com/StartAutomating/Irregular
+#endregion Irregular Engine [0.5.3] : https://github.com/StartAutomating/Irregular
 . $ImportRegex $(if ($psScriptRoot) { $psScriptRoot } else { $pwd })
-
 foreach ($k in $script:_RegexLibrary.Keys) {
-    $executionContext.SessionState.PSVariable.Set("?<$k>", $useRegex)
+    Set-Alias "?<$k>" Use-ARMRegEx
 }
-
