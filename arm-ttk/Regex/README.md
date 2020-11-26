@@ -27,7 +27,7 @@ This expression can be used anywhere within arm-ttk.
 For instance, using the pattern ARM_Template_Expression, we can find all matches for the expression within $templatetext:
 
 ~~~PowerShell
-$templateText | & ${?<ARM_Template_Expression>}
+$templateText | ?<ARM_Template_Expression>
 ~~~
 
 ARM_Template_Expression is defined in [/Regex/ARM/Template_Expression.regex.txt](./ARM/Template_Expression.regex.txt)
@@ -60,13 +60,13 @@ These are PowerShell scripts that produce a regular expression based off of inpu
 For instance, we can find all of the references to the VMSize parameter.
 
 ~~~PowerShell
-$templateText | & ${?<ARM_Parameter>} -Parameter 'VMSize'
+$templateText | ?<ARM_Parameter> -Parameter 'VMSize'
 ~~~
 
 Generators need not require parameters.  To find all parameters referenced throughout the template, use:
 
 ~~~PowerShell
-$templateText | & ${?<ARM_Parameter>}
+$templateText | ?<ARM_Parameter>
 ~~~
 
 ARM_Parameter is defined in [/Regex/ARM/Parameter.regex.ps1](./ARM/Parameter.regex.ps1)
