@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {
+                "name": "element1",
+                "type": "Microsoft.Common.PasswordBox",
+                "label": {
+                  "password": "Password",
+                  "confirmPassword": "Confirm password"
+                },
+                "toolTip": "",
+                "constraints": {
+                  "required": true,
+                  "regex": "^[a-zA-Z0-9]{8,}$",
+                  "validationMessage": "Password must be at least 8 characters long, contain only numbers and letters"
+                },
+                "options": {
+                  "hideConfirmation": true
+                },
+                "visible": true
+              }
+        ],
+        "outputs": {
+            "Location": "[location()]"
+        }
+    }
+}
