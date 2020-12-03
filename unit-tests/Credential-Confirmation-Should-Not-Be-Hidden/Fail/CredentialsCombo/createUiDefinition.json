@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {
+                "name": "element1",
+                "type": "Microsoft.Compute.CredentialsCombo",
+                "label": {
+                  "password": "Password",
+                  "confirmPassword": "Confirm password"
+                },
+                "toolTip": {
+                  "password": ""
+                },
+                "constraints": {
+                  "required": true,
+                  "customPasswordRegex": "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
+                  "customValidationMessage": "The password must be alphanumeric, contain at least 12 characters, and have at least 1 letter and 1 number."
+                },
+                "options": {
+                  "hideConfirmation": true
+                },
+                "osPlatform": "Windows",
+                "visible": true
+              }
+        ],
+        "outputs": {
+            "Location": "[location()]"
+        }
+    }
+}
