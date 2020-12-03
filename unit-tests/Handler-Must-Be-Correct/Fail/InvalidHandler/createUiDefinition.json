@@ -1,0 +1,14 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.Bogus",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {             
+            }
+        ],
+        "outputs": {
+            "Location": "[location()]"
+        }
+    }
+}
