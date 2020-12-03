@@ -1,0 +1,20 @@
+﻿# Matches a 'list' function within an expression, such as listKeys.
+
+           # we don't want to flag a UDF that might be called "myListOfIps" so we need to check the char preceeding list*()
+(?<=       # We don't want to include the preceeding character, so we use a lookbehind (?<=).
+    (?>    # It can only be one of the following (?> atomic match):
+    \[     # A bracket (the function could be the first thing in the template expression)
+    |      # OR
+    \(     # An open parenthesis (the function may be contained in another function)
+    |      # OR
+    ,      # A comma (the function may be contained in another function and not the first argument in that function)
+    )      # and the (?>  ) syntax says this is not included in the match because we need to check for expressions explicitly below    
+    \s{0,} # We also don't need to include any preceeding whitespace in the match itself
+)
+(?<ListFunctionName>  # We want to capture the list function name
+list\w{1,}            # which will be list followed by any number of word characters
+)
+(?=        # We want to check for but not match a couple more things, so we use a lookahead (?=)
+    \s{0,} # the list function can be followed by optional whitespace
+    \(     # and an open parenthesis
+)

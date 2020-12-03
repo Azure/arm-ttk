@@ -1,0 +1,5 @@
+﻿# This matches a bracket or double quote.
+# We need this occassionally to determine if a value is within a string or an expression.
+# This is normally used with the option -RightToLeft, to seek backwards from a point to the matching [ or ".
+(?<!\\) # As long as it is not preceeded by slashes
+[\[\"]  # match either a [ or a "

@@ -17,4 +17,6 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
 #region Cache Functions
 . $psScriptRoot\Update-TTKCache.ps1
 #endregion Cache Functions
-Set-Alias Sort-AzTemplate Format-AzTemplate
+Set-Alias Format-AzTemplate Sort-AzTemplate
+
+. $psScriptRoot\ttk.irregular.ps1

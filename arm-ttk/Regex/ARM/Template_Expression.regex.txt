@@ -1,0 +1,24 @@
+﻿# Matches an Expression in an Azure Resource Manager Template
+\s{0,}                                  # Match optional whitespace,
+\[                                      # then match the opening bracket,
+(?<Function>\S{1,})                     # then match topmost function name.
+(?<Parameters>\(                        # This will be followed by parenthesis.
+                                        # Will want want to match within balanced parenthesis.
+    (?>                                 # This is called a 'balancing group'.
+                                        # We need it so that we don't end the match too early
+        [^\(\)]+                        # If it is not a parenthesis, match
+        |                               
+        \((?<Depth>)                    # If it is a parenthesis, increment ?<Depth>
+        |
+        \)(?<-Depth>)                   # If it is a closing parenthesis, decrement ?<Depth>
+    )*(?(Depth)(?!))                    # Match until there is no depth.
+\))                                     # Then match the closing parenthesis
+(?<Index>\[\d{1,}\]){0,1}               # We could also have an an [index]
+(?<Property>\.                          # Or a .property with a potential [index]
+    (?<PropertyName>                    # The name of the property 
+        [^\.\[\]\s]{1,}                 # is anything but .,[, and whitespace
+    ){1,1}                                              
+    (?<PropertyIndex>\[\d{1,}\]){0,1}   # and it can be followed by an optional [propertyindex]
+){0,}                                   # We can have a sequence of .property[index], so repeat as required.
+\]                                      # The match the closing bracket
+\s{0,}                                  # and any optional whitespace
