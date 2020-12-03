@@ -4,7 +4,7 @@
     "version": "0.1.2-preview",
     "parameters": {        
         "outputs": {
-            "Location": "WestUS"
+            "Location": "literal value is not allowed"
         }
     }
 }
