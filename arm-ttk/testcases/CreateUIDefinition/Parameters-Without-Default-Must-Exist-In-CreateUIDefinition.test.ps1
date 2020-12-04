@@ -1,8 +1,8 @@
 ﻿<#
 .Synopsis
-    TODO: summary of test
+    Ensure that parameters that don't have defaultValues are defined CreateUIDefinition.outuputs
 .Description
-    TODO: describe this test
+    Ensure that parameters that don't have defaultValues are defined CreateUIDefinition.outuputs
 #>
 
 param(

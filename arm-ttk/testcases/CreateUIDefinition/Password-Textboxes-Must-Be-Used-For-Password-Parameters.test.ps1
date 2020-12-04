@@ -1,8 +1,11 @@
 ﻿<#
 .Synopsis
-    TODO: summary of test
+    Ensure that password textboxes are used for passwords parameters
 .Description
-    TODO: describe this test
+    Ensure that password textboxes are used for passwords parameters
+
+    * check parameter is defined in main template
+    * is defined as SecureString or SecureObject
 #>
 
 param(

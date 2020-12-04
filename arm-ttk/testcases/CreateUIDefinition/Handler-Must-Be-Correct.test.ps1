@@ -1,8 +1,11 @@
 ﻿<#
 .Synopsis
-    TODO: summary of test
+    Ensure that CreateUIDefinitionObject has a handler and that is contains the allowed values
 .Description
-    TODO: describe this test
+    Ensure that CreateUIDefinitionObject has a handler and that is contains the allowed values
+
+    * Microsoft.Compute.MultiVm
+    * Microsoft.Azure.CreateUIDef
 #>
 
 param(

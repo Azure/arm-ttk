@@ -1,8 +1,8 @@
 ﻿<#
 .Synopsis
-    TODO: summary of test
+    Ensure that VMSizes must match the template values
 .Description
-    TODO: describe this test
+    Ensure that VMSizes must match the template values in SizeSelector
 #>
 
 param(

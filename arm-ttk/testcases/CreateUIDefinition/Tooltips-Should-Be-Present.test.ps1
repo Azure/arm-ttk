@@ -1,8 +1,11 @@
 ﻿<#
 .Synopsis
-    TODO: summary of test
+    Ensure that tooltips are defined
 .Description
-    TODO: describe this test
+    Ensure that tooltips are defined for: 
+    * InfoBox
+    * Section
+    * TextBlock
 #>
 
 param(

@@ -1,8 +1,10 @@
 ﻿<#
 .Synopsis
-    TODO: summary of test
+    Ensure the credential confirmation are not blank
 .Description
-    TODO: describe this test
+    Ensure the credential confirmation are not blank and that property are not set to 'hideConfiration'
+    * Password Box
+    * Credential Combo
 #>
 
 param(

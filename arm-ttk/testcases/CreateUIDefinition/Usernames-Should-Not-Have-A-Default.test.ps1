@@ -1,8 +1,8 @@
 ﻿<#
 .Synopsis
-    TODO: summary of test
+    Ensure that Usernames have a default
 .Description
-    TODO: describe this test
+    Ensure that Usernames have a default
 #>
 
 param(
