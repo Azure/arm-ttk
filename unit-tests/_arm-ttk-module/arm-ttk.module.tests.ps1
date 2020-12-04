@@ -13,7 +13,7 @@
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 
-Push-Location -Path "$here\..\arm-ttk"
+Push-Location -Path "$here\..\..\arm-ttk"
 
 $module = 'arm-ttk'
 describe "arm-ttk Module Tests" {

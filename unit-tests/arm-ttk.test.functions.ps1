@@ -1,4 +1,14 @@
-﻿# Get-TTKPesterInput ( this gets the right input file, given the criteria above)
+﻿<#
+.Synopsis
+    arm-ttk Pester tests
+.Description
+    Pesters tests for the Azure Resource Manager Template Toolkit (arm-ttk).
+
+    These tests make sure arm-ttk is working properly, and are not to be confused with the validation within arm-ttk.
+
+    Get-TTKPesterInput ( this gets the right input file, given the criteria above)
+#>
+
 function Get-TTKPesterTestInput {
     param(
     [Parameter(Mandatory)]
