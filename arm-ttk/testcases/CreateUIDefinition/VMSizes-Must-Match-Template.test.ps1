@@ -27,7 +27,8 @@ foreach ($selector in $sizeSelectors) { # Then walk each selector,
 
     $lookingFor= 
         if ($stepsIndex -ge 0) {
-            $stepPath = $selector.JsonPath.Substring(0, $selector.JSONPath.IndexOf([char]']', $stepsIndex) + 1)
+            $selectorJsonPath = $selector.JsonPath -replace '^\[\d+\]\.'
+            $stepPath = $selectorJsonPath.Substring(0, $selector.JSONPath.IndexOf([char]']', $stepsIndex) + 1)            
             $theStep = & ([ScriptBlock]::Create("`$CreateUIDefinitionObject.$stepPath"))
             $stepName = $theStep.name
             "*steps(*$stepName*)*.$controlName*"
