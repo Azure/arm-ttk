@@ -11,7 +11,25 @@
 param(
 # The template object (the contents of azureDeploy.json, converted from JSON)
 [Parameter(Mandatory=$true,Position=0)]
-$TemplateObject
+$TemplateObject,
+
+# A list of properties that, while named like *id, are not considered potential resource IDs.
+[string[]]$NotResourceIDs = @(
+        "tenantId",
+        "workerSizeId", # Microsoft.Web/serverFarms
+        "keyVaultSecretId", # Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
+        "keyId", # Microsoft.Cdn/profiles urlSigningKeys
+        "subscriptionId", # Microsoft.Cdn/profiles urlSigningKeys
+        "StartingDeviceID", # SQLIaasVMExtension > settings/ServerConfigurationsManagementSettings/SQLStorageUpdateSettings
+        "servicePrincipalClientId", # common var name
+        "clientId", # Microsoft.BotService - common var name
+        "appId", # Microsoft.Insights
+        "tenantId", # Common Property name
+        "objectId", # Common Property name
+        "vlanId", # Unique Id to establish peering when setting up an ExpressRoute circuit
+        "SyntheticMonitorId" # Microsoft.Insights/webtests,
+        "projectID" # Common Property name
+    )
 )
 
 # First, find all objects with an ID property in the MainTemplate.
@@ -28,21 +46,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     $myId = $id.$myIdFieldName        
 
     # these properties are exempt, since they are not actually resourceIds
-    $exceptions = @(
-        "tenantId",
-        "workerSizeId", # Microsoft.Web/serverFarms
-        "keyVaultSecretId", # Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
-        "keyId", # Microsoft.Cdn/profiles urlSigningKeys
-        "subscriptionId", # Microsoft.Cdn/profiles urlSigningKeys
-        "StartingDeviceID", # SQLIaasVMExtension > settings/ServerConfigurationsManagementSettings/SQLStorageUpdateSettings
-        "servicePrincipalClientId", # common var name
-        "clientId", # Microsoft.BotService - common var name
-        "appId", # Microsoft.Insights
-        "tenantId", # Common Property name
-        "objectId", # Common Property name
-        "vlanId", # Unique Id to establish peering when setting up an ExpressRoute circuit
-        "SyntheticMonitorId" # Microsoft.Insights/webtests
-    )
+    $exceptions = $NotResourceIDs
 
     if ($exceptions -contains $myIdFieldName) { # We're checking resource ids, not tenant IDs
         continue
