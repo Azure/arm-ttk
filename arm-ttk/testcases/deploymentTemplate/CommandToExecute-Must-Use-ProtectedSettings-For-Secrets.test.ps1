@@ -21,7 +21,7 @@ foreach ($command in $commandsToExecute) {
     if (-not $command.parentObject.settings.commandToExecute) { # If the command is already within protected settings, ok
         continue
     }
-    $commandUsesAListFunction = $command | ?<ARM_List_Function>
+    $commandUsesAListFunction = "$($command.commandToExecute)" | ?<ARM_List_Function>
 
     if ($commandUsesAListFunction) {
         Write-Error "CommandToExecute uses '$commandUsesAListFunction', but is not in .protectedSettings" -ErrorId CommandToExecute.Unprotected.List -TargetObject $command
