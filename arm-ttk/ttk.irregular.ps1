@@ -538,10 +538,35 @@ function Use-ARMRegEx {
     )
 
     dynamicParam {
-        # If we didn't have a regex library, create one.
-        if (-not $script:_RegexLibrary) { $script:_RegexLibrary = @{} }
-
         $myInv = $MyInvocation
+
+        # If we didn't have a regex library
+        if (-not $script:_RegexLibrary -or -not $script:_RegexLibrary.Count) {
+            # it could be because we're invoke in a place where $script: variables aren't accessible.
+            if ($myInv.MyCommand.Module) { # If that's the case, and this command is within a module
+                $script:_RegexLibrary = @{} 
+                # then we can try to look at the RegexLibraryMetadata to reconstruct out regex liberary
+                $regexMetadata = . $myInv.MyCommand.Module {$_RegexLibraryMetadata}
+                if ($regexMetadata -and $regexMetadata.getEnumerator) { # If we found metadata
+                    foreach ($kv in $regexMetadata.GetEnumerator()) { # Walk over each piece of metadata
+                        $script:_RegexLibrary[$kv.Key] = # the key format is the same for RegexLibrary.
+                            # If the value has a pattern, it's a RegEx
+                            if ($kv.Value.Pattern) 
+                            { 
+                                [Regex]::new($kv.Value.Pattern, 'IgnoreCase,IgnorePatternWhitespace','00:00:05')
+                            } 
+                            # If the path was like *.ps1, it's a RegEx Generator.
+                            elseif ($kv.Value.Path -like '*.ps1') 
+                            { 
+                                $ExecutionContext.SessionState.InvokeCommand.GetCommand($kv.Value.Path, 'ExternalScript')
+                            }
+                    }
+                }
+            }
+            if (-not $script:_RegexLibrary) {
+                $script:_RegexLibrary = @{}
+            }
+        }
         # Then, determine what the name of the pattern in the library would be.
         $mySafeName =
             if ('.', '&' -contains $myInv.InvocationName -and
