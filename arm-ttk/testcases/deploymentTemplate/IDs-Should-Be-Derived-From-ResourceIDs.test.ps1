@@ -30,7 +30,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     # these properties are exempt, since they are not actually resourceIds
     $exceptions = @(
         "tenantId",
-        "workerSizeId", # Microsoft.Web/serverFarms
+        "targetWorkerSizeId", # Microsoft.Web/serverFarms
         "keyVaultSecretId", # Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
         "keyId", # Microsoft.Cdn/profiles urlSigningKeys
         "subscriptionId", # Microsoft.Cdn/profiles urlSigningKeys
