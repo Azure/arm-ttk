@@ -1,13 +1,15 @@
-
-name: RunPester
+name: test-publish
 on: 
 - workflow_dispatch
 - pull_request
 - push
 jobs: 
-  TestPowerShellOnLinux: 
+  TestAndPublish: 
     runs-on: ubuntu-latest
-    steps: 
+    env:
+      ModulePath: .\arm-ttk\arm-ttk.psd1
+      NuGetAPIKey: ${{ secrets.NuGetAPIKey }}
+    steps:         
       - name: InstallPester
         shell: pwsh
         run: |
@@ -35,6 +37,11 @@ jobs:
           Import-Module Pester -Force -PassThru -MaximumVersion $PesterMaxVersion} @Parameters
       - name: Check out repository
         uses: actions/checkout@v2
+      - name: Append GitHub run number to patch version in manifest  
+        shell: pwsh
+        run: |   
+          (Get-Content "$env:GITHUB_WORKSPACE\$env:ModulePath") -replace '#{Patch}#', "$env:GITHUB_RUN_NUMBER" `
+          | Set-Content "$env:GITHUB_WORKSPACE\$env:ModulePath"        
       - name: RunPester
         shell: pwsh
         run: |
@@ -95,6 +102,13 @@ jobs:
         with: 
           name: PesterResults
           path: '**.TestResults.xml'
-        if: ${{always()}}
-env: 
-  ModulePath: .\arm-ttk\arm-ttk.psd1
+        if: ${{always()}}    
+      - name: Publish module to PowerShell Gallery for master branch pushes only
+        shell: pwsh
+        env:
+          ModuleFolder: arm-ttk
+        run: |
+          Write-Host -Object 'Publishing arm-ttk module to PowerShell Gallery'
+          Publish-Module -Path "$env:GITHUB_WORKSPACE/$env:ModuleFolder" -NuGetAPIKey $env:NuGetAPIKey
+          Write-Host -Object 'Finished publishing module to PowerShell Gallery'
+        if: github.ref == 'refs/heads/master'
