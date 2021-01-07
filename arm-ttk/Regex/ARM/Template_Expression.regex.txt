@@ -8,9 +8,9 @@
                                         # We need it so that we don't end the match too early
         [^\(\)]+                        # If it is not a parenthesis, match
         |                               
-        \((?<Depth>)                    # If it is a parenthesis, increment ?<Depth>
+        \((?<Depth>)                    # If it is a parenthesis, increment Depth
         |
-        \)(?<-Depth>)                   # If it is a closing parenthesis, decrement ?<Depth>
+        \)(?<-Depth>)                   # If it is a closing parenthesis, decrement Depth
     )*(?(Depth)(?!))                    # Match until there is no depth.
 \))                                     # Then match the closing parenthesis
 (?<Index>\[\d{1,}\]){0,1}               # We could also have an an [index]
