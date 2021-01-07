@@ -545,7 +545,7 @@ function Use-ARMRegEx {
             # it could be because we're invoke in a place where $script: variables aren't accessible.
             if ($myInv.MyCommand.Module) { # If that's the case, and this command is within a module
                 $script:_RegexLibrary = @{} 
-                # then we can try to look at the RegexLibraryMetadata to reconstruct out regex liberary
+                # then we can try to look at the RegexLibraryMetadata to reconstruct our regex liberary
                 $regexMetadata = . $myInv.MyCommand.Module {$_RegexLibraryMetadata}
                 if ($regexMetadata -and $regexMetadata.getEnumerator) { # If we found metadata
                     foreach ($kv in $regexMetadata.GetEnumerator()) { # Walk over each piece of metadata
