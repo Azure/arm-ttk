@@ -27,11 +27,11 @@ foreach ($ref in $adminUserNameRefs) { # Walk over each one
     $UserNameHasVariable = $trimmedUserName | ?<ARM_Variable> -Extract
 
     if ($UserNameHasVariable) {
-        $variableDefault = $TemplateObject.variables.($UserNameHasVariable.VariableName).default
-        $variableDefaultExpression = $variableDefault | ?<ARM_Template_Expression>
-        if (-not $variableDefaultExpression) {
+        $variableValue = $TemplateObject.variables.($UserNameHasVariable.VariableName).value
+        $variableValueExpression = $variableValue | ?<ARM_Template_Expression>
+        if (-not $variableValueExpression) {
             Write-Error @"
-AdminUsername references variable '$($UserNameHasVariable.variableName)', which has a literal default value.
+AdminUsername references variable '$($UserNameHasVariable.variableName)', which has a literal value.
 "@ -ErrorId AdminUserName.Is.Variable.Literal # write an error
         }
     }
