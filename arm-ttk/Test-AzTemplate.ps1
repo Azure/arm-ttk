@@ -97,11 +97,15 @@ Each test script has access to a set of well-known variables:
     # If the parameter does not exist for a given test case, it will be ignored.
     [Collections.IDictionary]
     [Alias('TestParameters')]
-    $TestParameter,
+    $TestParameter,    
 
     # If provided, will skip any tests in this list.
     [string[]]
     $Skip,
+
+    # If provided, will use this file as the "main" template.
+    [string]
+    $MainTemplateFile,
 
     # If set, will run tests in Pester.
     [switch]
@@ -111,6 +115,7 @@ Each test script has access to a set of well-known variables:
         # First off, let's get all of the built-in test scripts.
         $testCaseSubdirectory = 'testcases'
         $myLocation =  $MyInvocation.MyCommand.ScriptBlock.File
+        $myModule   = $myInvocation.MyCommand.ScriptBlock.Module
         $testScripts= @($myLocation| # To do that, we start from the current file,
             Split-Path | # get the current directory,
             Get-ChildItem -Filter $testCaseSubdirectory | # get the cases directory,
@@ -198,9 +203,9 @@ Each test script has access to a set of well-known variables:
                 }
 
                 if (-not $Pester) {
-                    & $TheTest @testInput 2>&1 3>&1
+                    . $myModule $TheTest @testInput 2>&1 3>&1
                 } else {
-                    & $TheTest @testInput
+                    . $myModule $TheTest @testInput
                 }
             } while ($false)
         }
@@ -289,7 +294,8 @@ Each test script has access to a set of well-known variables:
                                     $key; continue # (this handles CreateUIDefinition.json, even if no schema is present).
                                 }
                                 if ($key -eq 'DeploymentTemplate' -and # Otherwise, if we're checking the deploymentTemplate
-                                    'mainTemplate.json', 'azuredeploy.json', 'prereq.azuredeploy.json' -contains $fn) { # and the file name is something we _know_ will be an ARM template
+                                    'mainTemplate.json', 'azuredeploy.json', 'prereq.azuredeploy.json' -contains $fn
+                                ) { # and the file name is something we _know_ will be an ARM template
                                     $key; continue # then run the deployment tests regardless of schema.
                                 }
                             }
@@ -306,7 +312,16 @@ Each test script has access to a set of well-known variables:
 
                 if (-not $matchingGroups) { continue }
                 if ($fileInfo.Schema -like '*deploymentTemplate*') {
-                    $isMainTemplate = 'mainTemplate.json', 'azureDeploy.json', 'prereq.azuredeploy.json' -contains $fileInfo.Name
+                    $isMainTemplate = 
+                        if ($MainTemplateFile) {
+                            $(
+                                $MainTemplateFile -eq $fileInfo.Name -or
+                                $MainTemplateFile -eq $fileInfo.Fullname
+                            )
+                        } else {
+                            'mainTemplate.json', 'azureDeploy.json', 'prereq.azuredeploy.json' -contains $fileInfo.Name
+                        }
+                        
                     $templateFileName = $fileInfo.Name
                     $TemplateObject = $fileInfo.Object
                     $TemplateText = $fileInfo.Text
