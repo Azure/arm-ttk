@@ -16,7 +16,8 @@ $TemplateObject,
 # A list of properties that, while named like *id, are not considered potential resource IDs.
 [string[]]$NotResourceIDs = @(
         "tenantId",
-        "workerSizeId", # Microsoft.Web/serverFarms
+        "targetWorkerSizeId", # Microsoft.Web/serverFarms (later apiVersions)
+        "workerSizeId", # Microsoft.Web/serverFarms (early apiVersions)
         "keyVaultSecretId", # Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
         "keyId", # Microsoft.Cdn/profiles urlSigningKeys
         "subscriptionId", # Microsoft.Cdn/profiles urlSigningKeys
