@@ -11,10 +11,14 @@ $TemplateObject
 )
 
 # Find all references to an adminUserName
-$adminUserNameRefs = $TemplateObject.resources | 
+$adminUserNameRefsResources = $TemplateObject.resources |
+    Find-JsonContent -Key adminUsername  -Value * -Like |
+    Where-Object { -not $_.ParentObject[0].'$schema' } # unless they're on a top-level property.
+$adminUserNameRefsVariables = $TemplateObject.variables |
     Find-JsonContent -Key adminUsername  -Value * -Like |
     Where-Object { -not $_.ParentObject[0].'$schema' } # unless they're on a top-level property.
 
+$adminUserNameRefs = $adminUserNameRefsResources + $adminUserNameRefsVariables
 
 foreach ($ref in $adminUserNameRefs) { # Walk over each one
     $trimmedUserName = "$($ref.adminUserName)".Trim()
