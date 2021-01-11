@@ -104,7 +104,7 @@ jobs:
           ModuleFolder: arm-ttk
         run: |
           $oldErrorActionPreference = $ErrorActionPreference
-          $ErrorActionPreference = 'SilentlyContinue'
+          $ErrorActionPreference = 'Continue'
           try {
               Publish-Module -Path "$env:GITHUB_WORKSPACE/$env:ModuleFolder" -NuGetAPIKey $env:NuGetAPIKey
               Write-Host -Object 'Module published to PowerShell Gallery'
