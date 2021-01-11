@@ -24,7 +24,7 @@
     CompanyName = 'Microsoft'
     
     # Copyright of this module
-    Copyright = 'Microsoft Corporation. All rights reserved.'
+    Copyright = 'Microsoft Corporation 2021. All rights reserved.'
     
     # Description of the functionality provided by this module
     Description = 'Azure Resource Manager Template Toolkit (arm-ttk): Validation tools for Azure Resource Manager Templates'
