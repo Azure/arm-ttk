@@ -110,7 +110,7 @@ jobs:
           catch {
               if ($_.Exception.Message -ilike "*cannot be published as the current version*is already available in the repository*") {
                   "The latest version of module already exists in the repository."
-                  $exitCode += 0
+                  continue
               }
               else {
                   $exitCode += 1
