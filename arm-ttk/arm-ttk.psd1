@@ -12,7 +12,7 @@
     RootModule = 'arm-ttk.psm1'
     
     # Version number of this module.
-    ModuleVersion = '0.3.#{Patch}#'
+    ModuleVersion = '0.3'
     
     # ID used to uniquely identify this module
     GUID = '20ac342e-df9d-4632-9063-2ab96a9642a8'
