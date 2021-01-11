@@ -18,7 +18,7 @@
     GUID = '20ac342e-df9d-4632-9063-2ab96a9642a8'
     
     # Author of this module
-    Author = 'azure-sdk'
+    Author = 'arm-ttk'
     
     # Company or vendor of this module
     CompanyName = 'Microsoft'
