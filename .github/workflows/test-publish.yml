@@ -104,7 +104,7 @@ jobs:
           ModuleFolder: arm-ttk
         run: |
           try {
-              Publish-Module -Path "$env:GITHUB_WORKSPACE/$env:ModuleFolder" -NuGetAPIKey $env:NuGetAPIKey
+              Publish-Module -Path "$env:GITHUB_WORKSPACE/$env:ModuleFolder" -NuGetAPIKey $env:NuGetAPIKey -ErrorAction SilentlyContinue
               Write-Host -Object 'Module published to PowerShell Gallery'
           }
           catch {
