@@ -103,9 +103,12 @@ jobs:
         env:
           ModuleFolder: arm-ttk
         run: |
+          $oldErrorActionPreference = $ErrorActionPreference
+          $ErrorActionPreference = 'SilentlyContinue'
           try {
-              Publish-Module -Path "$env:GITHUB_WORKSPACE/$env:ModuleFolder" -NuGetAPIKey $env:NuGetAPIKey -ErrorAction SilentlyContinue
+              Publish-Module -Path "$env:GITHUB_WORKSPACE/$env:ModuleFolder" -NuGetAPIKey $env:NuGetAPIKey
               Write-Host -Object 'Module published to PowerShell Gallery'
+              $ErrorActionPreference = $oldErrorActionPreference 
           }
           catch {
               if ($_.Exception.Message -ilike "*cannot be published as the current version*is already available in the repository*") {
