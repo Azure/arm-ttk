@@ -12,19 +12,19 @@
     RootModule = 'arm-ttk.psm1'
     
     # Version number of this module.
-    ModuleVersion = '0.3.#{Patch}#'
+    ModuleVersion = '0.3'
     
     # ID used to uniquely identify this module
     GUID = '20ac342e-df9d-4632-9063-2ab96a9642a8'
     
     # Author of this module
-    Author = 'azure-sdk'
+    Author = 'arm-ttk'
     
     # Company or vendor of this module
     CompanyName = 'Microsoft'
     
     # Copyright of this module
-    Copyright = 'Microsoft Corporation. All rights reserved.'
+    Copyright = 'Microsoft Corporation 2021. All rights reserved.'
     
     # Description of the functionality provided by this module
     Description = 'Azure Resource Manager Template Toolkit (arm-ttk): Validation tools for Azure Resource Manager Templates'

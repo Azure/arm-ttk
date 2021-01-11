@@ -36,12 +36,7 @@ jobs:
           Install-Module -Name Pester -Repository PSGallery -Force -Scope CurrentUser -MaximumVersion $PesterMaxVersion -SkipPublisherCheck -AllowClobber
           Import-Module Pester -Force -PassThru -MaximumVersion $PesterMaxVersion} @Parameters
       - name: Check out repository
-        uses: actions/checkout@v2
-      - name: Append GitHub run number to patch version in manifest  
-        shell: pwsh
-        run: |   
-          (Get-Content "$env:GITHUB_WORKSPACE\$env:ModulePath") -replace '#{Patch}#', "$env:GITHUB_RUN_NUMBER" `
-          | Set-Content "$env:GITHUB_WORKSPACE\$env:ModulePath"        
+        uses: actions/checkout@v2       
       - name: RunPester
         shell: pwsh
         run: |
@@ -108,7 +103,17 @@ jobs:
         env:
           ModuleFolder: arm-ttk
         run: |
-          Write-Host -Object 'Publishing arm-ttk module to PowerShell Gallery'
-          Publish-Module -Path "$env:GITHUB_WORKSPACE/$env:ModuleFolder" -NuGetAPIKey $env:NuGetAPIKey
-          Write-Host -Object 'Finished publishing module to PowerShell Gallery'
+          try {
+              Publish-Module -Path "$env:GITHUB_WORKSPACE/$env:ModuleFolder" -NuGetAPIKey $env:NuGetAPIKey
+              Write-Host -Object 'Module published to PowerShell Gallery'
+          }
+          catch {
+              if ($_.Exception.Message -ilike "*cannot be published as the current version*is already available in the repository*") {
+                  "The latest version of module already exists in the repository."
+              }
+              else {
+                  $exitCode += 1
+                  Write-Error $_
+              }
+          }
         if: github.ref == 'refs/heads/master'
