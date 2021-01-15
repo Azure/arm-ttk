@@ -6,6 +6,8 @@ The code in this repository can be used for analyzing and testing [Azure Resourc
 ## Using the TTK
 For detailed instruction on how to use the arm-ttk, see this [readme](/arm-ttk/README.md).  More information can be found in the [documentation](http://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/test-toolkit).
 
+For a guided tutorial on the arm-ttk, check out this [MS LEARN module](https://docs.microsoft.com/en-us/learn/modules/arm-template-test/).
+
 ## Philosophy
 
 A little bit about the tests...  These are the tests that are used to validate templates for the [Azure QuickStart Repo](https://github.com/Azure/azure-quickstart-templates) and the [Azure Marketplace](https://azuremarketplace.microsoft.com/en-us/marketplace/).  The purpose is to ensure a standard or consistent set of coding practices to make it easier to develop expertise using the template language (easy to read, write, debug).
