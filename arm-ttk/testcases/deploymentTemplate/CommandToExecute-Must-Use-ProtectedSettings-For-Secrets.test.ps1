@@ -18,7 +18,7 @@ $commandsToExecute = $TemplateObject |
 
 
 foreach ($command in $commandsToExecute) {
-    if (-not $command.parentObject.settings.commandToExecute) { # If the command is already within protected settings, ok
+    if ($command.parentObject.protectedSettings.commandToExecute) { # If the command is already within protected settings, ok
         continue
     }
     $commandUsesAListFunction = "$($command.commandToExecute)" | ?<ARM_List_Function>
