@@ -27,7 +27,7 @@ foreach ($ref in $adminUserNameRefs) { # Walk over each one
     $UserNameHasVariable = $trimmedUserName | ?<ARM_Variable> -Extract
 
     if ($UserNameHasVariable) {
-        $variableValue = $TemplateObject.variables.($UserNameHasVariable.VariableName).value
+        $variableValue = $TemplateObject.variables.($UserNameHasVariable.VariableName)
         $variableValueExpression = $variableValue | ?<ARM_Template_Expression>
         if (-not $variableValueExpression) {
             Write-Error @"
