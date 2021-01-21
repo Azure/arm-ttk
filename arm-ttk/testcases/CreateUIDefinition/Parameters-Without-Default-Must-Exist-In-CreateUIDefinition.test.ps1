@@ -8,8 +8,6 @@ $TemplateObject,
 $CreateUIDefinitionObject
 )
 
-$CreateUIDefinitionObject.parameters.outputs | out-string
-
 foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
     $parameterName = $parameter.Name
     $parameterInfo = $parameter.Value
