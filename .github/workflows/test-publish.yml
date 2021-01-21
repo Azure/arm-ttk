@@ -93,12 +93,13 @@ jobs:
           }
           } @Parameters
       - name: PublishTestResults
+        if: ${{always()}}
         uses: actions/upload-artifact@v2
         with: 
           name: PesterResults
-          path: '**.TestResults.xml'
-        if: ${{always()}}    
+          path: '**.TestResults.xml' 
       - name: Publish module to PowerShell Gallery for master branch pushes only
+        if: github.ref == 'refs/heads/master'
         shell: pwsh
         env:
           ModuleFolder: arm-ttk
@@ -120,4 +121,3 @@ jobs:
                   Write-Error $_
               }
           }
-        if: github.ref == 'refs/heads/master'
