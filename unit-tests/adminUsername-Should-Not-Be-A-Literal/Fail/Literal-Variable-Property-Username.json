@@ -1,0 +1,22 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "variables": {
+        "foo": {
+            "username": "bar"
+        }
+    },
+    "resources": [
+        {
+            "properties": {
+                "osProfile": {
+                    "adminUserName": "[variables('foo')].username"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                }
+            },
+            "apiVersion": "2019-12-01",
+            "type": "Microsoft.Compute/virtualMachines"
+        }
+    ]
+}
