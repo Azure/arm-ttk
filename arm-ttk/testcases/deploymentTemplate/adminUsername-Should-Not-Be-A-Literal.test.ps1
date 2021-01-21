@@ -39,4 +39,16 @@ if ("variables" -in $TemplateObject.PSobject.Properties.Name) {
             continue # and move onto the next
         }
     }
+
+    $UserNameHasVariable = $trimmedUserName | ?<ARM_Variable> -Extract
+
+    if ($UserNameHasVariable) {
+        $variableValue = $TemplateObject.variables.($UserNameHasVariable.VariableName)
+        $variableValueExpression = $variableValue | ?<ARM_Template_Expression>
+        if (-not $variableValueExpression) {
+            Write-Error @"
+AdminUsername references variable '$($UserNameHasVariable.variableName)', which has a literal value.
+"@ -ErrorId AdminUserName.Is.Variable.Literal # write an error
+        }
+    }
 }
