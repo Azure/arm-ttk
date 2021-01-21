@@ -42,7 +42,8 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         "tenantId", # Common Property name
         "objectId", # Common Property name
         "vlanId", # Unique Id to establish peering when setting up an ExpressRoute circuit
-        "SyntheticMonitorId" # Microsoft.Insights/webtests
+        "SyntheticMonitorId", # Microsoft.Insights/webtests
+	"policyDefinitionReferenceId" # Microsft.Authorization/policySetDefinition unique Id used when setting up a PolicyDefinitionReference
     )
 
     if ($exceptions -contains $myIdFieldName) { # We're checking resource ids, not tenant IDs
