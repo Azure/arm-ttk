@@ -17,7 +17,7 @@ $TemplateObjectCopy = $templateText | ConvertFrom-Json
 $TemplateObjectCopy.parameters.psobject.properties.remove('location')
 # and turn it back into JSON.
 $TemplateWithoutLocationParameter = $TemplateObjectCopy | 
-    ConvertTo-Json -Depth 10        
+    ConvertTo-Json -Depth 100       
 
 # Now get the location parameter 
 $locationParameter = $templateObject.parameters.location

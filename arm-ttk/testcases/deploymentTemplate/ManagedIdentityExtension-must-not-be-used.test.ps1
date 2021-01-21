@@ -10,7 +10,7 @@ param(
 $TemplateObject
 )
 
-$resourcesJson = $TemplateObject.resources  | ConvertTo-Json -Depth 10  
+$resourcesJson = $TemplateObject.resources  | ConvertTo-Json -Depth 100  
 
 if ($resourcesJson -match 'ManagedIdentityExtension') {
     Write-Error "Managed Identity Extension must not be used" -ErrorId ManagedIdentityExtension.Was.Used

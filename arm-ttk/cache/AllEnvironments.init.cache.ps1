@@ -11,4 +11,4 @@ if (-not $azEnv) {
     return
 }
 
-$azEnv | ConvertTo-Json -Depth 10 | Set-Content $MyOutputFile 
+$azEnv | ConvertTo-Json -Depth 100 | Set-Content $MyOutputFile 
