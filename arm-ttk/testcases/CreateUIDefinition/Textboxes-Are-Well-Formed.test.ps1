@@ -14,7 +14,10 @@ param(
 # First, find all textboxes within CreateUIDefinition.
 
 $allTextBoxes = $CreateUiDefinitionObject | Find-JsonContent -Key type -value Microsoft.Common.TextBox
-$lengthConstraintRegex = [Regex]::new('\{(?<Min>\d+),(?<Max>\d+)?\}(\$)?$')
+# Match length constraint at beginning of regex.
+# Input string starts with ^(?=.{N,N}                ^   (   ?  =   .  {N          ,N}
+$lengthConstraintRegexAtBeginning = [Regex]::new('^[\^][\(][\?][=][\.]\{(?<Min>\d+),(?<Max>\d+)?\}.*')
+$lengthConstraintRegexAtEnd = [Regex]::new('\{(?<Min>\d+),(?<Max>\d+)?\}(\$)?$')
 
 foreach ($textbox in $allTextBoxes) {
     # Then we walk over each textbox.
@@ -46,9 +49,10 @@ foreach ($textbox in $allTextBoxes) {
         try {
             # If it did,
             $constraintWasRegex = [Regex]::new($constraintRegexString) # try to cast to a regex
-            $hasLengthConstraint = $lengthConstraintRegex.Match($constraintRegexString)
+            $hasLengthConstraintAtBeginning = $lengthConstraintRegexAtBeginning.Match($constraintRegexString)
+            $hasLengthConstraintAtEnd = $lengthConstraintRegexAtEnd.Match($constraintRegexString)
     
-            if (-not $hasLengthConstraint.Success) {
+            if (-not ($hasLengthConstraintAtBeginning.Success -or $hasLengthConstraintAtEnd.Success -or $isExpression.Success)) {
                 Write-Warning "TextBox '$($textBox.Name)' regex does not have a length constraint." 
             }
         }
