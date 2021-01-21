@@ -10,7 +10,7 @@ param(
 $TemplateObject
 )
 
-$vms = $TemplateObject | Find-JsonContent -Key type -Value Microsoft.Compute/virtualMachines
+$vms = $TemplateObject.resources | Find-JsonContent -Key type -Value Microsoft.Compute/virtualMachines
 
 
 foreach ($vm in $vms) {
@@ -34,13 +34,13 @@ foreach ($vm in $vms) {
     $vmSize = $hardwareProfile.vmSize
 
     if ($vmSize -notmatch "\s{0,}\[.*?parameters\s{0,}\(\s{0,}'") {
-        if ($vmSize -match "\s{0,}\[.*?variables\s{0,}\(\s{0,}'") { 
+        if ($vmSize -match "\s{0,}\[.*?variables\s{0,}\(\s{0,}'") {
             $resolvedVmSize = Expand-AzTemplate -Expression $vmSize -InputObject $TemplateObject
             if ($resolvedVmSize -notmatch "\s{0,}\[.*?parameters\s{0,}\(\s{0,}'") {
                 Write-Error "VM Size must be a parameter" -TargetObject $vm
             }
         } else {
-            Write-Error "VM Size must be a parameter" -TargetObject $vm           
+            Write-Error "VM Size must be a parameter" -TargetObject $vm
         }
     }
 }

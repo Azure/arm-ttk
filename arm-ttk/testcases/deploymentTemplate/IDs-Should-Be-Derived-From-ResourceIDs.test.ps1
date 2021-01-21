@@ -15,7 +15,7 @@ $TemplateObject
 )
 
 # First, find all objects with an ID property in the MainTemplate.
-$ids = $TemplateObject  | Find-JsonContent -Key *id -Like
+$ids = $TemplateObject.resources | Find-JsonContent -Key *id -Like
 
 
 # If the "Parameters" property or "Outputs" property is in the lineage, skip check
@@ -25,7 +25,7 @@ $ids = $TemplateObject  | Find-JsonContent -Key *id -Like
 
 foreach ($id in $ids) { # Then loop over each object with an ID
     $myIdFieldName = $id.PropertyName
-    $myId = $id.$myIdFieldName        
+    $myId = $id.$myIdFieldName
 
     # these properties are exempt, since they are not actually resourceIds
     $exceptions = @(
@@ -74,7 +74,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         continue
     }
     $expandedId = Expand-AzTemplate -Expression $myId -InputObject $TemplateObject -Exclude Parameters # then expand it.
-    
+
     # these are allowed for resourceIds
     $allowedExpressions = @(
         "extensionResourceId",
@@ -108,4 +108,3 @@ foreach ($id in $ids) { # Then loop over each object with an ID
              -TargetObject $id -ErrorId ResourceId.Should.Contain.Proper.Expression
     }
 }
-
