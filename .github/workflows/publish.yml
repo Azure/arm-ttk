@@ -22,7 +22,7 @@ jobs:
               $ErrorActionPreference = $oldErrorActionPreference 
           }
           catch {
-              if ($_.Exception.Message -ilike "*cannot be published as the current version*is already available in the repository*") {
+              if ($_.Exception.Message -like "*cannot be published as the current version*is already available in the repository*") {
                   "The latest version of module already exists in the repository."
                   continue
               }
