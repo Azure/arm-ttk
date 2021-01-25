@@ -1,15 +1,12 @@
-name: test-publish
+name: RunPester
 on: 
 - workflow_dispatch
 - pull_request
 - push
 jobs: 
-  TestAndPublish: 
+  TestPowerShellOnLinux: 
     runs-on: ubuntu-latest
-    env:
-      ModulePath: .\arm-ttk\arm-ttk.psd1
-      NuGetAPIKey: ${{ secrets.NuGetAPIKey }}
-    steps:         
+    steps: 
       - name: InstallPester
         shell: pwsh
         run: |
@@ -36,7 +33,7 @@ jobs:
           Install-Module -Name Pester -Repository PSGallery -Force -Scope CurrentUser -MaximumVersion $PesterMaxVersion -SkipPublisherCheck -AllowClobber
           Import-Module Pester -Force -PassThru -MaximumVersion $PesterMaxVersion} @Parameters
       - name: Check out repository
-        uses: actions/checkout@v2       
+        uses: actions/checkout@v2
       - name: RunPester
         shell: pwsh
         run: |
@@ -93,31 +90,10 @@ jobs:
           }
           } @Parameters
       - name: PublishTestResults
-        if: ${{always()}}
         uses: actions/upload-artifact@v2
         with: 
           name: PesterResults
-          path: '**.TestResults.xml' 
-      - name: Publish module to PowerShell Gallery for master branch pushes only
-        if: github.ref == 'refs/heads/master'
-        shell: pwsh
-        env:
-          ModuleFolder: arm-ttk
-        run: |
-          $oldErrorActionPreference = $ErrorActionPreference
-          $ErrorActionPreference = 'Continue'
-          try {
-              Publish-Module -Path "$env:GITHUB_WORKSPACE/$env:ModuleFolder" -NuGetAPIKey $env:NuGetAPIKey
-              Write-Host -Object 'Module published to PowerShell Gallery'
-              $ErrorActionPreference = $oldErrorActionPreference 
-          }
-          catch {
-              if ($_.Exception.Message -ilike "*cannot be published as the current version*is already available in the repository*") {
-                  "The latest version of module already exists in the repository."
-                  continue
-              }
-              else {
-                  $exitCode += 1
-                  Write-Error $_
-              }
-          }
+          path: '**.TestResults.xml'
+        if: ${{always()}}
+env: 
+  ModulePath: .\arm-ttk\arm-ttk.psd1

@@ -1,0 +1,33 @@
+name: publish
+on: 
+- workflow_dispatch
+jobs: 
+  Publish: 
+    runs-on: ubuntu-latest
+    env:
+      ModulePath: .\arm-ttk\arm-ttk.psd1
+      ModuleFolder: arm-ttk
+      NuGetAPIKey: ${{ secrets.NuGetAPIKey }}
+    steps:         
+      - name: Check out repository
+        uses: actions/checkout@v2        
+      - name: Publish module to PowerShell Gallery
+        shell: pwsh
+        run: |
+          $oldErrorActionPreference = $ErrorActionPreference
+          $ErrorActionPreference = 'Continue'
+          try {
+              Publish-Module -Path "$env:GITHUB_WORKSPACE/$env:ModuleFolder" -NuGetAPIKey $env:NuGetAPIKey
+              Write-Host -Object 'Module published to PowerShell Gallery'
+              $ErrorActionPreference = $oldErrorActionPreference 
+          }
+          catch {
+              if ($_.Exception.Message -ilike "*cannot be published as the current version*is already available in the repository*") {
+                  "The latest version of module already exists in the repository."
+                  continue
+              }
+              else {
+                  $exitCode += 1
+                  Write-Error $_
+              }
+          }
