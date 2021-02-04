@@ -10,6 +10,7 @@ param(
 [PSObject]
 $CreateUIDefinitionObject,
 
+# A list of control types that can have a "HidExisting" property.
 [string[]]
 $ControlTypesWithHideExisting = @(
     'Microsoft.Storage.StorageAccountSelector',
@@ -19,28 +20,26 @@ $ControlTypesWithHideExisting = @(
 )
 
 
-$foundHideExisting = $false
-
-$needsResourceGroupInOutputs = $false
+$foundHideExisting = $false           # Keep track of if we found "HideExisting"
+$needsResourceGroupInOutputs = $false # and keep track on if we need 'ResourceGroup' in Outputs.
+# Walk over each potential control type.
 foreach ($controlType in $ControlTypesWithHideExisting) {
-    
-    foreach ($foundControl in $CreateUIDefinitionObject | Find-JsonContent -Key type -Value $controlType) {
-        $needsResourceGroupInOutputs = $true
-        if ($foundControl.psobject.properties['hideExisting']) {
+    # then walk thru all controls of that type.
+    foreach ($foundControl in (Find-JsonContent -Key type -Value $controlType -InputObject $CreateUIDefinitionObject) ) {
+        $needsResourceGroupInOutputs = $true  # If we found any of these controls, we need a 'ResourceGroup'
+        if ($foundControl.psobject.properties['hideExisting']) { # If any we found hideExisting, note that.
             $foundHideExisting = $true
-        }        
-        if ($foundControl.hideExisting) { continue }
-
-        # In the future, we want to pair this to it's output in mainTemplate and find out if it is used within a conditional.
+        }
     }
 }
 
-if ($needsResourceGroupInOutputs) {
+if ($needsResourceGroupInOutputs) { # If we needed a 'ResourceGroup'/'NewOrExisting' output
+    # determine the output names
     $outputNames = @($CreateUIDefinitionObject.parameters.outputs.psobject.properties | Select-Object -ExpandProperty Name)
-    if (-not ($outputNames -like '*resourcegroup*' )) {
+    if (-not ($outputNames -like '*ResourceGroup*' )) { # error if there is no 'ResourceGroup' output.
         Write-Error "An output named like '*ResourceGroup*' must be an output when resources of type '$controlType' are used" -TargetObject $foundControl -ErrorId Missing.Output.ResourceGroup
     }
-    if (-not ($outputNames -like '*neworexisting*' )) {
+    if (-not ($outputNames -like '*NewOrExisting*' )) { # error if there is no 'NewOrExisting' output.
         Write-Error "An output named like '*newOrExisting*' must be an output when resources of type '$controlType' are used" -TargetObject $foundControl -ErrorId Missing.Output.NewOrExisting
     }
 }
