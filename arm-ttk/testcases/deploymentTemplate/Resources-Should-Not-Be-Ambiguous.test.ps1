@@ -14,6 +14,7 @@ $TemplateObject,
 $TemplateText
 )
 
+# Find all uses of the function 'ResourceID'
 $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName resourceId
 
 :nextResourceId foreach ($rid in $resourceIdFunctions) {
@@ -25,9 +26,16 @@ $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName re
         if ($resourceIdParameters[$n] -like '*/*') {
             $foundResourceType = $resourceIdParameters[$n]
                     
-            if ($n -eq 0) {
-                Write-Error "At least one parameter must preceed the resource type" -TargetObject $rid -ErrorId 'ResourceID.Missing.Name'
-                continue nextResourceId
+            if ($n -eq 0) { # If the resource type is the first parameter
+                $foundResource = # see if we can find a resource with that type.
+                    Find-JsonContent -InputObject $TemplateObject.resources -Key Type -Value $resourceIdParameters[$n]
+                if (-not $foundResource -or 
+                    $foundResource.condition) 
+                { 
+                    Write-Error "At least one parameter must preceed the resource type" -TargetObject $rid -ErrorId 'ResourceID.Missing.Name'
+                    continue nextResourceId
+                }
+
             }
         }
         
