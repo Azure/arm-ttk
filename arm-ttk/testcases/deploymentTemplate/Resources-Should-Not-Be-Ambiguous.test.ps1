@@ -2,7 +2,15 @@
 .Synopsis
     Ensures Resources do not map ambiguously
 .Description
-    Ensures resources functions do not map ambiguously.  ResourceID functions should specify a type and a 
+    Ensures resources functions do not map ambiguously.  
+    
+    ResourceID functions should specify a type and a resource name.
+
+    A ResourceID is considered ambiguious if:
+
+    * The Resource was not found in the main template, and no ResourceGroup was specified.
+    * The Resource was found in the main template with a condition, and no Resource Group was specified.
+    * The related Resource contains some but not all of the name segments.
 #>
 param(
 # The object representation of an Azure Resource Manager template.
@@ -21,11 +29,11 @@ $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName re
     $resourceIdParameters = @($rid.Groups["Parameters"] -split ',')
 
     $foundResourceType = ''
+    $resourceTypeIndex = -1
     $foundApiVersion = ''
-    for ($n = 0 ;$n -lt $resourceIdParameters.Count;$n++) {
+    $additionalParameters = @(for ($n = 0 ;$n -lt $resourceIdParameters.Count;$n++) {
         if ($resourceIdParameters[$n] -like '*/*') {
-            $foundResourceType = $resourceIdParameters[$n]
-                    
+            $foundResourceType = $resourceIdParameters[$n]                    
             if ($n -eq 0) { # If the resource type is the first parameter
                 $foundResource = # see if we can find a resource with that type.
                     Find-JsonContent -InputObject $TemplateObject.resources -Key Type -Value $resourceIdParameters[$n]
@@ -35,21 +43,48 @@ $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName re
                     Write-Error "At least one parameter must preceed the resource type" -TargetObject $rid -ErrorId 'ResourceID.Missing.Name'
                     continue nextResourceId
                 }
-
             }
+            $resourceTypeIndex = $n
         }
-        
-
-        if (-not $foundApiVersion) { 
-            $foundApiVersion = $resourceIdParameters[$n] | ?<ARM_API_Version>
-        }
-    }
+        elseif ($n) {
+            $resourceIdParameters[$n] -replace 
+                            "^\s{0,}'{0,1}"  -replace 
+                            "\s{0,}'{0,1}$"  -replace 
+                            '\){0,}$'
+        }                       
+    })
 
     if ($foundResourceType) {
-        $resourceTypeName = $foundResourceType -replace "^\s{0,}'" -replace "\s{0,}'$"
+        $resourceTypeName = $foundResourceType -replace "^\s{0,}'" -replace "\s{0,}'$"        
 
         if ($foundResourceType -match "/'\s{0,}$") {
             Write-Error "ResourceType has a trailing slash '$foundResourceType'" -TargetObject $rid -ErrorId 'ResourceID.Trailing.Slash'
-        }
+        }        
+
+        # Find all resources of this type within the template
+        $resourcesOfType = 
+            @(Find-JsonContent -InputObject $TemplateObject.resources -Key type -Value $resourceTypeName) +
+            @(Find-JsonContent -InputObject $TemplateObject.resources -Key type -Value @($resourceTypeName -split '/' -ne '')[-1])
+            
+        
+        # walk thru each resource of the type
+        foreach ($resource in $resourcesOfType) {
+            
+            $foundParametersInResource = # See if we can find the additional parameters
+                @(foreach ($additionalParameter in $additionalParameters) {
+                    $resource.name -like "*$additionalParameter*"
+                })
+
+            if ($foundParametersInResource.Count -gt 1) { # If we found any additional parameters
+                # See if we have enough
+                if ($foundParametersInResource.Count -lt $additionalParameters.Count) {
+                    # If we didn't have enough, we may want to write an error.
+                    Write-Error "Resource referencing $rid does not contain all segments of it's resource name" -TargetObject $rid -ErrorId 'ResourceID.Missing.Name'
+                } else {
+                    # but if we did, we can finally feel ok about this resourceID.
+                    continue nextResourceID
+                }
+            }                           
+        }        
     }
 }
