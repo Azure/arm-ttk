@@ -30,6 +30,11 @@ foreach ($pwb in $passwordBoxes) { # Loop over each password box
         continue
     }
 
+    if ($pwb.constraints.regex -match '^\s{0,}\[' -and 
+        $pwb.constraints.regex -match '\]\s{0,}$') { # If the constraint Regex is an expression
+        continue # continue, as we don't want it to error and we cannot judge complexity of the expression result.
+    }
+
     try { # If it did,
         $constraintWasRegex = [Regex]::new($textbox.constraints.regex) # try to cast to a regex
         $hasLengthConstraint = $lengthConstraintRegex.Match($pwb.constraints.regex)
