@@ -8,8 +8,8 @@
 
     A ResourceID is considered ambiguious if:
 
-    * The Resource was not found in the main template, and no ResourceGroup was specified.
-    * The Resource was found in the main template with a condition, and no Resource Group was specified.
+    * The Resource was not found in the template, and no ResourceGroup was specified.
+    * The Resource was found in the template with a condition, and no Resource Group was specified.
     * The related Resource contains some but not all of the name segments.
 #>
 param(
