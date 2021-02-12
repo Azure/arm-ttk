@@ -134,7 +134,7 @@ foreach ($av in $allApiVersions) {
     if ($av.ApiVersion -like '*-*-*-*') {
         # If it's a preview or other special variant, e.g. 2016-01-01-preview
         $moreRecent = $validApiVersions[0..$howOutOfDate] # see if there's a more recent non-preview version. 
-        if ($howOutOfDate -gt 0) {
+        if ($howOutOfDate -gt 0 -and $moreRecent -notlike '*-*-*-*') {
             Write-Error "$FullResourceType uses a preview version ( $($av.apiVersion) ) and there are more recent versions available." -TargetObject $av -ErrorId ApiVersion.Preview.Not.Recent
             Write-Output "Valid Api Versions:`n$recentApiVersions"
         }        
