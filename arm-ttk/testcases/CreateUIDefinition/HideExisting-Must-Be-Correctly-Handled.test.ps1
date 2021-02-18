@@ -29,6 +29,9 @@ foreach ($controlType in $ControlTypesWithHideExisting) {
         $needsResourceGroupInOutputs = $true  # If we found any of these controls, we need a 'ResourceGroup'
         if ($foundControl.psobject.properties['hideExisting']) { # If any we found hideExisting, note that.
             $foundHideExisting = $true
+            if ($foundControl.hideExisting) {
+                $needsResourceGroupInOutputs = $false
+            }
         }
     }
 }
