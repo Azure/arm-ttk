@@ -1,8 +1,8 @@
 ﻿<#
 .Synopsis
-    Ensure that Usernames have a default
+    Ensure that Usernames do not have a default
 .Description
-    Ensure that Usernames have a default
+    Ensure that Usernames do not have a default
 #>
 
 param(
