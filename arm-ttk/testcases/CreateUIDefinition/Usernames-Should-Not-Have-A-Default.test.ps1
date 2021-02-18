@@ -1,4 +1,11 @@
-﻿param(
+﻿<#
+.Synopsis
+    Ensure that Usernames do not have a default
+.Description
+    Ensure that Usernames do not have a default
+#>
+
+param(
 [Parameter(Mandatory=$true)]
 [PSObject]
 $CreateUIDefinitionObject

@@ -1,4 +1,11 @@
-﻿param(
+﻿<#
+.Synopsis
+    Ensure that VMSizes must match the template values
+.Description
+    Ensure that VMSizes must match the template values in SizeSelector
+#>
+
+param(
 # The CreateUIDefinition object data
 [Parameter(Mandatory=$true)]
 [PSObject]

@@ -195,8 +195,6 @@ function Test-TTK{
 
 }
 
-
-
 $callstack = @(Get-PSCallStack)
 if ($callstack.Length -gt 2) { return }
 
@@ -210,8 +208,6 @@ describe 'Format-AzTemplate' {
         @($formatted.psobject.properties)[0].name | should be '$schema'
     }
 }
-
-
 
 $PSScriptRoot | 
     Get-ChildItem -Recurse -Filter *.tests.ps1 | 

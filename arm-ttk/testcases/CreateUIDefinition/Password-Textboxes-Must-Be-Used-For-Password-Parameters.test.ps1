@@ -1,4 +1,14 @@
-﻿param(
+﻿<#
+.Synopsis
+    Ensure that password textboxes are used for passwords parameters
+.Description
+    Ensure that password textboxes are used for passwords parameters
+
+    * check parameter is defined in main template
+    * is defined as SecureString or SecureObject
+#>
+
+param(
 [Parameter(Mandatory=$true)]
 [PSObject]
 $CreateUIDefinitionObject,

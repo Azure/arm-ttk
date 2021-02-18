@@ -1,4 +1,11 @@
-﻿param(
+﻿<#
+.Synopsis
+    Ensure that parameters that don't have defaultValues are defined CreateUIDefinition.outuputs
+.Description
+    Ensure that parameters that don't have defaultValues are defined CreateUIDefinition.outuputs
+#>
+
+param(
 [Parameter(Mandatory=$true)]
 [PSObject]
 $TemplateObject,

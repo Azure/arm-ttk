@@ -1,4 +1,14 @@
-﻿param(
+﻿<#
+.Synopsis
+    Ensure CreateUIDefinition must specify a valid schema value
+.Description
+    Ensures CreateUIDefinition must specify a valid schema value
+
+    * should have a $schema node
+    * must not be equal https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#
+    * should have a version
+#>
+param(
 [Parameter(Mandatory=$true,Position=0)]
 [PSObject]
 $CreateUIDefinitionObject

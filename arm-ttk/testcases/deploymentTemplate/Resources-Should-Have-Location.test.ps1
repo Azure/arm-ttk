@@ -1,4 +1,11 @@
-﻿param(
+﻿<#
+.Synopsis
+    TODO: summary of test
+.Description
+    TODO: describe this test
+#>
+
+param(
 [Parameter(Mandatory=$false,Position=0)] #not mandatory for case of an empty resource array
 [PSObject]
 $MainTemplateResources

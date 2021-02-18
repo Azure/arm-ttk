@@ -1,4 +1,14 @@
-﻿param(
+﻿<#
+.Synopsis
+    Ensure that tooltips are defined
+.Description
+    Ensure that tooltips are defined for: 
+    * InfoBox
+    * Section
+    * TextBlock
+#>
+
+param(
     [Parameter(Mandatory = $true, Position = 0)]
     [PSObject]
     $CreateUIDefinitionObject

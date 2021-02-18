@@ -1,4 +1,14 @@
-﻿param(
+﻿<#
+.Synopsis
+    Ensure that CreateUIDefinitionObject has a handler and that is contains the allowed values
+.Description
+    Ensure that CreateUIDefinitionObject has a handler and that is contains the allowed values
+
+    * Microsoft.Compute.MultiVm
+    * Microsoft.Azure.CreateUIDef
+#>
+
+param(
 # The create UI Definition object
 [Parameter(Mandatory=$true,Position=0)]
 [PSObject]

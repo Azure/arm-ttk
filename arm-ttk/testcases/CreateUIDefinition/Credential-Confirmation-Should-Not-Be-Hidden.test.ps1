@@ -1,4 +1,13 @@
-﻿param(
+﻿<#
+.Synopsis
+    Ensure the credential confirmation are not blank
+.Description
+    Ensure the credential confirmation are not blank and that property are not set to 'hideConfiration'
+    * Password Box
+    * Credential Combo
+#>
+
+param(
 [Parameter(Mandatory=$true)]
 [PSObject]
 $CreateUIDefinitionObject
