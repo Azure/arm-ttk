@@ -50,6 +50,20 @@ $allApiVersions = $TemplateObject.resources |
 Find-JsonContent -Key apiVersion -Value * -Like
 
 foreach ($av in $allApiVersions) {
+
+    <#
+      if the apiVersion is not a direct descendent of the resource skip this one
+      some RPs have a property named apiVersion in their properties body
+      The following paths would be valid to check      
+        resources[0].resources[0].apiVersion > this actually translates to apiVersion[0].apiVersion[0].apiVersion after Find-JSONContent
+                or
+        apiVersion
+    #>
+
+    if($av.jsonPath -ne "apiVersion" -and $av.jsonpath -notmatch "apiVersion\[\d+\]\.apiVersion"){
+        continue
+    }
+
     # Then walk over each object containing an ApiVersion.
     if ($av.ApiVersion -isnot [string]) {
         # If the APIVersion is not a string
@@ -107,6 +121,7 @@ foreach ($av in $allApiVersions) {
 
     # Create a string of recent or allowed apiVersions for display in the error message
     $recentApiVersions = ""
+
     foreach ($v in $validApiVersions) {
 
         $hasDate = $v -match "(?<Year>\d{4,4})-(?<Month>\d{2,2})-(?<Day>\d{2,2})"
@@ -133,12 +148,27 @@ foreach ($av in $allApiVersions) {
 
     if ($av.ApiVersion -like '*-*-*-*') {
         # If it's a preview or other special variant, e.g. 2016-01-01-preview
+
         $moreRecent = $validApiVersions[0..$howOutOfDate] # see if there's a more recent non-preview version. 
         if ($howOutOfDate -gt 0 -and $moreRecent -notlike '*-*-*-*') {
             Write-Error "$FullResourceType uses a preview version ( $($av.apiVersion) ) and there are more recent versions available." -TargetObject $av -ErrorId ApiVersion.Preview.Not.Recent
             Write-Output "Valid Api Versions:`n$recentApiVersions"
-        }        
+        }
+
+        # the sorted array doesn't work perfectly so 2020-01-01-preview comes before 2020-01-01
+        # in this case if the dates are the same, the non-preview version should be used
+        if ($howOutOfDate -eq 0 -and $validApiVersions.Count -gt 1){
+            # check the second apiVersion and see if it matches the preview one
+            $nextApiVersion = $validApiVersions[1]
+            # strip the qualifier on the apiVersion and see if it matches the next one in the sorted array
+            $truncatedApiVersion = $($av.apiVersion).Substring(0, $($av.ApiVersion).LastIndexOf("-"))
+            if ($nextApiVersion -eq $truncatedApiVersion){
+                Write-Error "$FullResourceType uses a preview version ( $($av.apiVersion) ) and there is a non-preview version for that apiVersion available." -TargetObject $av -ErrorId ApiVersion.Preview.Version.Has.NonPreview
+                Write-Output "Valid Api Versions:`n$recentApiVersions"                
+            } 
+        }     
     }
+
     # Finally, check how long it's been since the ApiVersion's date
     $timeSinceApi = $TestDate - $apiDate
     if (($timeSinceApi.TotalDays -gt $NumberOfDays) -and ($howOutOfDate -gt 0)) {
