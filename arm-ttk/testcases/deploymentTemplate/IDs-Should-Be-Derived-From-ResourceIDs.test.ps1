@@ -47,7 +47,8 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         "timezoneId", # Microsoft.SQL/managedInstances
         "targetProtectionContainerId", # Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings (yes really)
         "defaultMenuItemId", # Microsoft.Portal/dashboards - it's a messy resource
-        "menuId" # Microsoft.Portal/dashboards
+        "menuId", # Microsoft.Portal/dashboards
+        "DataTypeId" # Microsoft.OperationalInsights/workspaces/dataSources
     )
 
     if ($exceptions -contains $myIdFieldName) { # We're checking resource ids, not tenant IDs
