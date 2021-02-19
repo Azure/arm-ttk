@@ -45,7 +45,10 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         "SyntheticMonitorId", # Microsoft.Insights/webtests
         "policyDefinitionReferenceId", # Microsft.Authorization/policySetDefinition unique Id used when setting up a PolicyDefinitionReference
         "timezoneId", # Microsoft.SQL/managedInstances
-        "targetProtectionContainerId" # Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings (yes really)
+        "targetProtectionContainerId", # Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings (yes really)
+        "defaultMenuItemId", # Microsoft.Portal/dashboards - it's a messy resource
+        "menuId", # Microsoft.Portal/dashboards
+        "DataTypeId" # Microsoft.OperationalInsights/workspaces/dataSources
     )
 
     if ($exceptions -contains $myIdFieldName) { # We're checking resource ids, not tenant IDs
