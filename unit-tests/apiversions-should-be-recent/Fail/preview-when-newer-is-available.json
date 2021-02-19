@@ -1,0 +1,17 @@
+{
+    "$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "resources":  [
+    {
+      "apiVersion": "2017-12-01-preview",  // there also exists a 2017-12-01-preview apiVersion...
+      "type": "Microsoft.DBforMySQL/servers",
+      "name": "db]",
+      "location": "westeurope",
+      "properties": {
+        "administratorLogin": "sa",
+        "administratorLoginPassword": "don't put passwords in plain text",
+        "createMode": "Default",
+        "sslEnforcement": "Disabled"
+      }
+    }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "resources": [
+        {
+            "type": "Microsoft.ApiManagement/service/apis",
+            "apiVersion": "2020-06-01-preview",
+            "name": "foo/bar",
+            "properties": {
+                "displayName": "test",
+                "apiRevision": "1",
+                "description": "Init",
+                "subscriptionRequired": true,
+                "path": "foo",
+                "protocols": [
+                    "https"
+                ],
+                "isCurrent": true,
+                "apiVersion": "v1", // this should not be flagged
+                "apiVersionSetId": "[resourceId('Microsoft.ApiManagement/service/apiVersionSets', 'foo', 'bar')]"
+            }
+        }
+    ]
+}
