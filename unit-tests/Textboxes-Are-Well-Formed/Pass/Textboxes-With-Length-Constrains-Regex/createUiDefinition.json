@@ -1,0 +1,23 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {
+                "name": "TextBox1",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Textboxes-With-Constrains-Validations",
+                "toolTip": "Textboxes with constraints.validations.",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[0-9]{5,10}$",
+                    "validationMessage": "Textboxes with constraints.regex contains length limits."
+                }
+            }
+        ],
+        "outputs": {
+            "Location": "[location()]"
+        }
+    }
+}
