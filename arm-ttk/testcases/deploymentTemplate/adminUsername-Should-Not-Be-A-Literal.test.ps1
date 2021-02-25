@@ -15,8 +15,7 @@ param(
 
 if ("resources" -in $TemplateObject.PSobject.Properties.Name) {
     $adminUserNameRefsResources = $TemplateObject.resources |
-    Find-JsonContent -Key adminUsername  -Value * -Like |
-    Where-Object { -not $_.ParentObject[0].'$schema' } # unless they're on a top-level property.
+        Find-JsonContent -Key adminUsername  -Value * -Like 
 
     foreach ($ref in $adminUserNameRefsResources) {
         # Walk over each one
@@ -31,8 +30,7 @@ if ("resources" -in $TemplateObject.PSobject.Properties.Name) {
 
 if ("variables" -in $TemplateObject.PSobject.Properties.Name) {
     $adminUserNameRefsVariables = $TemplateObject.variables |
-    Find-JsonContent -Key adminUsername  -Value * -Like |
-    Where-Object { -not $_.ParentObject[0].'$schema' } # unless they're on a top-level property.
+    Find-JsonContent -Key adminUsername  -Value * -Like
 
     foreach ($ref in $adminUserNameRefsVariables) {
         # Walk over each one
