@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
 
     "variables": {
-        "trailingslash": "[resourceId(resourceGroup(),'Microsoft.Network/networkSecurityGroups/', 'nsg')]"
+        "trailingslash": "[resourceId(resourceGroup().name,'Microsoft.Network/networkSecurityGroups/', 'nsg')]"
 
     },
     "resources": [
