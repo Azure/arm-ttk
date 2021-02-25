@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
 
     "variables": {
-        "simpleResourceID": "[resourceId(resourceGroup(),'Microsoft.Network/networkSecurityGroups', 'nsg')]"
+        "simpleResourceID": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', 'nsg')]"
 
     },
     "resources": [
