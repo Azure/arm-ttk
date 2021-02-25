@@ -63,8 +63,7 @@ $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName re
 
         # Find all resources of this type within the template
         $resourcesOfType = 
-            @(Find-JsonContent -InputObject $TemplateObject.resources -Key type -Value $resourceTypeName) +
-            @(Find-JsonContent -InputObject $TemplateObject.resources -Key type -Value @($resourceTypeName -split '/' -ne '')[-1])
+            @(Find-JsonContent -InputObject $TemplateObject.resources -Key type -Value $resourceTypeName)            
             
         
         # walk thru each resource of the type
@@ -85,6 +84,34 @@ $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName re
                     continue nextResourceID
                 }
             }                           
-        }        
+        }
+
+        $resourcesOfSubType = 
+            @(Find-JsonContent -InputObject $TemplateObject.resources -Key type -Value @($resourceTypeName -split '/' -ne '')[-1])
+
+        # walk thru each resource of the type
+        foreach ($resource in $resourcesOfSubType) {
+            $resourceRef = $Resource
+            $resourceFullType = @( $resourceRef.ParentObject.type -ne $null)
+            [Array]::Reverse($resourceFullType)
+            if ($resourceTypeName -ne ($resourceFullType -join '/')) {
+                continue
+            }
+            $foundParametersInResource = # See if we can find the additional parameters
+                @(foreach ($additionalParameter in $additionalParameters) {
+                    $resource.name -like "*$additionalParameter*"
+                })
+
+            if ($foundParametersInResource.Count -gt 1) { # If we found any additional parameters
+                # See if we have enough
+                if ($foundParametersInResource.Count -lt $additionalParameters.Count) {
+                    # If we didn't have enough, we may want to write an error.
+                    Write-Error "Resource referencing $rid does not contain all segments of it's resource name" -TargetObject $rid -ErrorId 'ResourceID.Missing.Name'
+                } else {
+                    # but if we did, we can finally feel ok about this resourceID.
+                    continue nextResourceID
+                }
+            }                           
+        }
     }
 }
