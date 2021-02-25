@@ -25,7 +25,7 @@ Write-FormatView -Action {
             $msg + [Environment]::NewLine
             . $clearOutputStyle
         } else {
-            Write-Host -ForegroundColor Magenta -NoNewline $msg
+            Write-Host -ForegroundColor Magenta $msg
         }
         $global:_LastFile = $testOut.File.FullPath
     }
