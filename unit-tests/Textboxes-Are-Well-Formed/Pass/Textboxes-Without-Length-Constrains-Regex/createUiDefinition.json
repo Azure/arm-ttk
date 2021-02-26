@@ -11,6 +11,7 @@
                 "toolTip": "Textboxes with constraints.validations.",
                 "constraints": {
                     "required": true,
+                    // The reason for doing so is that usually the value users type in here will be passed directly to downstream as a parameter, and there is another constrain there really matters and the constrain varies from case to case.
                     "regex": "^[0-9]$",
                     "validationMessage": "Textboxes with constraints.regex contains length limits."
                 }
