@@ -5,10 +5,12 @@
     Determines that the .$schema property of any DeploymentTemplate is correct
 #>
 param(
-[PSObject]$TemplateObject
+    # The parameter object
+    [PSObject]
+    $ParameterObject
 )
 
-$templateSchema = $TemplateObject.'$schema'
+$templateSchema = $ParameterObject.'$schema'
 
 if (-not $templateSchema) {
     Write-Error 'DeploymentParameters Missing .$schema property' -ErrorId Parameters.Missing.Schema

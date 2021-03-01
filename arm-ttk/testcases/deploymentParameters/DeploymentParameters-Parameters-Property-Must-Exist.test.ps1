@@ -5,12 +5,12 @@
     Ensures that an Azure Resource Manager template contains the 'parameters' property.
 #>
 param(
-    # The template object
+    # The parameter object
     [Parameter(Mandatory=$true,Position=0)]
     [PSObject]
-    $TemplateObject
+    $ParameterObject
 )
 
-if (-not $TemplateObject.psobject.properties.item('parameters')) {
+if (-not $ParameterObject.parameters) {
     Write-Error -ErrorId Parameters.Missing.Parameters -Message "Parameters property must exist in the parameters file" 
 } 

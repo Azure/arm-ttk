@@ -6,23 +6,23 @@
     And that is formatted like a proper version, ie 1.0.0.0
 #>
 param(
-  # The template object
+  # The parameter object
   [Parameter(Mandatory=$true,Position=0)]
   [PSObject]
-  $TemplateObject
+  $ParameterObject
 )
 
-if (-not $TemplateObject.psobject.properties.item('contentVersion')) {
+if (-not $ParameterObject.contentVersion) {
     Write-Error -ErrorId Parameters.Missing.ContentVersion -Message "contentVersion property must exist in the template"
     continue
 } 
 
-if ($TemplateObject.contentVersion -isnot [string]) {
+if ($ParameterObject.contentVersion -isnot [string]) {
     Write-Error -ErrorId ContentVersion.Not.String -Message "contentVersion must be string" -TargetObject $TemplateObject.contentVersion 
     continue
 } 
 
-if ($TemplateObject.contentVersion -inotmatch '^([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)$') {
+if ($ParameterObject.contentVersion -notmatch '^(\d+\\.\d+\\.\d+\\.\d+)$') {
     Write-Warning -Message "Recommended that the 'contentVersion' should be a version string 
     Like:  1.0.0.0  -> but found: $($TemplateObject.contentVersion)"
     continue

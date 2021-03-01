@@ -294,7 +294,7 @@ Each test script has access to a set of well-known variables:
                                     $key; continue # (this handles CreateUIDefinition.json, even if no schema is present).
                                 }
                                 if ($key -eq 'DeploymentParameters' -and # Otherwise, if we're checking the deploymentTemplate
-                                'maintemplate.parameters.json', 'azuredeploy.parameters.json', 'prereq.azuredeploy.parameters.json' -contains $fn) { # and the file name is something we _know_ will be an ARM template
+                                   $fn -like '*.parameters.json' -contains $fn) { # and the file name is something we _know_ will be an ARM template
                                    $key; continue # then run the deployment tests regardless of schema.
                                 }
                                 if ($key -eq 'DeploymentTemplate' -and # Otherwise, if we're checking the deploymentTemplate
@@ -316,10 +316,10 @@ Each test script has access to a set of well-known variables:
                 if (-not $matchingGroups) { continue }
                 
                 if ($fileInfo.Schema -like '*deploymentParameters*') {
-                    $isMainTemplateParameters = 'maintemplate.parameters.json', 'azuredeploy.parameters.json', 'prereq.azuredeploy.parameters.json' -contains $fileInfo.Name
-                    $templateFileName = $fileInfo.Name
-                    $TemplateObject = $fileInfo.Object
-                    $TemplateText = $fileInfo.Text
+                    $isMainTemplateParameter = 'maintemplate.parameters.json', 'azuredeploy.parameters.json', 'prereq.azuredeploy.parameters.json' -contains $fileInfo.Name
+                    $parameterFileName = $fileInfo.Name
+                    $parameterObject = $fileInfo.Object
+                    $parameterText = $fileInfo.Text
                 }
                 if ($fileInfo.Schema -like '*deploymentTemplate*') {
                     $isMainTemplate = 

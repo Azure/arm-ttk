@@ -5,43 +5,43 @@
     Ensures that all parameters have a property 'value'
 #>
 param(
-  # The Template Object
+  # The parameter Object
   [Parameter(Mandatory = $true, Position = 0)]
   [PSObject]
-  $TemplateObject
+  $ParameterObject
 )
 
-Write-Debug $TemplateObject.parameters
-foreach ($p in $TemplateObject.parameters.psobject.properties) {
+Write-Verbose $ParameterObject.parameters
+foreach ($p in $ParameterObject.parameters.psobject.properties) {
     
   # If the parameter name starts with two underscores,
   if ($p.Name -like '__*') { continue } # skip it.
 
   # check if the property exist on the hashtable Value property for the key 'value'
   # just checking if the property is there might result in false negative, for example if the property contains:  $null, 0, False, empty string
-  if ( -not ($p.Value.PsObject.Properties.match('value').Count -or $p.Value.PsObject.Properties.match('reference').Count )) {
+  if ( -not ($p.Value.PsObject.properties["value"] -or $p.Value.PSObject.properties["reference"])) {
     Write-Error -ErrorId Parameters.Parameter.Missing.Value -Message "'$($p.Name)' must have a property 'value' or 'reference'    
     n.b.  properties starting with '__' are ignored" -TargetObject $p.Value 
     continue
   }
 
   # just checking if the property is there might result in false negative, for example if the property contains:  $null, 0, False, empty string
-  if ( $p.Value.PsObject.Properties.match('value').Count){     
+  if ( $p.Value.PsObject.Properties["value"]){     
     if($p.Value.value -imatch '^\s?\[.*\]\s?$'){
       Write-Error -ErrorId Parameters.Parameter.CannotBeReference -Message "'$($p.Name)'.value should cannot be a reference" -TargetObject $p.Value.value
     }
     continue
   }
 
-  if( $p.Value.PsObject.Properties.match('reference').Count){
+  if( $p.Value.PsObject.Properties["reference"]){
     $kvRef = $p.Value.reference 
-    if(-not $kvRef.PsObject.Properties.match('keyVault').Count){
+    if(-not $kvRef.PsObject.Properties["keyVault"]){
       Write-Error -ErrorId Parameters.Parameter.Missing.Value -Message "'$($p.Name)'.reference is missing have a property 'keyVault'" -TargetObject $p.Value.reference
       continue
     }
     else {
       $kv = $kvRef.keyVault;
-      if(-not $kv.PsObject.Properties.match('id').Count){
+      if(-not $kv.PsObject.Properties["id"]){
         Write-Error -ErrorId Parameters.Parameter.Missing.KeyVault.Id -Message "'$($p.Name)'.reference is missing have a property 'keyVault'" -TargetObject $p.Value.reference.keyVault
         continue
       }
@@ -52,12 +52,12 @@ foreach ($p in $TemplateObject.parameters.psobject.properties) {
         continue
       }
     }
-    if(-not $kvRef.PsObject.Properties.match('secretName').Count){
+    if(-not $kvRef.PsObject.Properties["secretName"]){
       Write-Error -ErrorId Parameters.Parameter.Missing.SecretName -TargetObject $p.Value.reference -Message "'$($p.Name)'.reference is missing have a property 'secretName'"
       continue
     }
     
-    if($kvRef.secretName -inotmatch '^([A-Za-z0-9\-]{1,127})$'){
+    if($kvRef.secretName -notmatch '^([A-Za-z0-9\-]{1,127})$'){
       Write-Error -ErrorId Parameters.Parameter.Bad.SecretName -TargetObject $kvRef.secretName -Message "'$($p.Name)'.reference.secretName should only contain alphanumeric caracters or dashes and be between 1 and 127 in length, `r`n Found: $($kvRef.secretName)"
       continue
     }
