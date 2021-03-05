@@ -1,3 +1,4 @@
+name: update-ttk-cache
 on: workflow_dispatch
 jobs: 
   UpdateTTKCache: 
