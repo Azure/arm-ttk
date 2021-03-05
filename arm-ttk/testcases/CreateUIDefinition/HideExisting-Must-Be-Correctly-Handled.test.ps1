@@ -25,18 +25,17 @@ foreach ($controlType in $ControlTypesWithHideExisting) {
 
     # then walk thru all controls of that type.
     foreach ($foundControl in (Find-JsonContent -Key type -Value $controlType -InputObject $CreateUIDefinitionObject) ) {
-        if ($foundControl.psobject.properties['hideExisting']) { # If any we found hideExisting, note that.
-            if (-not $foundControl.hideExisting) {
-                # determine the output names
-                $outputNames = @($CreateUIDefinitionObject.parameters.outputs.psobject.properties | Select-Object -ExpandProperty Name)
-                if (-not ($outputNames -like "*('$($foundControl.Name)').ResourceGroup*" )) { # error if there is no 'ResourceGroup' output.
-                    Write-Error "Control Named '$($foundControl.name)' must output the resourceGroup property when hideExisitng is false." -TargetObject $foundControl -ErrorId Missing.Output.ResourceGroup
-                }
-                if (-not ($outputNames -like "*('$($foundControl.Name)').NewOrExisting*" )) { # error if there is no 'NewOrExisting' output.
-                    Write-Error "Control Named '$($foundControl.name)' must output the newOrExisting property when hideExisitng is false."
-                }
+        if ((-not $foundControl.psobject.properties['hideExisting']) -or # If there is no hideExisting property, or it is set to false
+            (-not $foundControl.hideExisting)) {
+            # determine the output values
+            $outputValues = @($CreateUIDefinitionObject.parameters.outputs.psobject.properties | Select-Object -ExpandProperty Value)
+            if (-not ($outputValues -like "*$($foundControl.Name)*.ResourceGroup*" )) { # error if there is no 'ResourceGroup' output.
+                Write-Error "Control Named '$($foundControl.name)' must output the resourceGroup property when hideExisitng is false." -TargetObject $foundControl -ErrorId Missing.Output.ResourceGroup
             }
-        }
+            if (-not ($outputValues -like "*$($foundControl.Name)*.NewOrExisting*" )) { # error if there is no 'NewOrExisting' output.
+                Write-Error "Control Named '$($foundControl.name)' must output the newOrExisting property when hideExisitng is false." -TargetObject $foundControl -ErrorId Missing.Output.NewOrExisting
+            }
+        }        
     }
 }
 
