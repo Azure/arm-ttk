@@ -18,6 +18,8 @@ param(
 
 $lineBreaks = [Regex]::Matches($TemplateText, "`n|$([Environment]::NewLine)")
 
+$innerTemplates = $TemplateText | ?<ARM_InnerTemplate> 
+
 $exprStrOrQuote = [Regex]::new('(?<!\\)[\[\"]', 'RightToLeft')
 foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
     # If the parameter name starts with two underscores,
@@ -26,7 +28,16 @@ foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
     $escapedName = $Parameter.Name -replace '\s', '\s'
     # Create a Regex to find the parameter
 
-    $foundRefs = $TemplateText | ?<ARM_Parameter> -Parameter $escapedName
+    $foundRefs = $TemplateText | 
+        ?<ARM_Parameter> -Parameter $escapedName |
+        Where-Object { 
+            $Ref = $_
+            if (-not $innerTemplates) { return $true }
+            -not ($innerTemplates | Where-Object { 
+                $ref.Index -gt $_.Index -and
+                $ref.Index -lt ($_.index + $_.Length)
+            })
+        }
     if (-not $foundRefs) { # If we didn't, error
         Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject $parameter
     } else {
