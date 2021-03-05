@@ -11,7 +11,7 @@
       }
     ],   
     "outputs": {
-        "newOrExisting": "true"
+        "newOrExisting": "steps('dbAdminPassword').newOrExisting"
     }
   }
 }
