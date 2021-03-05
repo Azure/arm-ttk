@@ -1,0 +1,13 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+
+    "variables": {
+        "simpleResourceID": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', 'nsg')]"
+
+    },
+    "resources": [
+    ],
+    "outputs": {
+    }
+}
