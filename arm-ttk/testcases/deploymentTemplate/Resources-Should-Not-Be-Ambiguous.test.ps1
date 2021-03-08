@@ -22,6 +22,8 @@ $TemplateObject,
 $TemplateText
 )
 
+exit
+
 # Find all uses of the function 'ResourceID'
 $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName resourceId
 
