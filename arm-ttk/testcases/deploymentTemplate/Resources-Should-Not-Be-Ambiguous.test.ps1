@@ -22,6 +22,8 @@ $TemplateObject,
 $TemplateText
 )
 
+exit
+
 # Find all uses of the function 'ResourceID'
 $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName resourceId
 
@@ -33,10 +35,10 @@ $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName re
     $foundApiVersion = ''
     $additionalParameters = @(for ($n = 0 ;$n -lt $resourceIdParameters.Count;$n++) {
         if ($resourceIdParameters[$n] -like '*/*') {
-            $foundResourceType = $resourceIdParameters[$n]                    
+            $foundResourceType = $resourceIdParameters[$n].Replace('(','').Replace("'","") # Remove extraneous chars before looking for the resource
             if ($n -eq 0) { # If the resource type is the first parameter
                 $foundResource = # see if we can find a resource with that type.
-                    Find-JsonContent -InputObject $TemplateObject.resources -Key Type -Value $resourceIdParameters[$n]
+                    Find-JsonContent -InputObject $TemplateObject.resources -Key Type -Value $foundResourceType
                 if (-not $foundResource -or 
                     $foundResource.condition) 
                 { 
@@ -57,7 +59,7 @@ $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName re
     if ($foundResourceType) {
         $resourceTypeName = $foundResourceType -replace "^\s{0,}'" -replace "\s{0,}'$"        
 
-        if ($foundResourceType -match "/'\s{0,}$") {
+        if ($foundResourceType.EndsWith('/')) {    
             Write-Error "ResourceType has a trailing slash '$foundResourceType'" -TargetObject $rid -ErrorId 'ResourceID.Trailing.Slash'
         }        
 
