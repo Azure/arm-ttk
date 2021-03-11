@@ -92,13 +92,13 @@ foreach ($av in $allApiVersions) {
 
     if ($FullResourceTypes -like '*/providers/*')  # If we have a provider resources
     {
-        $FullResourceTypes = @($FullResourceTypes -split '/')
-        $fullResourceTypes = # The real full resource type will be the item after 'providers'
-            @(for ($i = 0; $i -lt $FullResourceTypes.Length; $i++) {
-                if ($FullResourceTypes[$i] -eq 'providers') {
-                    $fullResourceTypes[$i + 1]; break
-                }
-            })
+        $FullResourceTypes    = @($FullResourceTypes -split '/')
+        if ($av.Name -match "'/{0,}(?<ResourceType>\w+\.\w+)/{0,}'") {
+            $FullResourceTypes = @($matches.ResourceType)
+        } else {
+            Write-Warning "Could not identify provider resource for $($FullResourceTypes -join '/')"
+            continue
+        }
     }
 
     # To get the full type name, join them all with a slash
