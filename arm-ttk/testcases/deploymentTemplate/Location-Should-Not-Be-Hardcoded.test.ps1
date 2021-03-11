@@ -40,9 +40,10 @@ if($locationParameter -ne $null -and $locationParameter.type -ne "string"){
 if ($IsMainTemplate){ 
     if($locationParameter.defaultValue -and 
       "$($locationParameter.defaultvalue)".Trim() -ne '[resourceGroup().location]' -and 
-      "$($locationParameter.defaultvalue)".Trim() -ne 'global') {
+      "$($locationParameter.defaultvalue)".Trim() -ne 'global' -and 
+      "$($locationParameter.defaultvalue)".Trim() -ne '[deployment().location]') {
             Write-Error "The defaultValue of the location parameter in the main template must not be a specific location. `
-                         The default value must be [resourceGroup().location] or 'global'. It is `"$($locationParameter.defaultValue)`"" -ErrorId Location.Parameter.Hardcoded -TargetObject $parameter
+                         The default value must be [resourceGroup().location], [deployment().location] or 'global'. It is `"$($locationParameter.defaultValue)`"" -ErrorId Location.Parameter.Hardcoded -TargetObject $parameter
 }
 # In all other templates:
 # if the parameter named "location" exists, it must not have a defaultValue property
@@ -53,7 +54,8 @@ if ($IsMainTemplate){
     }   
 }
 # Now check that the rest of the template doesn't use [resourceGroup().location] 
-if ($TemplateWithoutLocationParameter -like '*resourceGroup().location*') {
+if ($TemplateWithoutLocationParameter -like '*resourceGroup().location*' -or
+    $TemplateWithoutLocationParameter -like '*deployment().location*') {
     # If it did, write an error
-    Write-Error "$TemplateFileName must use the location parameter, not resourceGroup().location (except when used as a default value in the main template)" -ErrorId Location.Parameter.Should.Be.Used -TargetObject $parameter
+    Write-Error "$TemplateFileName must use the location parameter, not resourceGroup().location or deployment().location (except when used as a default value in the main template)" -ErrorId Location.Parameter.Should.Be.Used -TargetObject $parameter
 }
