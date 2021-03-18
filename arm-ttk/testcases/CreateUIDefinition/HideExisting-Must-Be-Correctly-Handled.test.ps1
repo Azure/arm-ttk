@@ -27,7 +27,7 @@ foreach ($controlType in $ControlTypesWithHideExisting) {
         
         $options = $foundControl.options
 
-        # if hideExisting != True (alternatives are the property may be missing or explicitly set to false)
+        # if hideExisting != True (options are the property may be missing or explicitly set to false)
         if ($options.HideExisting -ne $true) {
             # determine the output values
             $outputValues = @($CreateUIDefinitionObject.parameters.outputs.psobject.properties | Select-Object -ExpandProperty Value)
