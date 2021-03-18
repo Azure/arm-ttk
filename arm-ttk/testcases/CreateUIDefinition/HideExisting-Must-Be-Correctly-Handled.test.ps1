@@ -19,14 +19,16 @@ $ControlTypesWithHideExisting = @(
 )
 )
 
-
 # Walk over each potential control type.
 foreach ($controlType in $ControlTypesWithHideExisting) {
 
     # then walk thru all controls of that type.
     foreach ($foundControl in (Find-JsonContent -Key type -Value $controlType -InputObject $CreateUIDefinitionObject) ) {
-        if ((-not $foundControl.psobject.properties['hideExisting']) -or # If there is no hideExisting property, or it is set to false
-            (-not $foundControl.hideExisting)) {
+        
+        $options = $foundControl.options
+
+        # if not hideExisting == True (the property may be missing or explicitly set to false)
+        if ($options.HideExisting -ne $true) {
             # determine the output values
             $outputValues = @($CreateUIDefinitionObject.parameters.outputs.psobject.properties | Select-Object -ExpandProperty Value)
             if (-not ($outputValues -like "*$($foundControl.Name)*.ResourceGroup*" )) { # error if there is no 'ResourceGroup' output.
