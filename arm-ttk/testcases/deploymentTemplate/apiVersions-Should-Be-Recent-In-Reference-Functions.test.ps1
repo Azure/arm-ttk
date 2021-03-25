@@ -1,4 +1,10 @@
-﻿param(
+﻿<#
+.Synopsis
+    Ensures the apiVersions are recent (when used in reference functions).
+.Description
+    Ensures the apiVersions of any resources used within reference functions are recent and non-preview.
+#>
+param(
     # The resource in the main template
     [Parameter(Mandatory = $true, Position = 0)]
     [string]
