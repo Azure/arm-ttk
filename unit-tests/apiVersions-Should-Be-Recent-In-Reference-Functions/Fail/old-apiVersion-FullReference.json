@@ -6,6 +6,6 @@
     "variables": {},
     "resources": [],
     "outputs": {
-        "oldIPReference": "[listKeys(resourceId('Microsoft.Network/publicIPAddresses', 'test'), '2015-06-15')]"
+        "oldIPReference": "[reference(resourceId('Microsoft.Network/publicIPAddresses', 'test'), '2015-06-15', 'Full')]"
     }
 }
