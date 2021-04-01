@@ -41,8 +41,17 @@ foreach ($foundRef in $foundReferences) {
     $hasResourceId = $foundRef.Value | ?<ARM_Template_Function> -FunctionName resourceId
     if (-not $hasResourceId) { continue }
 
-    $potentialResourceType = 
-        $hasResourceId.Groups["Parameters"].value -split '[(),]' -ne '' -like '*/*' -replace "^'" -replace "'$"
+    
+    $parameterSegments= @($hasResourceId.Groups["Parameters"].value -split '[(),]' -ne '' -replace "^\s{0,}'" -replace "'\s{0,}$")
+    $potentialResourceType = ''
+    $resourceTypeStarted = $false
+    $potentialResourceType = @(foreach ($seg in $parameterSegments) {
+        if ($seg -like '*/*') {
+            $seg
+        }
+    }) -join '/'
+    
+     
     
     if (-not $potentialResourceType) { continue }
     
@@ -76,9 +85,9 @@ foreach ($foundRef in $foundReferences) {
     if ($howOutOfDate -eq -1 -and $validApiVersions) {
         # Removing the error for this now - this is happening with the latest versions and outdated manifests
         # We can assume that if the version is indeed invalid, deployment will fail
-        # Write-Error "$fullResourceType is using an invalid apiVersion." -ErrorId ApiVersion.Not.Valid
-        # Write-Output "ApiVersion not found for: $fullResourceType and version $($av.apiVersion)" 
-        # Write-Output "Valid Api Versions found:`n$recentApiVersions"
+        Write-Error "$potentialResourceType is using an invalid apiVersion." -ErrorId ApiVersion.Not.Valid
+        Write-Output "ApiVersion not found for: $fullResourceType and version $($av.apiVersion)" 
+        Write-Output "Valid Api Versions found:`n$recentApiVersions"
     }
 
     if ($ApiVersion -like '*-*-*-*') {
