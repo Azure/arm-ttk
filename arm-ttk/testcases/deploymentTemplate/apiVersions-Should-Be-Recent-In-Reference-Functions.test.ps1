@@ -85,7 +85,7 @@ foreach ($foundRef in $foundReferences) {
     if ($howOutOfDate -eq -1 -and $validApiVersions) {
         # Removing the error for this now - this is happening with the latest versions and outdated manifests
         # We can assume that if the version is indeed invalid, deployment will fail
-        Write-Error "$potentialResourceType is using an invalid apiVersion." -ErrorId ApiVersion.Not.Valid
+        Write-Error "$potentialResourceType is using an invalid apiVersion." -ErrorId ApiVersion.Not.Valid -TargetObject $foundRef
         Write-Output "ApiVersion not found for: $fullResourceType and version $($av.apiVersion)" 
         Write-Output "Valid Api Versions found:`n$recentApiVersions"
     }
@@ -125,7 +125,7 @@ foreach ($foundRef in $foundReferences) {
         }
         if (-not $nonPreviewVersionInUse) {
             # If it's older than two years, and there's nothing more recent
-            Write-Error "Api versions must be the latest or under $($NumberOfDays / 365) years old ($NumberOfDays days) - API version $($ApiVersion) of $FullResourceType is $([Math]::Floor($timeSinceApi.TotalDays)) days old" -ErrorId ApiReference.Version.OutOfDate
+            Write-Error "Api versions must be the latest or under $($NumberOfDays / 365) years old ($NumberOfDays days) - API version $($ApiVersion) of $FullResourceType is $([Math]::Floor($timeSinceApi.TotalDays)) days old" -ErrorId ApiReference.Version.OutOfDate -TargetObject $foundRef
             Write-Output "Valid Api Versions:`n$recentApiVersions"
         }
     }
