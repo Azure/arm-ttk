@@ -62,6 +62,11 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         continue
     }
 
+    if ( $id.ParentObject.type -match '^microsoft\.ApiManagement/service/backend$' ) {
+        continue
+    }
+
+
     # skip resourceId check within tags #274
     if ( $id.JSONPath -match "\.(tags)\.($myIdFieldName)" ) { 
         continue 

@@ -6,12 +6,12 @@
 #>
 
 param(
-[Parameter(Mandatory=$false,Position=0)] #not mandatory for case of an empty resource array
-[PSObject]
-$MainTemplateResources
+    [Parameter(Mandatory = $true, Position = 0)] #not mandatory for case of an empty resource array
+    [PSObject]$TemplateObject
 )
-foreach ($mtr in $MainTemplateResources) {
-    foreach ($resource in @(@($mtr) + $mtr.ParentResources)) { 
+
+foreach ($r in $TemplateObject.Resources) {
+    foreach ($resource in @(@($r) + $r.ParentResources)) { 
         if ($resource.Location) {
             $location = "$($resource.location)".Trim()
             if ($location -notmatch '^\[.*\]$' -and $location -ne 'global') {
