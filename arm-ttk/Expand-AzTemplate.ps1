@@ -230,6 +230,7 @@
                 #*MainTemplateObject (the main template, converted from JSON)
                 $MainTemplateObject = Import-Json -FilePath $MainTemplatePath
                 #*MainTemplateResources (the resources and child resources in the main template)
+                # TODO this was removed from the only test using it (it wasn't working, can probably remove from the fw)
                 $MainTemplateResources = if ($mainTemplateObject.Resources) {
                     Expand-Resource -Resource $MainTemplateObject.resources
                 } else { $null }
