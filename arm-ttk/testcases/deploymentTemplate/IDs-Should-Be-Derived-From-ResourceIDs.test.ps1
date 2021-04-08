@@ -62,7 +62,9 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         continue
     }
 
-    if ( $id.ParentObject.type -match '^microsoft\.ApiManagement/service/backend$' ) {
+    Write-Host $id.ParentObject.type
+
+    if ( $id.ParentObject.type -match '^microsoft\.ApiManagement/service/backends$' ) {
         continue
     }
 
