@@ -61,7 +61,22 @@ foreach ($foundRef in $foundReferences) {
         Select-Object -ExpandProperty apiVersions |
         Sort-Object -Descending)
 
-    if (-not $validApiVersions) { continue }
+    if (-not $validApiVersions) { 
+        $potentialResourceTypes = @($potentialResourceType -split '/')
+        for ($i = ($potentialResourceTypes.Count - 1); $i -ge 1; $i--) {
+            $potentialType = $potentialResourceTypes[0..$i] -join '/'
+            if ($AllAzureResources.$potentialType) {
+                $validApiVersions = @($AllAzureResources.$potentialType | # and see if there's an apiVersion.
+                    Select-Object -ExpandProperty apiVersions |
+                    Sort-Object -Descending)            
+                break
+            }
+        }
+        if (-not $validApiVersions) { 
+            continue
+        }
+         
+    }
 
     # Create a string of recent or allowed apiVersions for display in the error message
     $recentApiVersions = ""
