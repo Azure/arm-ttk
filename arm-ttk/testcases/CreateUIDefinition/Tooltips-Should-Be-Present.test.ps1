@@ -18,7 +18,7 @@ param(
 $shouldHaveTooltips = $CreateUIDefinitionObject | 
     Find-JsonContent -Key type -Value Microsoft.* -Like
    
-$noToolTipControls = "Microsoft.Common.InfoBox", "Microsoft.Common.Section", "Microsoft.Common.TextBlock"
+$noToolTipControls = "Microsoft.Common.InfoBox", "Microsoft.Common.Section", "Microsoft.Common.TextBlock", "Microsoft.Solutions.ArmApiControl"
 
 foreach ($shouldHave in $shouldHaveTooltips) {
     # then loop through each control
