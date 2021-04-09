@@ -12,7 +12,7 @@
                   "path": "[concat(subscription().id, '/providers/Microsoft.Sql/checkNameAvailability?api-version=2014-04-01')]",
                   "body": {
                     "name": "[basics('database_server_name')]",
-                    "type": "Microsoft.Sql/servers" //this type should not be found by the test
+                    "type": "Microsoft.Sql/servers" //this type should not be found by the test as it doesn't meet the patter Microsoft.*.*
                   }
                 }
               }
