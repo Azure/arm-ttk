@@ -12,8 +12,13 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]
-    $TemplateText
+    $TemplateText,
+    [Parameter(Mandatory = $true)]
+    [string]
+    $TemplateGenerator 
 )
+
+if($TemplateGenerator -eq 'bicep'){ continue }
 
 $exprStrOrQuote = [Regex]::new('(?<!\\)[\[\"]', 'RightToLeft') # use this to go backwards from a match below and ensure we are in an expression
 
