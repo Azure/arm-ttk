@@ -144,7 +144,7 @@
                 'CreateUIDefinitionFullPath','createUIDefinitionText','CreateUIDefinitionObject',
                 'FolderName', 'HasCreateUIDefinition', 'IsMainTemplate','FolderFiles',
                 'MainTemplatePath', 'MainTemplateObject', 'MainTemplateText',
-                'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 'MainTemplateOutputs', 'TemplateGenerator'
+                'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 'MainTemplateOutputs', 'TemplateMetadata'
 
             foreach ($_ in $WellKnownVariables) {
                 $ExecutionContext.SessionState.PSVariable.Set($_, $null)
@@ -166,10 +166,10 @@
             $TemplateObject = Import-Json -FilePath $TemplateFullPath
             # TODO - we can't pass a bool as a global var, so this is a string (and it can't be null)
             # isBicep - is the file being tested a bicep generated file?
-            if($TemplateObject.metadata._generator.name -ne $null){
-                $TemplateGenerator = $($TemplateObject.metadata._generator.name)
+            if($TemplateObject.metadata -ne $null){
+                $TemplateMetadata = $($TemplateObject.metadata)
             } else {
-                $TemplateGenerator = "none"
+                $TemplateMetadata = @{}
             }
 
             if ($resolvedTemplatePath -like '*.json' -and 
