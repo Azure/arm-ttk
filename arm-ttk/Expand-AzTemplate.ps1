@@ -164,8 +164,7 @@
             $TemplateText = [IO.File]::ReadAllText($resolvedTemplatePath)
             #*$TemplateObject (the template text, converted from JSON)
             $TemplateObject = Import-Json -FilePath $TemplateFullPath
-            # TODO - we can't pass a bool as a global var, so this is a string (and it can't be null)
-            # isBicep - is the file being tested a bicep generated file?
+
             if($TemplateObject.metadata -ne $null){
                 $TemplateMetadata = $($TemplateObject.metadata)
             } else {
