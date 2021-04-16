@@ -144,7 +144,7 @@
                 'CreateUIDefinitionFullPath','createUIDefinitionText','CreateUIDefinitionObject',
                 'FolderName', 'HasCreateUIDefinition', 'IsMainTemplate','FolderFiles',
                 'MainTemplatePath', 'MainTemplateObject', 'MainTemplateText',
-                'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 'MainTemplateOutputs'
+                'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 'MainTemplateOutputs', 'TemplateMetadata'
 
             foreach ($_ in $WellKnownVariables) {
                 $ExecutionContext.SessionState.PSVariable.Set($_, $null)
@@ -164,6 +164,12 @@
             $TemplateText = [IO.File]::ReadAllText($resolvedTemplatePath)
             #*$TemplateObject (the template text, converted from JSON)
             $TemplateObject = Import-Json -FilePath $TemplateFullPath
+
+            if($TemplateObject.metadata -ne $null){
+                $TemplateMetadata = $($TemplateObject.metadata)
+            } else {
+                $TemplateMetadata = @{}
+            }
 
             if ($resolvedTemplatePath -like '*.json' -and 
                 $TemplateObject.'$schema' -like '*CreateUIDefinition*') {
