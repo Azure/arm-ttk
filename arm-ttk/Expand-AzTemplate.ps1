@@ -144,7 +144,9 @@
                 'CreateUIDefinitionFullPath','createUIDefinitionText','CreateUIDefinitionObject',
                 'FolderName', 'HasCreateUIDefinition', 'IsMainTemplate','FolderFiles',
                 'MainTemplatePath', 'MainTemplateObject', 'MainTemplateText',
-                'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 'MainTemplateOutputs', 'TemplateMetadata'
+                'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 
+                'MainTemplateOutputs', 'TemplateMetadata',
+                'InnerTemplates'
 
             foreach ($_ in $WellKnownVariables) {
                 $ExecutionContext.SessionState.PSVariable.Set($_, $null)
@@ -207,8 +209,8 @@
                         if ($fileInfo.DirectoryName -eq '__macosx') {
                             return # (excluding files as side-effects of MAC zips)
                         }
+                        
                         # All FolderFile objects will have the following properties:
-
 
                         if ($fileInfo.Extension -eq '.json') {
                             $fileObject = [Ordered]@{
@@ -271,6 +273,21 @@
                 $FolderFiles = @(@($createUIDefFile) + @($otherFolderFiles) -ne $null)
             }
 
+            
+            $innerTemplates = @(if ($templateText -and $TemplateText.Contains('"template"')) {
+                Find-JsonContent -InputObject $templateObject -Key template |
+                    Where-Object { $_.expressionEvaluationOptions.scope -eq 'inner' }
+            })
+
+            if ($innerTemplates) {
+                foreach ($it in $innerTemplates) {
+                    $foundInnerTemplate = $it | Resolve-JSONContent -JsonText $TemplateText
+                    $TemplateText = $TemplateText.Remove($foundInnerTemplate.Index, $foundInnerTemplate.Length)
+                    $templateText = $templateText.Insert($foundInnerTemplate.Index, '"template": "innerTemplate"')
+                }
+
+                $TemplateObject = $TemplateText | ConvertFrom-Json
+            }            
 
             $out = [Ordered]@{}
             foreach ($v in $WellKnownVariables) {
