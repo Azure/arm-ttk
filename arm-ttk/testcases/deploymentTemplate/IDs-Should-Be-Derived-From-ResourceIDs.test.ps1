@@ -56,7 +56,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     if ($id.JsonPath -match '^(parameters|outputs)') { # Skip anything in parameters or outputs
         continue
     }
-    if ($is.JsonPath -match '\.metadata\.') { # Skip anything beneath metadata
+    if ($id.JsonPath -match '\.metadata\.') { # Skip anything beneath metadata
         continue
     }
 
