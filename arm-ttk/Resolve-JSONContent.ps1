@@ -2,7 +2,7 @@
 {
     <#
     .Synopsis
-        
+        Resolves JSONPaths to a location within a string.
     .Description
         Resolves the location of content within a JSON file
     .Link
