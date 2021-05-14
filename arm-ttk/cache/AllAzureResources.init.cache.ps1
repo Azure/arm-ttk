@@ -23,7 +23,7 @@ $allResources =foreach ($provider in $providers) {
 }
 
 $allResourcesByType = $allResources | Group-Object ResourceType -AsHashTable
-$sortedResources = [Oredered]@{}
+$sortedResources = [Ordered]@{}
 foreach ($ar in @($allResourcesByType.GetEnumerator() | Sort-Object Key -Descending)) {
     $sortedResources[$ar.Key] = $ar.Value
 }
