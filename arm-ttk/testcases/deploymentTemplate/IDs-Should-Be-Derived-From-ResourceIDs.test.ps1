@@ -69,6 +69,10 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         continue
     }
 
+    # Skip this check if the property is within an Azure Dashboard
+    if ( $id.ParentObject.type -match '^Microsoft\.Portal\/dashboards$' ) {
+        continue
+    }
 
     # skip resourceId check within tags #274
     if ( $id.JSONPath -match "\.(tags)\.($myIdFieldName)" ) { 
