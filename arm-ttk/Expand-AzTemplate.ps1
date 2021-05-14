@@ -283,7 +283,7 @@
                 foreach ($it in $innerTemplates) {
                     $foundInnerTemplate = $it | Resolve-JSONContent -JsonText $TemplateText
                     $TemplateText = $TemplateText.Remove($foundInnerTemplate.Index, $foundInnerTemplate.Length)
-                    $templateText = $templateText.Insert($foundInnerTemplate.Index, '"template": "innerTemplate"')
+                    $templateText = $templateText.Insert($foundInnerTemplate.Index, '"template": {}')
                 }
 
                 $TemplateObject = $TemplateText | ConvertFrom-Json
