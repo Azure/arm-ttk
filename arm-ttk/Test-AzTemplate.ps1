@@ -207,6 +207,30 @@ Each test script has access to a set of well-known variables:
                 } else {
                     . $myModule $TheTest @testInput
                 }
+
+                if ($TestParameters.ContainsKey('InnerTemplates')) { # If an ARM template has inner templates
+                    foreach ($innerTemplate in $testParameters.InnerTemplates) {
+                        $usedParameters = $false
+                        # Map TemplateText to the inner template text by converting to JSON (if the test command uses -TemplateText)
+                        if ($testCommandParameters.ContainsKey("TemplateText")) { 
+                            $templateObject = $testInput['TemplateText']   = $innerTemplate.template | ConvertTo-Json
+                            $usedParameters = $true
+                        }
+                        # And Map TemplateObject to the converted json (if the test command uses -TemplateObject)
+                        if ($testCommandParameters.ContainsKey("TemplateObject")) { 
+                            $templateObject = $testInput['TemplateObject'] = $innerTemplate.template
+                            $usedParameters = $true
+                        }
+
+                        if ($usedParameters) {
+                            if (-not $Pester) {
+                                . $myModule $TheTest @testInput 2>&1 3>&1
+                            } else {
+                                . $myModule $TheTest @testInput
+                            }           
+                        }
+                    }
+                }
             } while ($false)
         }
 
@@ -443,6 +467,7 @@ Each test script has access to a set of well-known variables:
             foreach ($kv in $expandedTemplate.GetEnumerator()) {
                 $ExecutionContext.SessionState.PSVariable.Set($kv.Key, $kv.Value)
             }
+            
             $wellKnownVariables = @($expandedTemplate.Keys) + $cacheItemNames
 
             if ($testParameter) {
