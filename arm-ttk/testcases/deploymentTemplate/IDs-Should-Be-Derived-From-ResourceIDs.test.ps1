@@ -53,7 +53,10 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     if ($exceptions -contains $myIdFieldName) { # We're checking resource ids, not tenant IDs
         continue
     }
-    if ($id.JsonPath -match '^(parameters|outputs)') {
+    if ($id.JsonPath -match '^(parameters|outputs)') { # Skip anything in parameters or outputs
+        continue
+    }
+    if ($id.JsonPath -match '\.metadata\.') { # Skip anything beneath metadata
         continue
     }
 
