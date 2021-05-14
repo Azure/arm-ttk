@@ -22,9 +22,8 @@
                             "message": "194px",
                             "customDimensions": "351px",
                             "Type": "172px",
-                            "Details": "522px"
-                    // should not fail on cycleId 
-                            "cycleId": "76px",
+                            "Details": "522px",
+                            "cycleId": "76px",  // should not fail on cycleId 
                             "totalStates": "96px"
                         },
                         "Query": " *removed beginning part of Query for brevity* | Project timestamp, message, cycleId, totalStates, processed\n",
