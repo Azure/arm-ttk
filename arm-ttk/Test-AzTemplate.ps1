@@ -208,7 +208,7 @@ Each test script has access to a set of well-known variables:
                     . $myModule $TheTest @testInput
                 }
 
-                if ($TestParameters.ContainsKey('InnerTemplates')) { # If an ARM template has inner templates
+                if ($TestParameters.InnerTemplates.Count) { # If an ARM template has inner templates
                     foreach ($innerTemplate in $testParameters.InnerTemplates) {
                         $usedParameters = $false
                         # Map TemplateText to the inner template text by converting to JSON (if the test command uses -TemplateText)
@@ -281,6 +281,7 @@ Each test script has access to a set of well-known variables:
                         Name = $dq
                         Timespan = $testTook
                         File = $fileInfo
+                        TestInput = @{} + $TestInput
                     })
                 } else {
                     it $dq {
@@ -346,9 +347,18 @@ Each test script has access to a set of well-known variables:
                             'mainTemplate.json', 'azureDeploy.json', 'prereq.azuredeploy.json' -contains $fileInfo.Name
                         }
                         
-                    $templateFileName = $fileInfo.Name
+                    $templateFileName = $fileInfo.Name                    
                     $TemplateObject = $fileInfo.Object
                     $TemplateText = $fileInfo.Text
+                    if ($InnerTemplates.Count) {
+                        foreach ($it in $innerTemplates) {
+                            $foundInnerTemplate = $it | Resolve-JSONContent -JsonText $TemplateText
+                            $TemplateText = $TemplateText.Remove($foundInnerTemplate.Index, $foundInnerTemplate.Length)
+                            $templateText = $templateText.Insert($foundInnerTemplate.Index, '"template": {}')
+                        }
+
+                        $TemplateObject = $TemplateText | ConvertFrom-Json
+                    }
                 }
                 foreach ($groupName in $matchingGroups) {
                     $testInput = @{}
