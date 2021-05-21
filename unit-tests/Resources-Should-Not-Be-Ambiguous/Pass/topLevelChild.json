@@ -1,0 +1,14 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "variables": {
+    "resourceReference": "[resourceId('otherResourceGroup', 'Microsoft.Network/virtualMachines/extensions', 'vm', 'ext')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "vm/ext"
+    }
+  ],
+  "outputs": {}
+}

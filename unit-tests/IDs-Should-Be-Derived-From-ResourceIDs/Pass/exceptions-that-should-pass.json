@@ -1,36 +1,91 @@
 ﻿{
 	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"storageAccountName": {
+			"type": "string",
+			"defaultValue": "name"
+		},
+		"storageResourceGroupName": {
+			"type": "string",
+			"defaultValue": "name"
+		},
+		"appGatewayBackendPool": {
+			"type": "string",
+			"defaultValue": "name"
+		}
+	},
+	"variables": {
+		"id": "[guid('ok')]"
+	},
 	"resources": [
 		{
-			"id": "[resourceId('Microsoft.Storage/storageAccounts', 'name')]", //TODO this throws off the error message since we pull the parent's name (in this case 'variables')
-			"pass1": {
-				"id": "[ resourceId ( 'Microsoft.Network/applicationGateways/httpListeners', 'appGW', 'appGatewayHttpListener')]"
-			},
-			"pass2": {
-				"id": "[parameters ('appGatewayBackendPool')]"
-			},
-			"pass3": {
-				"id": "[variables('id')]"
-			},
-			"pass4": {
-				"id": "[subscriptionResourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
-			},
-			"pass5": {
-				"id": "[ tenantResourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
-			},
-			"pass6": {
-				"id": "[extensionResourceId( resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), 'Microsoft.Resources/type', 'resourceName')]"
-			},
-			"pass7": {
-				"id": "[resourceId(parameters('storageResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
-			},
-			"pass8": {
-				"id": "[if(bool('true'), resourceId(parameters('storageResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), json('null'))]"
-			},
-			"keyVaultSecretId": "[concat()]", // this is actually a uri Microsoft.Network/applicationGateways sslCertificates - created with reference() and concat /secrets/secretname
-			"storageAccountSubscriptionId": "[subscription().subscriptionId]", // Microsoft.Sql/servers/auditSettings asks for a subscriptionId
-			"roleAssignmentGuid": "[ guid ('some seed')]", // variables that are used for roleAssignment GUIDs (or any other guid) ends in "id" and should be exempted if the function is used
-			"policyDefinitionReferenceId": "some value" // Microsoft.Authorization/policySetDefinitions allows policyDefinitionReferenceId to be "A unique id (within the policy set definition) for this policy definition reference."
+			"name": "somepropertyname",
+			"type": "Microsoft.CustomProviders/resourceProviders",
+			"apiVersion": "2018-09-01-preview",
+			"properties": {
+				"id": "[resourceId('Microsoft.Storage/storageAccounts', 'name')]", //TODO this throws off the error message since we pull the parent's name (in this case 'variables')
+				"pass1": {
+					"id": "[ resourceId ( 'Microsoft.Network/applicationGateways/httpListeners', 'appGW', 'appGatewayHttpListener')]"
+				},
+				"pass2": {
+					"id": "[parameters ('appGatewayBackendPool')]"
+				},
+				"pass3": {
+					"id": "[variables('id')]"
+				},
+				"pass4": {
+					"id": "[subscriptionResourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+				},
+				"pass5": {
+					"id": "[ tenantResourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+				},
+				"pass6": {
+					"id": "[extensionResourceId( resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), 'Microsoft.Resources/type', 'resourceName')]"
+				},
+				"pass7": {
+					"id": "[resourceId(parameters('storageResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+				},
+				"pass8": {
+					"id": "[if(bool('true'), resourceId(parameters('storageResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), json('null'))]"
+				},
+				"exceptionList": {
+					"appId": "some data value", // Microsoft.Insights
+					"clientId": "some data value", // Microsoft.BotService - common var name
+					"DataTypeId": "some data value", // Microsoft.OperationalInsights/workspaces/dataSources
+					"defaultMenuItemId": "some data value", // Microsoft.Portal/dashboards - it's a messy resource
+					"keyVaultSecretId": "some data value", // Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
+					"keyId": "some data value", // Microsoft.Cdn/profiles urlSigningKeys
+					"objectId": "some data value", // Common Property name
+					"menuId": "some data value", // Microsoft.Portal/dashboards
+					"policyDefinitionReferenceId": "some data value", // Microsft.Authorization/policySetDefinition unique Id used when setting up a PolicyDefinitionReference
+					"servicePrincipalClientId": "some data value", // common var name
+					"StartingDeviceID": "some data value", // SQLIaasVMExtension > settings/ServerConfigurationsManagementSettings/SQLStorageUpdateSettings
+					"subscriptionId": "some data value", // Microsoft.Cdn/profiles urlSigningKeys
+					"SyntheticMonitorId": "some data value", // Microsoft.Insights/webtests
+					"targetProtectionContainerId": "some data value", // Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings (yes really)
+					"targetWorkerSizeId": "some data value", // Microsoft.Web/serverFarms (later apiVersions)
+					"tenantId": "some data value", // Common Property name
+					"timezoneId": "some data value", // Microsoft.SQL/managedInstances
+					"vlanId": "some data value", // Unique Id to establish peering when setting up an ExpressRoute circuit
+					"workerSizeId": "some data value" // Microsoft.Web/serverFarms (older apiVersions)
+				},
+
+				"tags": {
+					"intagId": "some data" //ignore property if it's parent is tags  #274    
+				}
+			}
+		},
+		{   // this entire resource should be ignored - the properties are poorly named
+			"name": "service/backend",
+			"type": "Microsoft.ApiManagement/service/backends",
+			"apiVersion": "2020-06-01-preview",
+			"properties": {
+				"description": "desc",
+				"resourceId": "[concat('https://management.azure.com', resourceId('Microsoft.Web/sites', 'web'))]",
+				"url": "[concat('https://', reference(resourceId('Microsoft.Web/sites', 'web'), '2020-09-01').defaultHostName)]",
+				"protocol": "http"
+			}
 		}
 	]
 }

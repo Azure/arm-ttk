@@ -1,0 +1,109 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "location": {
+        "type": "string"
+      }
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2019-10-01",
+        "name": "vmDeploy",
+        "properties": {
+          "expressionEvaluationOptions": {
+            "scope": "inner"
+          },
+          "mode": "Incremental",
+          "parameters": {
+            "adminUsername": {
+              "value": "sneaky" // this should fail since it is not an expresssion
+            },
+            "location": {
+              "value": "[parameters('location')]"
+            }
+          },
+          "template": {
+            "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+              "adminUsername": { // this one should be skipped entirely
+                "type": "string"
+              },
+              "location": {
+                "type": "string"
+              },
+              "now": {
+                "type": "string",
+                "defaultValue": "[utcNow()]"
+              },
+              "nicId": {
+                "type": "string",
+                "defaultValue": "stub to simplify repo"
+              },
+              "vmName": {
+                "type": "string",
+                "defaultValue": "myvm"
+              },
+              "vmSize": {
+                "type": "string",
+                "defaultValue": "Standard_B2ms"
+              }
+            },
+            "functions": [],
+            "variables": {
+              "adminPassword": "[format('{0}-X', uniqueString(resourceGroup().id, parameters('now')))]"
+            },
+            "resources": [
+              {
+                "type": "Microsoft.Compute/virtualMachines",
+                "apiVersion": "2020-06-01",
+                "name": "[parameters('vmName')]",
+                "location": "[parameters('location')]",
+                "properties": {
+                  "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                  },
+                  "networkProfile": {
+                    "networkInterfaces": [
+                      {
+                        "id": "[parameters('nicId')]"
+                      }
+                    ]
+                  },
+                  "osProfile": {
+                    "computerName": "[parameters('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[variables('adminPassword')]",
+                    "windowsConfiguration": {
+                      "provisionVMAgent": true,
+                      "enableAutomaticUpdates": true,
+                      "patchSettings": {
+                        "patchMode": "AutomaticByOS"
+                      }
+                    }
+                  },
+                  "storageProfile": {
+                    "imageReference": {
+                      "publisher": "MicrosoftWindowsServer",
+                      "offer": "WindowsServer",
+                      "sku": "2019-Datacenter",
+                      "version": "latest"
+                    },
+                    "osDisk": {
+                      "name": "[format('{0}-os', parameters('vmName'))]",
+                      "createOption": "FromImage",
+                      "managedDisk": {
+                        "storageAccountType": "StandardSSD_LRS"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }

@@ -29,33 +29,54 @@ foreach ($id in $ids) { # Then loop over each object with an ID
 
     # these properties are exempt, since they are not actually resourceIds
     $exceptions = @(
-        "tenantId",
-        "targetWorkerSizeId", # Microsoft.Web/serverFarms (later apiVersions)
-        "workerSizeId",       # Microsoft.Web/serverFarms (older apiVersions)
-        "keyVaultSecretId", # Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
-        "keyId", # Microsoft.Cdn/profiles urlSigningKeys
-        "subscriptionId", # Microsoft.Cdn/profiles urlSigningKeys
-        "StartingDeviceID", # SQLIaasVMExtension > settings/ServerConfigurationsManagementSettings/SQLStorageUpdateSettings
-        "servicePrincipalClientId", # common var name
-        "clientId", # Microsoft.BotService - common var name
-        "appId", # Microsoft.Insights
-        "tenantId", # Common Property name
-        "objectId", # Common Property name
-        "vlanId", # Unique Id to establish peering when setting up an ExpressRoute circuit
-        "SyntheticMonitorId", # Microsoft.Insights/webtests
+        "appId",                       # Microsoft.Insights
+        "clientId",                    # Microsoft.BotService - common var name
+        "DataTypeId",                  # Microsoft.OperationalInsights/workspaces/dataSources
+        "defaultMenuItemId",           # Microsoft.Portal/dashboards - it's a messy resource
+        "keyVaultSecretId",            # Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
+        "keyId",                       # Microsoft.Cdn/profiles urlSigningKeys
+        "objectId",                    # Common Property name
+        "menuId",                      # Microsoft.Portal/dashboards
         "policyDefinitionReferenceId", # Microsft.Authorization/policySetDefinition unique Id used when setting up a PolicyDefinitionReference
-        "timezoneId", # Microsoft.SQL/managedInstances
+        "servicePrincipalClientId",    # common var name
+        "StartingDeviceID",            # SQLIaasVMExtension > settings/ServerConfigurationsManagementSettings/SQLStorageUpdateSettings
+        "subscriptionId",              # Microsoft.Cdn/profiles urlSigningKeys
+        "SyntheticMonitorId",          # Microsoft.Insights/webtests
         "targetProtectionContainerId", # Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings (yes really)
-        "defaultMenuItemId", # Microsoft.Portal/dashboards - it's a messy resource
-        "menuId", # Microsoft.Portal/dashboards
-        "DataTypeId" # Microsoft.OperationalInsights/workspaces/dataSources
+        "targetWorkerSizeId",          # Microsoft.Web/serverFarms (later apiVersions)
+        "tenantId",                    # Common Property name
+        "timezoneId",                  # Microsoft.SQL/managedInstances
+        "vlanId",                      # Unique Id to establish peering when setting up an ExpressRoute circuit
+        "workerSizeId"                 # Microsoft.Web/serverFarms (older apiVersions)
     )
 
     if ($exceptions -contains $myIdFieldName) { # We're checking resource ids, not tenant IDs
         continue
     }
-    if ($id.JsonPath -match '^(parameters|outputs)') {
+    if ($id.JsonPath -match '^(parameters|outputs)') { # Skip anything in parameters or outputs
         continue
+    }
+    if ($id.JsonPath -match '\.metadata\.') { # Skip anything beneath metadata
+        continue
+    }
+
+    # Skip this check if the property is within a logic app
+    if ( $id.ParentObject.type -match '^microsoft\.logic/workflows$' ) {
+        continue
+    }
+
+    if ( $id.ParentObject.type -match '^microsoft\.ApiManagement/service/backends$' ) {
+        continue
+    }
+
+    # Skip this check if the property is within an Azure Dashboard
+    if ( $id.ParentObject.type -match '^Microsoft\.Portal\/dashboards$' ) {
+        continue
+    }
+
+    # skip resourceId check within tags #274
+    if ( $id.JSONPath -match "\.(tags)\.($myIdFieldName)" ) { 
+        continue 
     }
 
     if ($myId -isnot [string] -and ($myId -as [float] -eq $null)) {
@@ -67,11 +88,6 @@ foreach ($id in $ids) { # Then loop over each object with an ID
                 continue
             }
         }
-    }
-
-    # Skip this check if the property is within a logic app
-    if ( $id.ParentObject.type -imatch '^microsoft\.logic/workflows$' ) {
-        continue
     }
 
     # $myId = "$($id.id)".Trim() # Grab the actual ID,

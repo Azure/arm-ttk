@@ -1,4 +1,4 @@
-﻿<#
+<#
 .Synopsis
     Ensures that all adminUsernames are expressions
 .Description
@@ -15,15 +15,27 @@ param(
 
 if ("resources" -in $TemplateObject.PSobject.Properties.Name) {
     $adminUserNameRefsResources = $TemplateObject.resources |
-    Find-JsonContent -Key adminUsername  -Value * -Like |
-    Where-Object { -not $_.ParentObject[0].'$schema' } # unless they're on a top-level property.
+    Find-JsonContent -Key adminUsername  -Value * -Like 
 
     foreach ($ref in $adminUserNameRefsResources) {
         # Walk over each one
-        $trimmedUserName = "$($ref.adminUserName)".Trim()
+        # if the property is not a string, then it's likely a param value for a nested deployment, and we should skip it.
+        $a = $ref.adminUsername
+        if ($a -isnot [string]) { 
+            #check to see if this is a param value on a nested deployment - it will have a value property
+            if ($a.value -is [string]) {
+                $trimmedUserName = "$($a.value)".Trim()
+            }
+            else {
+                continue # since we don't know what object shape we're testing at this point (could be a param declaration on a nested deployment)
+            }
+        }
+        else {
+            $trimmedUserName = "$($a)".Trim()
+        }
         if ($trimmedUserName -notmatch '\[[^\]]+\]') {
             # If they aren't expressions
-            Write-Error -TargetObject $ref -Message "AdminUsername is not an expression" -ErrorId AdminUsername.Is.Literal # write an error
+            Write-Error -TargetObject $ref -Message "AdminUsername `"$trimmedUserName`" is not an expression" -ErrorId AdminUsername.Is.Literal # write an error
             continue # and move onto the next
         }
     }
@@ -31,15 +43,16 @@ if ("resources" -in $TemplateObject.PSobject.Properties.Name) {
 
 if ("variables" -in $TemplateObject.PSobject.Properties.Name) {
     $adminUserNameRefsVariables = $TemplateObject.variables |
-    Find-JsonContent -Key adminUsername  -Value * -Like |
-    Where-Object { -not $_.ParentObject[0].'$schema' } # unless they're on a top-level property.
+    Find-JsonContent -Key adminUsername  -Value * -Like
 
     foreach ($ref in $adminUserNameRefsVariables) {
         # Walk over each one
+        # if the property is not a string, then it's likely a param value for a nested deployment, and we should skip it.
+        if ($ref.adminUserName -isnot [string]) { continue }
         $trimmedUserName = "$($ref.adminUserName)".Trim()
         if ($trimmedUserName -notmatch '\[[^\]]+\]') {
             # If they aren't expressions
-            Write-Error -TargetObject $ref -Message "AdminUsername is not an expression" -ErrorId AdminUsername.Is.Literal # write an error
+            Write-Error -TargetObject $ref -Message "AdminUsername `"$trimmedUserName`" is variable which is not an expression" -ErrorId AdminUsername.Var.Is.Literal # write an error
             continue # and move onto the next
         }
     }

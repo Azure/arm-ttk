@@ -23,4 +23,8 @@ $allResources =foreach ($provider in $providers) {
 }
 
 $allResourcesByType = $allResources | Group-Object ResourceType -AsHashTable
-$allResourcesByType | ConvertTo-Json -Depth 100 | Set-Content $MyOutputFile 
+$sortedResources = [Ordered]@{}
+foreach ($ar in @($allResourcesByType.GetEnumerator() | Sort-Object Key -Descending)) {
+    $sortedResources[$ar.Key] = $ar.Value
+}
+$sortedResources | ConvertTo-Json -Depth 100 | Set-Content $MyOutputFile 

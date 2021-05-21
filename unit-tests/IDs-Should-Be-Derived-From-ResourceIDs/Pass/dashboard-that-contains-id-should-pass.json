@@ -1,0 +1,168 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "dashboardName": {
+            "defaultValue": "armttkDashboard",
+            "type": "String"
+        },
+        "appinsightName":{
+            "type": "string"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Portal/dashboards",
+            "apiVersion": "2020-09-01-preview",
+            "name": "[parameters('dashboardName')]",
+            "location": "westeurope",
+            "tags": {
+                "hidden-title": "arm-ttk dashboard"
+            },
+            "properties": {
+                "lenses": [
+                    {
+                        "order": 0,
+                        "parts": [
+                            {
+                                "position": {
+                                    "x": 0,
+                                    "y": 0,
+                                    "rowSpan": 4,
+                                    "colSpan": 10
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "resourceTypeMode",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "ComponentId",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "Scope",
+                                            "value": {
+                                                "resourceIds": [
+                                                    "[resourceId('microsoft.insights/components', parameters('appinsightName'))]"
+                                                ]
+                                            },
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "PartId",
+                                            "value": "45be4c00-bc15-4b77-9134-dc091d4cff32",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "Version",
+                                            "value": "2.0",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "TimeRange",
+                                            "value": "P1D",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "DashboardId",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "DraftRequestParameters",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "Query",
+                                            "value": "traces\n| order by timestamp\n| extend ProcessId = tostring(customDimensions[\"ProcessId\"])\n| extend EventName = tostring(customDimensions[\"EventName\"])\n| project message, appId, ProcessId, EventName\n\n",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "ControlType",
+                                            "value": "AnalyticsGrid",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "SpecificChart",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "PartTitle",
+                                            "value": "Analytics",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "PartSubTitle",
+                                            "value": "[parameters('appinsightName')]",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "Dimensions",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "LegendOptions",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "IsQueryContainTimeRange",
+                                            "value": false,
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+                                    "settings": {
+                                        "content": {
+                                            "GridColumnsWidth": {
+                                                "appId": "268px",
+                                                "message": "232px",
+                                                "ProcessId": "75px",
+                                                "EventName": "192px"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "metadata": {
+                    "model": {
+                        "timeRange": {
+                            "value": {
+                                "relative": {
+                                    "duration": 24,
+                                    "timeUnit": 1
+                                }
+                            },
+                            "type": "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
+                        },
+                        "filterLocale": {
+                            "value": "en-us"
+                        },
+                        "filters": {
+                            "value": {
+                                "MsPortalFx_TimeRange": {
+                                    "model": {
+                                        "format": "utc",
+                                        "granularity": "auto",
+                                        "relative": "24h"
+                                    },
+                                    "displayCache": {
+                                        "name": "UTC Time",
+                                        "value": "Past 24 hours"
+                                    },
+                                    "filteredPartIds": [
+                                        "StartboardPart-LogsDashboardPart-a92d5c95-132e-4e72-be32-cfd64bdf9124"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
