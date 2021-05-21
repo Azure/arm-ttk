@@ -62,7 +62,9 @@ if ($emptyItems) {
                 continue
             }
             $lineNumber = @($lineBreaks | ? { $_.Index -lt $emptyItem.Index }).Count + 1
-            Write-Error "Empty property: $emptyItem found on line: $lineNumber" -TargetObject $emptyItem
+            $targetObject = $emptyItem.PsObject.Copy()
+            $targetObject | Add-Member -MemberType NoteProperty -Name lineNumber -Value $lineNumber
+            Write-Error "Empty property: $emptyItem found on line: $lineNumber" -TargetObject $targetObject
         } 
     }
 }
