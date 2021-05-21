@@ -19,6 +19,9 @@ jobs:
             Update-TTKCache
             $updatedFiles = 0
             $branchName = "CacheUpdate-$([DateTime]::Now.ToString("yyyy-MM-dd"))"
+            git config --global user.email Azure@microsoft.com
+            git config --global user.name  Azure
+
             git checkout -b $branchName
             Get-ChildItem -Recurse -Filter *.cache.json |
                 ForEach-Object {
@@ -30,8 +33,6 @@ jobs:
                     }
                 }
             if ($updatedFiles) {
-                git config --global user.email Azure@microsoft.com
-                git config --global user.name  Azure
                 $gitPushed =  git push --set-upstream origin $branchName 2>&1
                 "Git Push Output: $($gitPushed  | Out-String)"
                 $LASTEXITCODE = 0
