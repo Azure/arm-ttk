@@ -146,7 +146,7 @@
                 'MainTemplatePath', 'MainTemplateObject', 'MainTemplateText',
                 'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 
                 'MainTemplateOutputs', 'TemplateMetadata',
-                'InnerTemplates'
+                'InnerTemplates', 'ParentTemplateText', 'ParentTemplateObject'
 
             foreach ($_ in $WellKnownVariables) {
                 $ExecutionContext.SessionState.PSVariable.Set($_, $null)
@@ -166,6 +166,10 @@
             $TemplateText = [IO.File]::ReadAllText($resolvedTemplatePath)
             #*$TemplateObject (the template text, converted from JSON)
             $TemplateObject = Import-Json -FilePath $TemplateFullPath
+            #*$ParentTemplateText (the parent or original template (will be the same if no nested deployments is found))
+            $ParentTemplateText = [IO.File]::ReadAllText($resolvedTemplatePath)
+            #*$ParentTemplateObject (the parent or original template (will be the same if no nested deployments is found))
+            $ParentTemplateObject = Import-Json -FilePath $TemplateFullPath
 
             if($TemplateObject.metadata -ne $null){
                 $TemplateMetadata = $($TemplateObject.metadata)
