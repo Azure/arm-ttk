@@ -35,23 +35,32 @@ $foundReferences = $TemplateText |
     ?<ARM_Template_Function> -FunctionName 'reference|list\w{1,}'
 
 foreach ($foundRef in $foundReferences) {
+    
     $hasApiVersion = $foundRef.Value | ?<ARM_API_Version> -Extract # Find the api version
     if (-not $hasApiVersion) { continue } # if we don't have one, continue.
     $apiVersion = $hasApiVersion.0 
     $hasResourceId = $foundRef.Value | ?<ARM_Template_Function> -FunctionName resourceId
-    if (-not $hasResourceId) { continue }
-
-    
-    $parameterSegments= @($hasResourceId.Groups["Parameters"].value -split '[(),]' -ne '' -replace "^\s{0,}'" -replace "'\s{0,}$")
+    $hasVariable   = $foundRef.value | ?<ARM_Variable> | Select-Object -First 1
     $potentialResourceType = ''
-    $resourceTypeStarted = $false
-    $potentialResourceType = @(foreach ($seg in $parameterSegments) {
-        if ($seg -like '*/*') {
-            $seg
-        }
-    }) -join '/'
-    
-     
+
+    if ($hasResourceId) {       
+        $parameterSegments= @($hasResourceId.Groups["Parameters"].value -split '[(),]' -ne '' -replace "^\s{0,}'" -replace "'\s{0,}$")
+        $potentialResourceType = ''
+        $resourceTypeStarted = $false
+        $potentialResourceType = @(foreach ($seg in $parameterSegments) {
+            if ($seg -like '*/*') {
+                $seg
+            }
+        }) -join '/'
+    } elseif ($hasVariable) {
+        $foundResource = Find-JsonContent -Key name -Value "*$($hasVariable.Value)*" -InputObject $TemplateObject -Like |
+            Where-Object JSONPath -Like *Resources* | 
+            Select-Object -First 1
+
+        $typeList = @(@($foundResource) + @($foundResource.ParentObject) | Where-Object Type | Select-Object -ExpandProperty Type)
+        [Array]::Reverse($typeList)
+        $potentialResourceType = $typeList -join '/'
+    }
     
     if (-not $potentialResourceType) { continue }
     
