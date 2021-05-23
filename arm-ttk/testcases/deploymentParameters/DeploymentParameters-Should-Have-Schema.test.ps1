@@ -13,7 +13,10 @@ param(
 $templateSchema = $ParameterObject.'$schema'
 
 if (-not $templateSchema) {
-    Write-Error 'DeploymentParameters Missing .$schema property' -ErrorId Parameters.Missing.Schema
+    # Skippig error is content version is missing, i.e. '$schemaless'
+    if ($ParameterObject.contentVersion ) { 
+        Write-Error -ErrorId Parameters.Missing.Schema -Message 'DeploymentParameters Missing .$schema property' 
+    }
     return
 }
 

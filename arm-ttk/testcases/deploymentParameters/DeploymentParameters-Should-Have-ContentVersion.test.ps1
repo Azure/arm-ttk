@@ -13,17 +13,20 @@ param(
 )
 
 if (-not $ParameterObject.contentVersion) {
-    Write-Error -ErrorId Parameters.Missing.ContentVersion -Message "contentVersion property must exist in the template"
-    continue
+    # Skippig error is schema is missing, i.e. '$schemaless'
+    if ($ParameterObject.'$schema') { 
+        Write-Error -ErrorId Parameters.Missing.ContentVersion -Message "contentVersion property must exist in the template"
+    }
+    return
 } 
 
 if ($ParameterObject.contentVersion -isnot [string]) {
     Write-Error -ErrorId ContentVersion.Not.String -Message "contentVersion must be string" -TargetObject $TemplateObject.contentVersion 
-    continue
+    return
 } 
 
 if ($ParameterObject.contentVersion -notmatch '^(\d+\\.\d+\\.\d+\\.\d+)$') {
     Write-Warning -Message "Recommended that the 'contentVersion' should be a version string 
     Like:  1.0.0.0  -> but found: $($TemplateObject.contentVersion)"
-    continue
+    return
 } 

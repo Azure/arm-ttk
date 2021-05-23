@@ -11,6 +11,11 @@ param(
   $ParameterObject
 )
 
+# Skipping this when using key/value format, i.e. '$schemaless'
+if (-not $ParameterObject.'$schema') {
+  return
+}
+
 Write-Verbose $ParameterObject.parameters
 foreach ($p in $ParameterObject.parameters.psobject.properties) {
     

@@ -293,12 +293,12 @@ Each test script has access to a set of well-known variables:
                                 if ($fn -match $key) { # check to see if it's name matches the key
                                     $key; continue # (this handles CreateUIDefinition.json, even if no schema is present).
                                 }
-                                if ($key -eq 'DeploymentParameters' -and # Otherwise, if we're checking the deploymentTemplate
-                                   $fn -like '*.parameters.json' -contains $fn) { # and the file name is something we _know_ will be an ARM template
+                                if ($key -eq 'DeploymentParameters' -and # checking the deploymentParamters and file pattern
+                                   $fn -like '*.parameters') { # and the file name is something we _know_ will be an ARM parameters template
                                    $key; continue # then run the deployment tests regardless of schema.
                                 }
                                 if ($key -eq 'DeploymentTemplate' -and # Otherwise, if we're checking the deploymentTemplate
-                                    'maintemplate.json', 'azuredeploy.json', 'prereq.azuredeploy.json' -contains $fn) { # and the file name is something we _know_ will be an ARM template
+                                    'maintemplate', 'azuredeploy', 'prereq.azuredeploy' -contains $fn) { # and the file name is something we _know_ will be an ARM template
                                     $key; continue # then run the deployment tests regardless of schema.
                                 }
                             }
@@ -314,8 +314,8 @@ Each test script has access to a set of well-known variables:
                 }
 
                 if (-not $matchingGroups) { continue }
-                
-                if ($fileInfo.Schema -like '*deploymentParameters*') {
+
+                if ($fileInfo.Schema -like '*deploymentParameters*' -or $fileInfo.Name -like '*.parameters.json') { #  
                     $isMainTemplateParameter = 'maintemplate.parameters.json', 'azuredeploy.parameters.json', 'prereq.azuredeploy.parameters.json' -contains $fileInfo.Name
                     $parameterFileName = $fileInfo.Name
                     $parameterObject = $fileInfo.Object
