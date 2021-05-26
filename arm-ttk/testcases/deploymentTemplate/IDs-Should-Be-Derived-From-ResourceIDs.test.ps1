@@ -38,6 +38,7 @@ foreach ($id in $ids) {
         "keyId",                       # Microsoft.Cdn/profiles urlSigningKeys
         "objectId",                    # Common Property name
         "menuId",                      # Microsoft.Portal/dashboards
+        "nodeAgentSkuId",              # Microsoft.Batch/batchAccounts/pools
         "policyDefinitionReferenceId", # Microsft.Authorization/policySetDefinition unique Id used when setting up a PolicyDefinitionReference
         "servicePrincipalClientId",    # common var name
         "StartingDeviceID",            # SQLIaasVMExtension > settings/ServerConfigurationsManagementSettings/SQLStorageUpdateSettings
