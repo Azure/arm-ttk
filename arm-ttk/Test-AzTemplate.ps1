@@ -226,7 +226,8 @@ Each test script has access to a set of well-known variables:
 
                         if ($usedParameters) {
                             if (-not $Pester) {
-                                . $myModule $TheTest @testInput 2>&1 3>&1 | 
+                                . $myModule $TheTest @testInput 2>&1 3>&1 | # Run the test, and add data about the inner template context it was in.
+                                    Add-Member NoteProperty InnerTemplateName $innerTemplate.ParentObject[0].Name -Force -PassThru |
                                     Add-Member NoteProperty InnerTemplateStart $foundInnerTemplate.Index -Force -PassThru |
                                     Add-Member NoteProperty InnerTemplateLength $foundInnerTemplate.Length -Force -PassThru
                             } else {
@@ -276,8 +277,10 @@ Each test script has access to a set of well-known variables:
                                         $parentTemplateText, $testCaseOutput.InnerTemplateStart + $testCaseOutput.InnerTemplateLength
                                     ).Count
 
-                            " InnerTemplate [ Lines $InnerTemplateStartLine - $InnerTemplateEndLine ]"
+                            "NestedTemplate $($testCaseOutput.InnerTemplateName) [ Lines $InnerTemplateStartLine - $InnerTemplateEndLine ]"
                         } else {''}
+
+                    $displayGroup = if ($innerGroup) { $innerGroup } else { $GroupName } 
 
 
                     $null= foreach ($testOut in $testCaseOutput) {                        
@@ -326,7 +329,7 @@ Each test script has access to a set of well-known variables:
                         Output = $testOutput
                         AllOutput = $testCaseOutput
                         Passed = $testErrors.Count -lt 1
-                        Group = $GroupName + $innerGroup
+                        Group = $displayGroup
                         Location = $testIssueLocations
                         Name = $dq
                         Timespan = $testTook
