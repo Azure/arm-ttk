@@ -1,0 +1,13 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "parameters":{
+      "someKeyVaultKey": {
+        "reference": {
+          "keyVault": {
+            "id": "/not/the/correct/id/pattern"
+          },
+          "secretName": "value1"
+        }
+      }
+    }
+}
