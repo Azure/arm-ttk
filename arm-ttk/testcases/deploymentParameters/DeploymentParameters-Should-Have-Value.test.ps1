@@ -3,6 +3,10 @@
     Ensures that parameters have a value
 .Description
     Ensures that all parameters have a property 'value'
+.link
+    https://github.com/toddkitta/azure-content/blob/master/articles/guidance/guidance-naming-conventions.md
+.link
+    https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules#microsoftkeyvault
 #>
 param(
   # The parameter Object
@@ -32,7 +36,8 @@ foreach ($p in $ParameterObject.parameters.psobject.properties) {
   # just checking if the property is there might result in false negative, for example if the property contains:  $null, 0, False, empty string
   if ( $p.Value.PsObject.Properties["value"]){     
     if($p.Value.value -imatch '^\s?\[.*\]\s?$'){
-      Write-Error -ErrorId Parameters.Parameter.CannotBeReference -Message "'$($p.Name)'.value should cannot be a reference" -TargetObject $p.Value.value
+      # TODO: if we add a blacklist of ARM expressions, we can flip this to an error - otherwise something like "[key()]" is a valid parameter and won't be evaulated by ARM
+      Write-Warning -Message "'$($p.Name)'.value will not be evaluated as an expression" -TargetObject $p.Value.value
     }
     continue
   }
