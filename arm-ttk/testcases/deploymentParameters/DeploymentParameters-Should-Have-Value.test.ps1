@@ -16,7 +16,6 @@ if (-not $ParameterObject.'$schema') {
   return
 }
 
-Write-Verbose $ParameterObject.parameters
 foreach ($p in $ParameterObject.parameters.psobject.properties) {
     
   # If the parameter name starts with two underscores,
