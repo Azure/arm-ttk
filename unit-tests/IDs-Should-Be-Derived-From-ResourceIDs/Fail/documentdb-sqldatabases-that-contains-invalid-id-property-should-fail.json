@@ -15,7 +15,7 @@
                 "resource": {
                     "id": "dbName"
                 },
-                "id": "this is is not excluded from verification"
+                "id": "this is not excluded from verification"
             }
         }
     ],
