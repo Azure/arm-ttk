@@ -24,7 +24,7 @@ jobs:
             git config --global user.name  Azure
 
             git checkout -b $branchName
-            git pull Azure master
+            git pull origin master
             
             Get-ChildItem -Recurse -Filter *.cache.json |
                 ForEach-Object {
