@@ -1,5 +1,5 @@
 #TODO - don't think this cache is ever used
-exist
+exit
 
 $MyFile= $MyInvocation.MyCommand.ScriptBlock.File  
 $myName = $MyFile | Split-Path -Leaf 
