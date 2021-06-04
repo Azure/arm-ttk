@@ -7,6 +7,22 @@
         Resolves the location of content within a JSON file
     .Link
         Find-JSONContent
+    .Example
+        Resolve-JSONContent -JSONPath 'a.b' -JSONText '{
+            a: {
+                b: {
+                    c: [0,1,2]
+                }
+            }
+        }'
+    .Example
+        Resolve-JSONContent -JSONPath 'a.b.c[1]' -JSONText '{
+            a: {
+                b: {
+                    c: [0,1,2]
+                }
+            }
+        }'
     #>
     param(
     # The Path to an instance within JSON
@@ -196,18 +212,38 @@
 
         if (-not $cursor) { return }
         
-        if ($propMatch) { # If our last part of the path was a property
-            [PSCustomObject]@{
+        if ($propMatch) { # If our last part of the path was a property        
+            [PSCustomObject][Ordered]@{
                 JSONPath = $JSONPath
+                JSONText = $JSONText
                 Index    = $propMatch.Groups["Name"].Index - 1 # Subtract one for initial quote
                 Length   = ($propMatch.Groups["JSON_Value"].Index + $propMatch.Groups["JSON_Value"].Length)  - 
                     $propMatch.Groups["Name"].Index + 1  # Add one for initial quote
+                Line     = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Matches(
+                                $JSONText, $propMatch.Groups["Name"].Index - 1
+                           ).Count
+                Column   = $propMatch.Groups["Name"].Index - 1 + $(
+                                $m = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Match(
+                                    $JSONText, $propMatch.Groups["Name"].Index - 1)
+                                $m.Index + $m.Length
+                            ) + 1
+                PSTypeName = 'JSON.Content.Location'
             }
-        } else {
-            [PSCustomObject]@{
+        } elseif ($listMatch) {
+            [PSCustomObject][Ordered]@{
+                PSTypeName = 'JSON.Content.Location'
                 JSONPath = $JSONPath
-                Index    = $propMatch.Groups["ListItem"].Index
-                Length   = $propMatch.Groups["ListItem"].Length
+                JSONText = $JSONText
+                Index    = $listMatch.Index
+                Length   = $listMatch.Length
+                Line     = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Matches(
+                                $JSONText, $listMatch.Index
+                           ).Count
+                Column   = $listMatch.Groups["ListItem"].Index + $(
+                                $m = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Match(
+                                    $JSONText, $listMatch.Index)
+                                $m.Index + $m.Length
+                            ) + 1
             }
             
         }
