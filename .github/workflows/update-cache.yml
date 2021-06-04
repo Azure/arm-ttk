@@ -38,9 +38,23 @@ jobs:
             if ($updatedFiles) {
                 $gitPushed =  git push --set-upstream origin $branchName 2>&1
                 "Git Push Output: $($gitPushed  | Out-String)"
-                
-                curl -X POST -H "Accept: application/vnd.github.v3+json" -H 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/Azure/arm-ttk/pulls -d '{"head":"$branchName","base":"master"}'
+              
+                 $d = @{
+                   head = $branchName
+                   base = "master"
+                 }
+                 $params = @{
+                   Uri = 'https://api.github.com/repos/Azure/arm-ttk/pulls';
+                   Method = 'POST';
+                   Headers = @{
+                     Accept = "application/vnd.github.v3+json"
+                     Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}"
+                   }
+                  Body = (ConvertTo-Json $d -Compress)
+                }
 
+                Invoke-RestMethod @params
+                
                 $LASTEXITCODE = 0
                 exit 0
             }
