@@ -1,0 +1,26 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "someKey" : {
+        "value" : "some data"
+      },
+      "someObject" : {
+        "value" : {}
+      },
+      "someBool" : {
+        "value" : true
+      },
+      "someInt" : {
+        "value" : 1
+      },
+      "someKeyVaultReference": {
+        "reference": {
+          "keyVault": {
+            "id": "/subscriptions/00000000-abcd-ef12-ABCD-EF3456789000/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/myvault"
+          },
+          "secretName": "ExamplePassword"
+        }  
+      }
+    }
+}

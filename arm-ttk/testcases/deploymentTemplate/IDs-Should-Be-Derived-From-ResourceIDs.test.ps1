@@ -9,9 +9,9 @@
     .\IDs-Should-Be-Derived-From-ResourceIDs.test.ps1 -TemplateObject (Get-Content ..\..\..\unit-tests\IDs-Should-Be-Derived-From-ResourceIDs.json -Raw | ConvertFrom-Json)
 #>
 param(
-# The template object (the contents of azureDeploy.json, converted from JSON)
-[Parameter(Mandatory=$true,Position=0)]
-$TemplateObject
+    # The template object (the contents of azureDeploy.json, converted from JSON)
+    [Parameter(Mandatory = $true, Position = 0)]
+    $TemplateObject
 )
 
 # First, find all objects with an ID property in the MainTemplate.
@@ -23,7 +23,8 @@ $ids = $TemplateObject.resources | Find-JsonContent -Key *id -Like
 # If the id points to an object, we can skip, unless:
 # the object contains a single property Value, which will will treat as the ID
 
-foreach ($id in $ids) { # Then loop over each object with an ID
+foreach ($id in $ids) {
+    # Then loop over each object with an ID
     $myIdFieldName = $id.PropertyName
     $myId = $id.$myIdFieldName
 
@@ -37,6 +38,7 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         "keyId",                       # Microsoft.Cdn/profiles urlSigningKeys
         "objectId",                    # Common Property name
         "menuId",                      # Microsoft.Portal/dashboards
+        "nodeAgentSkuId",              # Microsoft.Batch/batchAccounts/pools
         "policyDefinitionReferenceId", # Microsft.Authorization/policySetDefinition unique Id used when setting up a PolicyDefinitionReference
         "servicePrincipalClientId",    # common var name
         "StartingDeviceID",            # SQLIaasVMExtension > settings/ServerConfigurationsManagementSettings/SQLStorageUpdateSettings
@@ -50,10 +52,16 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         "workerSizeId"                 # Microsoft.Web/serverFarms (older apiVersions)
     )
 
-    if ($exceptions -contains $myIdFieldName) { # We're checking resource ids, not tenant IDs
+    if ($exceptions -contains $myIdFieldName) {
+        # We're checking resource ids, not tenant IDs
         continue
     }
     if ($id.JsonPath -match '^(parameters|outputs)') {
+        # Skip anything in parameters or outputs
+        continue
+    }
+    if ($id.JsonPath -match '\.metadata\.') {
+        # Skip anything beneath metadata
         continue
     }
 
@@ -66,6 +74,21 @@ foreach ($id in $ids) { # Then loop over each object with an ID
         continue
     }
 
+    # Skip this check if the property is within an Azure Dashboard
+    if ( $id.ParentObject.type -match '^Microsoft\.Portal\/dashboards$' ) {
+        continue
+    }
+
+    # Skip this check if the property is within an Microsoft.DocumentDb/databaseAccounts/mongodbDatabases/collections
+    # also skip for "other collections" on docDB
+    if ( $id.ParentObject.type -match '^Microsoft\.DocumentDb/databaseAccounts/\w{0,}/collections$' ) {
+        continue
+    }
+
+    # Skip this check if id is inside resource property and type is Microsoft.DocumentDB/databaseAccounts/sqlDatabases
+    if ( $id.ParentObject.type -match '^Microsoft\.DocumentDB/databaseAccounts/sqlDatabases$' -and $id.JsonPath -match '\.(resource)\.' ) {
+        continue
+    }
 
     # skip resourceId check within tags #274
     if ( $id.JSONPath -match "\.(tags)\.($myIdFieldName)" ) { 
@@ -75,7 +98,8 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     if ($myId -isnot [string] -and ($myId -as [float] -eq $null)) {
         if (-not $myId.Value) {
             continue
-        } else {
+        }
+        else {
             $myId = $myId.Value
             if ($myId -isnot [string]) {
                 continue
@@ -116,10 +140,10 @@ foreach ($id in $ids) { # Then loop over each object with an ID
     #
     $exprMatch = "\s{0,}\[\s{0,}($($allowedExpressions -join '|' ))\s{0,}\(\s{0,}"
 
-    if ($expandedId -is [string] -and ` #if it happens to be an object property, skip it
-        $expandedId -notmatch $exprMatch  ){
-            Write-Error "Property: `"$($id.propertyName)`" must use one of the following expressions for an resourceId property:
+    #if it happens to be an object property, skip it
+    if ($expandedId -is [string] -and $expandedId -notmatch $exprMatch) {
+        Write-Error "Property: `"$($id.propertyName)`" must use one of the following expressions for an resourceId property:
             $($allowedExpressions -join ',')" `
-             -TargetObject $id -ErrorId ResourceId.Should.Contain.Proper.Expression
+            -TargetObject $id -ErrorId ResourceId.Should.Contain.Proper.Expression
     }
 }

@@ -1,0 +1,18 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "functions": [],
+    "variables": {
+        "sqlServerName": "testSqlServer"
+    },
+    "resources": [
+        {
+            "name":"[variables('sqlServerName')]",
+            "type":"Microsoft.DBforMySQL/servers"
+        }
+    ],
+    "outputs": {
+        "NonPreviewVersionWhereSamePreviewDateExists" : "[listkeys(variables('sqlServerName'), '2020-02-01')]"
+    }
+}

@@ -1,0 +1,67 @@
+name: update-cache
+#on: workflow_dispatch
+on: 
+  schedule:
+    - cron: '55 11 7,21 * *'
+jobs: 
+  UpdateTTKCache: 
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Log in with Azure
+        uses: azure/login@v1
+        with: 
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+      - name: Update TTK Cache
+        uses: Azure/powershell@v1
+        with: 
+          errorActionPreference: Continue
+          inlineScript: |
+            Get-ChildItem -Recurse -Filter arm-ttk.psd1 | Import-Module -Name { $_.FullName} -Force -PassThru | Out-String
+            Update-TTKCache
+            $updatedFiles = 0
+            $branchName = "CacheUpdate-$([DateTime]::Now.ToString("yyyy-MM-dd"))"
+            git config --global user.email Azure@microsoft.com
+            git config --global user.name  Azure
+
+            git checkout -b $branchName
+            git pull origin master
+            
+            Get-ChildItem -Recurse -Filter *.cache.json |
+                ForEach-Object {
+                    $inFile = $_
+                    if (git diff $inFile.FullName) {                        
+                        git add $inFile.FullName
+                        git commit -m "Updating $($inFile.Name)"
+                        $updatedFiles+=2
+                    }
+                }
+            if ($updatedFiles) {
+                $gitPushed =  git push --set-upstream origin $branchName 2>&1
+                "Git Push Output: $($gitPushed  | Out-String)"
+              
+                 $d = @{
+                   head = $branchName
+                   base = "master"
+                   title = $branchName
+                 }
+                 $params = @{
+                   Uri = 'https://api.github.com/repos/Azure/arm-ttk/pulls';
+                   Method = 'POST';
+                   Headers = @{
+                     Accept = "application/vnd.github.v3+json"
+                     Authorization = "Bearer ${{ secrets.GITHUB_TOKEN }}"
+                   }
+                  Body = (ConvertTo-Json $d -Compress)
+                }
+
+                Invoke-RestMethod @params
+                
+                $LASTEXITCODE = 0
+                exit 0
+            }
+            exit 0
+          azPSVersion: 3.1.0
+          

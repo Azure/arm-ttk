@@ -18,8 +18,12 @@ param(
     [switch]$IsMainTemplate
 )
 
+# initialize TemplateTextWithoutLocationParameter for the case where there is no parameter object in the template (test is below)
+$TemplateWithoutLocationParameter = $TemplateText 
+
 # First, create a copy of the template object
 $TemplateObjectCopy = $templateText | ConvertFrom-Json
+
 # Then remove the location property if it exists
 if ($TemplateObjectCopy.parameters.psobject -ne $null) {
     $TemplateObjectCopy.parameters.psobject.properties.remove('location')
