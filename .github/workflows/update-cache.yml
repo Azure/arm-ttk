@@ -41,6 +41,7 @@ jobs:
                 $LASTEXITCODE = 0
                 exit 0
             }
+            gh
             exit 0
           azPSVersion: 3.1.0
           
