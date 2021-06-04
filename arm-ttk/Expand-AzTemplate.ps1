@@ -144,8 +144,8 @@
                 'CreateUIDefinitionFullPath','createUIDefinitionText','CreateUIDefinitionObject',
                 'FolderName', 'HasCreateUIDefinition', 'IsMainTemplate','FolderFiles',
                 'MainTemplatePath', 'MainTemplateObject', 'MainTemplateText',
-                'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 
-                'MainTemplateOutputs', 'TemplateMetadata',
+                'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 'MainTemplateOutputs', 'TemplateMetadata',
+                'isParametersFile', 'ParameterFileName', 'ParameterObject', 'ParameterText',
                 'InnerTemplates', 'ParentTemplateText', 'ParentTemplateObject'
 
             foreach ($_ in $WellKnownVariables) {
