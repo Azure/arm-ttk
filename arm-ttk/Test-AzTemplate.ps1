@@ -171,6 +171,7 @@ Each test script has access to a set of well-known variables:
 
 
         # Next we want to declare some internal functions:
+        
         #*Test-Case (executes a test, given a set of parameters)
         function Test-Case($TheTest, $TestParameters = @{}) {
             $testCommandParameters =
@@ -303,13 +304,18 @@ Each test script has access to a set of well-known variables:
                                 $testIssueLocations.Add([PSCustomObject]@{Line=$lineNumber;Column=$columnNumber;Index=$testOut.TargetObject.Index;Length=$testOut.TargetObject.Length})
                             }
                             elseif ($testOut.TargetObject.PSTypeName -eq 'JSON.Content') {                                
-                                if ($createUIDefinitionText) {
-                                    $foundPath = 
+                                if ($GroupName -eq 'CreateUIDefinition') {
+                                    $null = $testIssueLocations.Add((
                                         Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $createUIDefinitionText
-                                }
-                                if ($templateText -and -not $foundPath) {
-                                    $foundPath =
-                                        Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $templateText
+                                    ))                                        
+                                } elseif ($GroupName -eq 'DeploymentParameters') {
+                                    $null = $testIssueLocations.Add((
+                                        Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $parameterText
+                                    ))
+                                } else {
+                                    $resolvedLocation = Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $parameterText
+                                    $resolvedLocation.Line += $(if ($InnerTemplateStartLine) { $InnerTemplateStartLine - 1 })
+                                    $null = $testIssueLocations.Add($resolvedLocation)
                                 }
                             }
                         }
@@ -320,9 +326,7 @@ Each test script has access to a set of well-known variables:
                         }
                     }
 
-                    
-
-                    New-Object PSObject -Property ([Ordered]@{
+                    [PSCustomObject][Ordered]@{
                         pstypename = 'Template.Validation.Test.Result'
                         Errors = $testErrors
                         Warnings = $testWarnings
@@ -335,7 +339,7 @@ Each test script has access to a set of well-known variables:
                         Timespan = $testTook
                         File = $fileInfo
                         TestInput = @{} + $TestInput
-                    })
+                    }
                 } else {
                     it $dq {
                         # Pester tests only fail on a terminating error,
