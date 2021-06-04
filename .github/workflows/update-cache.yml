@@ -39,7 +39,7 @@ jobs:
                 $gitPushed =  git push --set-upstream origin $branchName 2>&1
                 "Git Push Output: $($gitPushed  | Out-String)"
                 
-                gh pr list
+                curl
                 
                 $LASTEXITCODE = 0
                 exit 0
