@@ -42,6 +42,7 @@ jobs:
                  $d = @{
                    head = $branchName
                    base = "master"
+                   title = $branchName
                  }
                  $params = @{
                    Uri = 'https://api.github.com/repos/Azure/arm-ttk/pulls';
