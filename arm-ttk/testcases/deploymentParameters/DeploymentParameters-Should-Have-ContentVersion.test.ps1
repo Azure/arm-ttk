@@ -25,7 +25,7 @@ if ($ParameterObject.contentVersion -isnot [string]) {
     return
 } 
 
-if ($ParameterObject.contentVersion -notmatch '^(\d+\\.\d+\\.\d+\\.\d+)$') {
+if ($ParameterObject.contentVersion -notmatch '^(\d+\.\d+\.\d+\.\d+)$') {
     Write-Warning -Message "Recommended that the 'contentVersion' should be a version string 
     Like:  1.0.0.0  -> but found: $($TemplateObject.contentVersion)"
     return
