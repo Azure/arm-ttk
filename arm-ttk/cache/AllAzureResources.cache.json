@@ -35973,7 +35973,11 @@
         },
         {
           "location": "West US 3",
-          "zones": []
+          "zones": [
+            "2",
+            "3",
+            "1"
+          ]
         },
         {
           "location": "Norway East",
@@ -36228,7 +36232,11 @@
         },
         {
           "location": "West US 3",
-          "zones": []
+          "zones": [
+            "2",
+            "3",
+            "1"
+          ]
         },
         {
           "location": "Norway East",
@@ -37935,7 +37943,11 @@
         },
         {
           "location": "West US 3",
-          "zones": []
+          "zones": [
+            "2",
+            "3",
+            "1"
+          ]
         },
         {
           "location": "Norway East",
@@ -41684,7 +41696,11 @@
         },
         {
           "location": "West US 3",
-          "zones": []
+          "zones": [
+            "2",
+            "3",
+            "1"
+          ]
         },
         {
           "location": "Norway East",
@@ -42256,7 +42272,11 @@
         },
         {
           "location": "West US 3",
-          "zones": []
+          "zones": [
+            "2",
+            "3",
+            "1"
+          ]
         },
         {
           "location": "Norway East",
@@ -42730,7 +42750,11 @@
         },
         {
           "location": "West US 3",
-          "zones": []
+          "zones": [
+            "2",
+            "3",
+            "1"
+          ]
         },
         {
           "location": "Norway East",
