@@ -1,0 +1,18 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "variables": {
+        "deploymentName": "Deployment-1.0"
+    },
+    "resources": [
+        {
+            "properties": {
+                "parameters": {
+                    "adminUsername": {
+                        "value": "[reference(resourceId('Microsoft.Resources/deployments', variables('deploymentName')), '2019-10-01').outputs.accountSettings.value.accountAdminName]"
+                    }
+                }
+            }
+        }
+    ]
+}

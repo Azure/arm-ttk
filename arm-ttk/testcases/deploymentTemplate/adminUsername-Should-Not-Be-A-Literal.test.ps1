@@ -60,8 +60,10 @@ if ("variables" -in $TemplateObject.PSobject.Properties.Name) {
     # TODO - irregular doesn't handle null gracefully so we need to test for it
     if ($trimmedUserName -ne $null) {
         $UserNameHasVariable = $trimmedUserName | ?<ARM_Variable> -Extract
+        $userNameHasFunction = $trimmedUserName | ?<ARM_Template_Function> -Extract
 
-        if ($UserNameHasVariable) {
+        # If we had a variable reference (not inside of another function)
+        if ($UserNameHasVariable -and $userNameHasFunction.FunctionName -eq 'variables') { 
             $variableValue = $TemplateObject.variables.($UserNameHasVariable.VariableName)
             $variableValueExpression = $variableValue | ?<ARM_Template_Expression>
             if (-not $variableValueExpression) {
