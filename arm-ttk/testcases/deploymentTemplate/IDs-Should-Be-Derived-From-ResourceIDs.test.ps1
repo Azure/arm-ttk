@@ -85,8 +85,8 @@ foreach ($id in $ids) {
         continue
     }
 
-    # Skip this check if id is inside resource property and type is Microsoft.DocumentDB/databaseAccounts/sqlDatabases
-    if ( $id.ParentObject.type -match '^Microsoft\.DocumentDB/databaseAccounts/sqlDatabases$' -and $id.JsonPath -match '\.(resource)\.' ) {
+    # Skip this check if id is inside resource property and type is Microsoft.DocumentDB/databaseAccounts/sqlDatabases, note that this includes child resources in the match
+    if ( $id.ParentObject.type -match '^Microsoft\.DocumentDB/databaseAccounts/sqlDatabases' -and $id.JsonPath -match '\.(resource)\.' ) {
         continue
     }
 
