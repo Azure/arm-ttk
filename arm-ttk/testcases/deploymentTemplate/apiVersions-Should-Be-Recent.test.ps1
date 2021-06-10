@@ -49,6 +49,9 @@ if (-not $TemplateObject.resources) {
 $allApiVersions = $TemplateObject.resources | 
 Find-JsonContent -Key apiVersion -Value * -Like
 
+
+
+
 foreach ($av in $allApiVersions) {
 
     <#
@@ -86,7 +89,19 @@ foreach ($av in $allApiVersions) {
         $av.type # and adding this resource's type. 
     )
 
-    # To get the full type name, join them all with a slash 
+
+    if ($FullResourceTypes -like '*/providers/*')  # If we have a provider resources
+    {
+        $FullResourceTypes    = @($FullResourceTypes -split '/')
+        if ($av.Name -match "'/{0,}(?<ResourceType>\w+\.\w+)/{0,}'") {
+            $FullResourceTypes = @($matches.ResourceType)
+        } else {
+            Write-Warning "Could not identify provider resource for $($FullResourceTypes -join '/')"
+            continue
+        }
+    }
+
+    # To get the full type name, join them all with a slash
     $FullResourceType = $FullResourceTypes -join '/' 
 
     # Now, get the API version as a string

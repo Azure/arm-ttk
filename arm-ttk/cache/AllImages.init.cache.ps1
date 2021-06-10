@@ -1,4 +1,7 @@
-﻿$MyFile= $MyInvocation.MyCommand.ScriptBlock.File  
+#TODO - don't think this cache is ever used
+exit
+
+$MyFile= $MyInvocation.MyCommand.ScriptBlock.File  
 $myName = $MyFile | Split-Path -Leaf 
 $myName = $myName -replace '\.init\.cache\.ps1'
 $myRoot = $MyFile | Split-Path

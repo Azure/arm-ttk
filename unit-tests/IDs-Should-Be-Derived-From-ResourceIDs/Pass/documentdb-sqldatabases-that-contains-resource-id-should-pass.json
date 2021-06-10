@@ -1,0 +1,22 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "functions": [],
+    "variables": {},
+    "resources": [
+        {
+            "name": "dbAccount/dbName",
+            "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+            "apiVersion": "2021-04-15",
+            "location": "eastus",
+            "tags": {},
+            "properties": {
+                "resource": {
+                    "id": "dbName"
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

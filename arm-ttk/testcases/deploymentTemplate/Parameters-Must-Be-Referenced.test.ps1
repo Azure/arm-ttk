@@ -23,7 +23,7 @@ foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
     # If the parameter name starts with two underscores,
     if ($parameter.Name -like '__*') { continue } # skip it.
 
-    $escapedName = $Parameter.Name -replace '\s', '\s'
+    $escapedName = $parameter.Name -replace '\s', '\s'
     # Create a Regex to find the parameter
 
     $foundRefs = $TemplateText | ?<ARM_Parameter> -Parameter $escapedName
@@ -34,7 +34,9 @@ foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
             $foundQuote =$exprStrOrQuote.Match($TemplateText, $fr.Index + 1) # make sure we hit a [ before a quote
             if ($foundQuote.Value -eq '"') { # if we don't, error
                 $lineNumber = @($lineBreaks | ? { $_.Index -lt $fr.Index }).Count + 1    
-                Write-Error -Message "Parameter reference is not contained within an expression: $($Parameter.Name) on line: $lineNumber" -ErrorId Parameters.Must.Be.Referenced.In.Expression -TargetObject $parameter
+                $targetObject = $parameter.PsObject.Copy()
+                $targetObject | Add-Member -MemberType NoteProperty -Name lineNumber -Value $lineNumber
+                Write-Error -Message "Parameter reference is not contained within an expression: $($Parameter.Name) on line: $lineNumber" -ErrorId Parameters.Must.Be.Referenced.In.Expression -TargetObject $targetObject
             }
         }
     }
