@@ -43,6 +43,7 @@ foreach ($CreateUIOutput in $CreateUIDefinitionObject.parameters.outputs.psobjec
         }
         else {
             foreach ($prop in $expression.psobject.properties) {
+                # TODO this only goes one level deep on the object will have to see if deeper objects surface in the wild
                 if ($prop.value -is [string]) {
                     $basicsOrSteps.Matches($prop.value)
                 }
