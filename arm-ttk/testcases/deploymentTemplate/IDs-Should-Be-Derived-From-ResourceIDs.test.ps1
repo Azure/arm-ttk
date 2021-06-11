@@ -61,9 +61,6 @@ foreach ($id in $ids) {
         continue
     }
 
-    if ($id.JsonPath -match 'properties\.') { # Skip anything in .properties.
-        continue
-    }
     if ($id.JsonPath -match '\.metadata\.') { # Skip anything beneath metadata
         continue
     }
@@ -96,6 +93,12 @@ foreach ($id in $ids) {
     # skip resourceId check within tags #274
     if ( $id.JSONPath -match "\.(tags)\.($myIdFieldName)" ) { 
         continue 
+    }
+
+    # Skip this check the resource type is Microsoft.Web/sites/config
+    # TODO we need a fn that will stitch together the full type when this a nested child resource - the latter is a little broad
+    if ( $id.ParentObject.type -match '^Microsoft\.sites/config' -or $id.ParentObject.type -match 'config') {
+        continue
     }
 
     if ($myId -isnot [string] -and ($myId -as [float] -eq $null)) {
