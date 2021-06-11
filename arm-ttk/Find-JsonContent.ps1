@@ -68,8 +68,8 @@
                 $OutObject[$prop.Name] = $prop.Value
             }
             $OutObject['ParentObject'] = $parent
-            $OutObject['PropertyName'] = if ($property) {$Property[-1]}
-
+            $OutObject['PSTypeName']   = 'JSON.Content'
+            $OutObject['PropertyName'] = if ($property) {$Property[-1]}            
             $OutObject['JSONPath']     = @(
                 $np =0
                 foreach ($p in $property) {
