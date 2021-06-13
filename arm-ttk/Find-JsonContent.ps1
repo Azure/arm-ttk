@@ -47,10 +47,6 @@
     [switch]
     $NotMatch,
 
-    # If set, will return a unique match for each key discovered.
-    [switch]
-    $EachMatchingKey,
-
     # A list of parent objects.  This parameter will be passed recursively.
     [PSObject[]]
     $Parent,
