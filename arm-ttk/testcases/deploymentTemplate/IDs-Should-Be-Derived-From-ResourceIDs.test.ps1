@@ -90,6 +90,11 @@ foreach ($id in $ids) {
         continue
     }
 
+    # Skip this check if id is inside location property of Microsoft.insights/webtests
+    if ($id.ParentObject.type -match '^Microsoft\.insights/webtests' -and $id.JSONPath -match '\.locations\.') {
+        continue
+    }
+
     # skip resourceId check within tags #274
     if ( $id.JSONPath -match "\.(tags)\.($myIdFieldName)" ) { 
         continue 
