@@ -47,6 +47,10 @@
     [switch]
     $NotMatch,
 
+    # If set, will return a unique match for each key discovered.
+    [switch]
+    $EachMatchingKey,
+
     # A list of parent objects.  This parameter will be passed recursively.
     [PSObject[]]
     $Parent,
@@ -124,8 +128,12 @@
                         } else {
                             $key
                         })
-                    $property += $matchingKeys
-                    . $OutputMatch $in
+                    $propertyList = @() + $Property
+                    foreach ($k in $matchingKeys) {
+                        $property += $k
+                        . $OutputMatch $in
+                        $property = $propertyList
+                    }
                 }
                 elseif (
                     ($NotMatch -and $propertyNames -notmatch $Key) -or
