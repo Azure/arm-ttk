@@ -26,9 +26,11 @@
 
         if ($convertProblems) {
             if ($convertProblems[0].InnerException) {
-                $PSCmdlet.WriteError([Management.Automation.ErrorRecord]::new($convertProblems[0].InnerException, 'Import.Json.Failed', 'InvalidOperation', $FilePath))
+                $PSCmdlet.WriteError([Management.Automation.ErrorRecord]::new(
+                    [Exception]::new("Import failed for '$filePath': $($convertProblems[0].InnerException.Message)",$convertProblems[0].InnerException)
+                , 'Import.Json.Failed', 'InvalidOperation', $FilePath))
             } else {
-                $PSCmdlet.WriteError([Management.Automation.ErrorRecord]::new("$($convertProblems)", 'Import.Json.Failed', 'InvalidOperation', $FilePath))
+                $PSCmdlet.WriteError([Management.Automation.ErrorRecord]::new("Import failed for '$filePath': $($convertProblems)", 'Import.Json.Failed', 'InvalidOperation', $FilePath))
             }
         }
     }
