@@ -1,0 +1,22 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "variables": {},
+    "resources": [
+        {
+            "name": "[concat('ApiApp_', parameters('webServiceName')]",
+            "type": "backends",
+            "apiVersion": "2020-06-01-preview",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service', variables('apiManagementInstanceName'))]"
+            ],
+            "properties": {
+                "description": "[parameters('webServiceName')]",
+                "resourceId": "[concat('https://management.azure.com', resourceId('Microsoft.Web/sites', parameters('webServiceName')))]",
+                "url": "[concat('https://', reference(resourceId('Microsoft.Web/sites', parameters('webServiceName')), '2020-09-01').defaultHostName)]",
+                "protocol": "http"
+            }
+        }
+    ],
+    "outputs": {}
+}

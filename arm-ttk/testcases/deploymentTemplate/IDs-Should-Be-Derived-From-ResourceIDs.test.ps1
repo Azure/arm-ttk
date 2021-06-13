@@ -90,6 +90,11 @@ foreach ($id in $ids) {
         continue
     }
 
+    # Skip backend resource properties.
+    if ($id.ParentObject.type -match 'backends$' -and $id.JsonPath -match 'properties\.') {
+        continue
+    }
+
     # skip resourceId check within tags #274
     if ( $id.JSONPath -match "\.(tags)\.($myIdFieldName)" ) { 
         continue 
