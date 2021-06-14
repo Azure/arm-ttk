@@ -49,7 +49,8 @@ foreach ($id in $ids) {
         "tenantId",                    # Common Property name
         "timezoneId",                  # Microsoft.SQL/managedInstances
         "vlanId",                      # Unique Id to establish peering when setting up an ExpressRoute circuit
-        "workerSizeId"                 # Microsoft.Web/serverFarms (older apiVersions)
+        "workerSizeId",                # Microsoft.Web/serverFarms (older apiVersions)
+        "metricId"                     # Microsoft.ServiceBus/namespaces
     )
 
     if ($exceptions -contains $myIdFieldName) {
