@@ -124,6 +124,7 @@ Each test script has access to a set of well-known variables:
 
 
         $builtInTestCases = @{}
+        $script:PassFailTotalPerRun = @{Pass=0;Fail=0;Total=0}
         # Next we'll define some human-friendly built-in groups.
         $builtInGroups = @{
             'all' = 'deploymentTemplate', 'createUIDefinition', 'deploymentParameters'
@@ -326,6 +327,13 @@ Each test script has access to a set of well-known variables:
                         }
                     }
 
+                    $script:PassFailTotalPerRun.Total++
+                    if ($testErrors.Count -lt 1) {
+                        $script:PassFailTotalPerRun.Pass++
+                    } else {
+                        $script:PassFailTotalPerRun.Fail++
+                    }
+
                     [PSCustomObject][Ordered]@{
                         pstypename = 'Template.Validation.Test.Result'
                         Errors = $testErrors
@@ -339,6 +347,9 @@ Each test script has access to a set of well-known variables:
                         Timespan = $testTook
                         File = $fileInfo
                         TestInput = @{} + $TestInput
+                        Summary = if ($isLastFile -and -not $testQueue.Count) {
+                            [PSCustomObject]$script:PassFailTotalPerRun    
+                        }
                     }
                 } else {
                     it $dq {
@@ -359,7 +370,9 @@ Each test script has access to a set of well-known variables:
 
         #*Test-FileList (tests a list of files)
         function Test-FileList {
+            $lastFile = $FolderFiles[-1]                        
             foreach ($fileInfo in $FolderFiles) { # We loop over each file in the folder.
+                $isLastFile = $fileInfo -eq $lastFile
                 $matchingGroups =
                     @(if ($fileInfo.Schema) { # If a given file has a schema,
                         foreach ($key in $TestGroup.Keys) { # and it matches the name of the testgroup

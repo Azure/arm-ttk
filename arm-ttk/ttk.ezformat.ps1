@@ -135,7 +135,11 @@ Write-FormatView -Action {
                     } } 
             }
         }
-    }) -join ''
+    }
+    if ($testOut.Summary) {
+        $testOut.Summary | Format-List | Out-String
+    }
+    ) -join ''
 } -TypeName 'Template.Validation.Test.Result'  |
     Out-FormatData -ModuleName arm-ttk |
     Set-Content -Path (Join-Path $myRoot "$myName.format.ps1xml") -Encoding UTF8
