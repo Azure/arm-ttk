@@ -395,7 +395,13 @@ Each test script has access to a set of well-known variables:
                                 if ($key -eq 'DeploymentTemplate' -and # Otherwise, if we're checking the deploymentTemplate
                                     'maintemplate', 'azuredeploy', 'prereq.azuredeploy' -contains $fn) { # and the file name is something we _know_ will be an ARM template
                                     $key; continue # then run the deployment tests regardless of schema.
-                                }
+                                } elseif (
+                                    $key -eq 'DeploymentTemplate' -and # Otherwise, if we're checking for the deploymentTemplate
+                                    $fileInfo.Object.resources # and the file has a .resources property.                                    
+                                ) {
+                                    Write-Warning "File '$($fileInfo.Name)' has no schema, but has .resources.  Treating as a DeploymentTemplate."
+                                    $key; continue # then run the deployment tests regardless of schema.
+                                }                                
                             }
                             if (-not ("$key".StartsWith('_') -or "$key".StartsWith('.'))) { continue } # Last, check if the test group is for a file extension.
                             if ($fileInfo.Extension -eq "$key".Replace('_', '.')) { # If it was, run tests associated with that extension.

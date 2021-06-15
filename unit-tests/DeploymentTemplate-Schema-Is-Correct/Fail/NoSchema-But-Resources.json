@@ -1,0 +1,8 @@
+﻿{
+    resources: [
+        {
+            name: "foo"
+        }
+    ]
+}
+
