@@ -104,6 +104,12 @@ Each test script has access to a set of well-known variables:
     [string[]]
     $Skip,
 
+    # If provided, will skip tests on a file-by-file basis.
+    # The key of this dictionary is a wildcard on a filename.
+    # The value of this dictionary is a list of wildcards to exclude.
+    [Collections.IDictionary]
+    $SkipByFile,
+
     # If provided, will use this file as the "main" template.
     [string]
     $MainTemplateFile,
@@ -243,7 +249,7 @@ Each test script has access to a set of well-known variables:
         #*Test-Group (executes a group of tests)
         function Test-Group {
             $testQueue = [Collections.Queue]::new(@($GroupName))
-            while ($testQueue.Count) {
+            :nextTestInGroup while ($testQueue.Count) {
                 $dq = $testQueue.Dequeue()
                 if ($TestGroup.$dq) {
                     foreach ($_ in $TestGroup.$dq) {
@@ -254,6 +260,15 @@ Each test script has access to a set of well-known variables:
 
                 if ($ValidTestList -and $ValidTestList -notcontains $dq) {
                     continue
+                }
+
+                if ($SkipByFile) {
+                    foreach ($sbp in $SkipByFile.GetEnumerator()) {
+                        if ($fileInfo.Name -notlike $sbp.Key) { continue }
+                        foreach ($v in $sbp.Value) {
+                            if ($dq -like $v) { continue nextTestInGroup }
+                        }
+                    }                    
                 }
 
                 if (-not $Pester) {
@@ -432,30 +447,34 @@ Each test script has access to a set of well-known variables:
                     foreach ($_ in $WellKnownVariables) {
                         $testInput[$_] = $ExecutionContext.SessionState.PSVariable.Get($_).Value
                     }
-                    $ValidTestList = if ($test) {
-                        $testList = @(Get-TestGroups ($test -replace '[_-]',' ') -includeTest)
-                        if (-not $testList) {
-                            Write-Warning "Test '$test' was not found, all tests will be run"
-                        }
-                        if ($skip) {
+                    $ValidTestList = 
+                        if ($test) {
+                            $testList = @(Get-TestGroups ($test -replace '[_-]',' ') -includeTest)
+                            if (-not $testList) {
+                                Write-Warning "Test '$test' was not found, all tests will be run"
+                            }
+                            if ($skip) {
+                                foreach ($tl in $testList) {
+                                    if ($skip -replace '[_-]', ' ' -notcontains $tl) {
+                                        $tl
+                                    }
+                                }
+                            } 
+                            else {
+                                $testList
+                            }
+                        } elseif ($skip) {
+                            $testList = @(Get-TestGroups -GroupName $groupName -includeTest)
                             foreach ($tl in $testList) {
                                 if ($skip -replace '[_-]', ' ' -notcontains $tl) {
                                     $tl
                                 }
                             }
                         } else {
-                            $testList
+                            $null
                         }
-                    } elseif ($skip) {
-                        $testList = @(Get-TestGroups -GroupName $groupName -includeTest)
-                        foreach ($tl in $testList) {
-                            if ($skip -replace '[_-]', ' ' -notcontains $tl) {
-                                $tl
-                            }
-                        }
-                    } else {
-                        $null
-                    }
+
+                    
                     if (-not $Pester) {
                         $context = "$($fileInfo.Name)->$groupName"
                         Test-Group
