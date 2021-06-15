@@ -8,8 +8,6 @@ jobs:
   TestPowerShellOnLinux: 
     runs-on: ubuntu-latest
     steps: 
-      - name: Check out repository
-        uses: actions/checkout@v2
       - name: InstallPester
         id: InstallPester
         shell: pwsh
@@ -22,7 +20,9 @@ jobs:
               }
           }
           Write-Host "::debug:: InstallPester $(@(foreach ($p in $Parameters.GetEnumerator()) {'-' + $p.Key + ' ' + $p.Value}) -join ' ')"
-          & './arm-ttk/GitHubWorkflow/Steps/InstallPester.ps1' @Parameters
+          & './GitHubWorkflow/Steps/InstallPester.ps1' @Parameters
+      - name: Check out repository
+        uses: actions/checkout@v2
       - name: RunPester
         id: RunPester
         shell: pwsh
@@ -36,7 +36,7 @@ jobs:
               }
           }
           Write-Host "::debug:: RunPester $(@(foreach ($p in $Parameters.GetEnumerator()) {'-' + $p.Key + ' ' + $p.Value}) -join ' ')"
-          & './arm-ttk/GitHubWorkflow/Steps/RunPester.ps1' @Parameters
+          & './GitHubWorkflow/Steps/RunPester.ps1' @Parameters
       - name: PublishTestResults
         uses: actions/upload-artifact@v2
         with: 
