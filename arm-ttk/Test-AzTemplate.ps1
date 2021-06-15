@@ -126,7 +126,7 @@ Each test script has access to a set of well-known variables:
         $builtInTestCases = @{}
         # Next we'll define some human-friendly built-in groups.
         $builtInGroups = @{
-            'all' = 'deploymentTemplate', 'createUIDefinition', 'deploymentParameters'
+            'all' = 'deploymentTemplate', 'createUIDefinition', 'deploymentParameters', 'AllFiles'
             'mainTemplateTests' = 'deploymentTemplate', 'deploymentParameters'
         }
 
@@ -362,14 +362,19 @@ Each test script has access to a set of well-known variables:
             foreach ($fileInfo in $FolderFiles) { # We loop over each file in the folder.
                 $matchingGroups =
                     @(if ($fileInfo.Schema) { # If a given file has a schema,
+                        'AllFiles'
                         foreach ($key in $TestGroup.Keys) { # and it matches the name of the testgroup
                             if ("$key".StartsWith("_") -or "$key".StartsWith('.')) { continue }
                             if ($fileInfo.Schema -match $key) {
                                 $key # then run that group of tests.
                             }
                         }
+                        
                     } else {
                         foreach ($key in $TestGroup.Keys) { # If it didn't have a schema
+                            if ($key -eq 'AllFiles') {
+                                $key; continue
+                            }
                             if ($fileInfo.Extension -eq '.json') { # and it was a JSON file
                                 $fn = $fileInfo.Name -ireplace '\.json$',''
                                 if ($fn -match $key) { # check to see if it's name matches the key
