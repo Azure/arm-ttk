@@ -1,0 +1,31 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "variables": {},
+    "resources": [
+        {
+            "name": "WebTest",
+            "type": "microsoft.insights/webtests",
+            "properties": {
+                "Locations": [
+                    {
+                        "Id": "[variables('location1')]"
+                    },
+                    {
+                        "Id": "us-tx-sn1-azr"
+                    },
+                    {
+                        "Id": "us-il-ch1-azr"
+                    },
+                    {
+                        "Id": "us-va-ash-azr"
+                    },
+                    {
+                        "Id": "us-fl-mia-edge"
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {}
+}
