@@ -37,7 +37,7 @@ foreach ($av in $allowedValues) { # Walk thru each thing we find.
     $stepName = $av.ParentObject[1].name # If the grandparent object has a name field, we're in steps
     $lookingFor= if ($stepName) { "*steps(*$stepName*).$controlName*"} else {"*basics(*$($controlName)*"} 
     $theOutput = foreach ($out in $CreateUIDefinitionObject.parameters.outputs.psobject.properties) {
-        if ($out.Value -like $lookingFor) { 
+        if ($out.Value | ?<CreateUIDefinition_Output> -ElementName $stepName) {
             $out; break
         }
     }
