@@ -11,8 +11,8 @@ $FolderFiles
 
 foreach ($file in $FolderFiles) {
     if ($file.FullPath -notmatch '\.json(c)?$') { continue }
-    $imported = Import-Json -FilePath $TemplateFullPath -ErrorAction SilentlyContinue -ErrorVariable ConvertIssue
+    $imported = Import-Json -FilePath $file.FullPath -ErrorAction SilentlyContinue -ErrorVariable ConvertIssue
     if (-not $imported) {
-        Write-Error "Could not import '$TemplateFullPath'" -TargetObject $TemplateFullPath -ErrorId "Invalid.JSON"
+        Write-Error "Could not import '$($file.FullPath)'" -TargetObject $file.FullPath -ErrorId "Invalid.JSON"
     }
 }
