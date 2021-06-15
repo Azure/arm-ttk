@@ -21,8 +21,12 @@
         if (-not $resolvedPath) { return }
 
         $convertProblems = $null
+        try {
         [IO.File]::ReadAllText("$resolvedPath") | 
             ConvertFrom-Json -ErrorAction SilentlyContinue -ErrorVariable ConvertProblems
+        } catch {
+            $convertProblems = $_
+        }
 
         if ($convertProblems) {
             if ($convertProblems[0].InnerException) {
