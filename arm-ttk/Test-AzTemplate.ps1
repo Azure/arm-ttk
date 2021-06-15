@@ -359,11 +359,16 @@ Each test script has access to a set of well-known variables:
 
         #*Test-FileList (tests a list of files)
         function Test-FileList {
+            $isFirstFile = $false
             foreach ($fileInfo in $FolderFiles) { # We loop over each file in the folder.
                 $matchingGroups =
                     @(if ($fileInfo.Schema) { # If a given file has a schema,
-                        'AllFiles'
-                        foreach ($key in $TestGroup.Keys) { # and it matches the name of the testgroup
+                        if ($isFirstFile) {   # see if it's the first file.
+                            'AllFiles'        # If it is, add it to the group 'AllFiles'.
+                            $isFirstFile = $false
+                        }
+                        
+                        foreach ($key in $TestGroup.Keys) { # Then see if the schema matches the name of the testgroup
                             if ("$key".StartsWith("_") -or "$key".StartsWith('.')) { continue }
                             if ($fileInfo.Schema -match $key) {
                                 $key # then run that group of tests.
