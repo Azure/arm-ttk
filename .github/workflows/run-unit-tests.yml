@@ -20,7 +20,7 @@ jobs:
               }
           }
           Write-Host "::debug:: InstallPester $(@(foreach ($p in $Parameters.GetEnumerator()) {'-' + $p.Key + ' ' + $p.Value}) -join ' ')"
-          dir | Out-Host
+          dir .. | Out-Host
           & ./arm-ttk/GitHubWorkflow/Steps/InstallPester.ps1 @Parameters
       - name: Check out repository
         uses: actions/checkout@v2
