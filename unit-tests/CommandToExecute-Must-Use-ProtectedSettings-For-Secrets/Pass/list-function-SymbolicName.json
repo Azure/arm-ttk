@@ -3,8 +3,9 @@
   "contentVersion": "1.0.0.0",
   "resources": {
     "SymbolicResourceName": {
+      "type": "CustomScript",
       "protectedSettings": {
-        "commandToExecute": "[listKeys()]"
+        "commandToExecute": "[listKeys()]"        
       }
     }
   }
