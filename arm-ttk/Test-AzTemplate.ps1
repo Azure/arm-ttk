@@ -124,6 +124,7 @@ Each test script has access to a set of well-known variables:
 
 
         $builtInTestCases = @{}
+        $script:PassFailTotalPerRun = @{Pass=0;Fail=0;Total=0}
         # Next we'll define some human-friendly built-in groups.
         $builtInGroups = @{
             'all' = 'deploymentTemplate', 'createUIDefinition', 'deploymentParameters'
@@ -326,6 +327,13 @@ Each test script has access to a set of well-known variables:
                         }
                     }
 
+                    $script:PassFailTotalPerRun.Total++
+                    if ($testErrors.Count -lt 1) {
+                        $script:PassFailTotalPerRun.Pass++
+                    } else {
+                        $script:PassFailTotalPerRun.Fail++
+                    }
+
                     [PSCustomObject][Ordered]@{
                         pstypename = 'Template.Validation.Test.Result'
                         Errors = $testErrors
@@ -339,6 +347,9 @@ Each test script has access to a set of well-known variables:
                         Timespan = $testTook
                         File = $fileInfo
                         TestInput = @{} + $TestInput
+                        Summary = if ($isLastFile -and -not $testQueue.Count) {
+                            [PSCustomObject]$script:PassFailTotalPerRun    
+                        }
                     }
                 } else {
                     it $dq {
@@ -359,8 +370,9 @@ Each test script has access to a set of well-known variables:
 
         #*Test-FileList (tests a list of files)
         function Test-FileList {
-            $isFirstFile = $false
+            $lastFile = $FolderFiles[-1]                        
             foreach ($fileInfo in $FolderFiles) { # We loop over each file in the folder.
+                $isLastFile = $fileInfo -eq $lastFile
                 $matchingGroups =
                     @(if ($fileInfo.Schema) { # If a given file has a schema,
                         if ($isFirstFile) {   # see if it's the first file.
@@ -392,7 +404,13 @@ Each test script has access to a set of well-known variables:
                                 if ($key -eq 'DeploymentTemplate' -and # Otherwise, if we're checking the deploymentTemplate
                                     'maintemplate', 'azuredeploy', 'prereq.azuredeploy' -contains $fn) { # and the file name is something we _know_ will be an ARM template
                                     $key; continue # then run the deployment tests regardless of schema.
-                                }
+                                } elseif (
+                                    $key -eq 'DeploymentTemplate' -and # Otherwise, if we're checking for the deploymentTemplate
+                                    $fileInfo.Object.resources # and the file has a .resources property.                                    
+                                ) {
+                                    Write-Warning "File '$($fileInfo.Name)' has no schema, but has .resources.  Treating as a DeploymentTemplate."
+                                    $key; continue # then run the deployment tests regardless of schema.
+                                }                                
                             }
                             if (-not ("$key".StartsWith('_') -or "$key".StartsWith('.'))) { continue } # Last, check if the test group is for a file extension.
                             if ($fileInfo.Extension -eq "$key".Replace('_', '.')) { # If it was, run tests associated with that extension.

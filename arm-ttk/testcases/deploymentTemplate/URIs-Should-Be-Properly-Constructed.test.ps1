@@ -15,7 +15,8 @@ param(
     $FunctionNotAllowedInUri = @('format', 'concat')
 )
 
-$foundObjects = Find-JsonContent -InputObject $TemplateObject -Key 'ur[il]$' -Match 
+# commenting out the test due to # 417
+# $foundObjects = Find-JsonContent -InputObject $TemplateObject -Key 'ur[il]$' -Match 
 
 foreach ($found in $foundObjects) { # Walk over each found object
     foreach ($prop in $found.psobject.properties) { # then walk thru each property
