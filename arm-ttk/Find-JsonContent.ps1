@@ -90,7 +90,7 @@
         if (-not $InputObject) { return }
 
 
-        $index = -1
+        $index = -1       
         foreach ($in in $InputObject) {
             if (-not $in) { continue }
             $index++
@@ -106,7 +106,11 @@
                         ($NotLike -and $in.$key -notlike $Value) -or
                         ($NotMatch -and $in.$key -notmatch $Value) -or
                         ($in.$key -eq $Value -and -not ($NotLike -or $NotMatch))) {
-                        $property += $key
+                        if ($InputObject -is [Collections.IList] -or $InputObject.count) {
+                            $property += "[$index].$($key)"
+                        } else {
+                            $property += $key
+                        }                        
                         . $outputMatch $in
                     }
                 }
@@ -126,7 +130,12 @@
                         })
                     $propertyList = @() + $Property
                     foreach ($k in $matchingKeys) {
-                        $property += $k
+                        if ($InputObject -is [Collections.IList] -or $InputObject.count) {
+                            $property += "[$index].$($k)"
+                        } else {
+                            $property += $k
+                        }
+                        
                         . $OutputMatch $in
                         $property = $propertyList
                     }
@@ -158,7 +167,7 @@
                     @(if ($Property) {
                         $property
                     }
-                    if ($InputObject.Count) {
+                    if ($InputObject -is [Collections.IList] -or $InputObject.Count) {
                         "[$index]"
                     })
                 foreach ($prop in $in.psobject.properties) {
