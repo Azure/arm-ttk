@@ -20,7 +20,33 @@ describe Find-JSONContent {
         $foundIt.JSONPath | Should -Be a.b.c
     }
 
-    it 'Is will return multiple results when mutliple keys match' {
+    it 'Will return the index within a list' {
+        $jsonText = '{
+            a: {
+                b: {
+                    c: [{d:1},{e:2}]
+                }
+            }
+        }'
+        $jsonObject = $jsonText | ConvertFrom-Json
+        $foundIt = Find-JsonContent -InputObject $jsonObject -Key d
+        $foundIt.JSONPath | Should -Be 'a.b.c[0].d'
+    }
+
+    it 'Will return the index within a list when provided a -Value' {
+        $jsonText = '{
+            a: {
+                b: {
+                    c: [{d:1},{e:2}]
+                }
+            }
+        }'
+        $jsonObject = $jsonText | ConvertFrom-Json
+        $foundIt = Find-JsonContent -InputObject $jsonObject -Key e
+        $foundIt.JSONPath | Should -Be 'a.b.c[1].e'
+    }
+
+    it 'Will return multiple results when mutliple keys match' {
         $jsonText = '{
             a: {
                 b: {
