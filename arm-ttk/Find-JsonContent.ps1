@@ -130,7 +130,7 @@
                         })
                     $propertyList = @() + $Property
                     foreach ($k in $matchingKeys) {
-                        if ($InputObject -is [Collections.IList] -or $InputObject.count) {
+                        if ($InputObject -is [Collections.IList]) {
                             $property += "[$index].$($k)"
                         } else {
                             $property += $k
