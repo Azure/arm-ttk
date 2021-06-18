@@ -291,14 +291,14 @@ function Expand-AzTemplate
             
             $innerTemplates = @(if ($templateText -and $TemplateText.Contains('"template"')) {
                 Find-JsonContent -InputObject $templateObject -Key template |
-                    Where-Object { $_.expressionEvaluationOptions.scope -eq 'inner' }
+                    Where-Object { $_.expressionEvaluationOptions.scope -eq 'inner' -or $_.parameters.policyDefinitionID }
             })
 
             if ($innerTemplates) {
                 foreach ($it in $innerTemplates) {
                     $foundInnerTemplate = $it | Resolve-JSONContent -JsonText $TemplateText
                     $TemplateText = $TemplateText.Remove($foundInnerTemplate.Index, $foundInnerTemplate.Length)
-                    $templateText = $templateText.Insert($foundInnerTemplate.Index, '"template": {}')
+                    $TemplateText = $TemplateText.Insert($foundInnerTemplate.Index, '"template": {}')
                 }
 
                 $TemplateObject = $TemplateText | ConvertFrom-Json
