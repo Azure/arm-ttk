@@ -11,14 +11,14 @@ $TemplateObject
 )
 
 
-# Find all references to an commandToExecute
+# Find all references to an commandToExecute.
 $commandsToExecute = $TemplateObject | 
     Find-JsonContent -Key commandToExecute  -Value * -Like |
-    Where-Object { -not $_.ParentObject[0].'$schema' } # unless they're on a top-level property.
+    Where-Object { $_.ParentObject[0].type -imatch 'CustomScript$' } # on a customScript resource.
 
 
 foreach ($command in $commandsToExecute) {
-    if ($command.parentObject.protectedSettings.commandToExecute) { # If the command is already within protected settings, ok
+    if ($command.parentObject.protectedSettings.commandToExecute) { # If the command is already within protected settings, ok.
         continue
     }
     $commandUsesAListFunction = "$($command.commandToExecute)" | ?<ARM_List_Function>

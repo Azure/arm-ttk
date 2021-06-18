@@ -3,6 +3,7 @@
   "contentVersion": "1.0.0.0",
   "resources": [
     {
+      "type": "CustomScript",
       "protectedSettings": {
         "commandToExecute": "[listKeys()]"
       }
