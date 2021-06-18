@@ -106,7 +106,7 @@
                         ($NotLike -and $in.$key -notlike $Value) -or
                         ($NotMatch -and $in.$key -notmatch $Value) -or
                         ($in.$key -eq $Value -and -not ($NotLike -or $NotMatch))) {
-                        if ($InputObject -is [Collections.IList] -or $InputObject.count) {
+                        if ($InputObject -is [Collections.IList]) {
                             $property += "[$index].$($key)"
                         } else {
                             $property += $key
@@ -167,7 +167,7 @@
                     @(if ($Property) {
                         $property
                     }
-                    if ($InputObject -is [Collections.IList] -or $InputObject.Count) {
+                    if ($InputObject -is [Collections.IList]) {
                         "[$index]"
                     })
                 foreach ($prop in $in.psobject.properties) {
