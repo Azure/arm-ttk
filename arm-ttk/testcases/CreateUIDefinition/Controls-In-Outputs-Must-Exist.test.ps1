@@ -37,7 +37,20 @@ $basicsOrSteps = [Regex]::new(@'
 
 foreach ($CreateUIOutput in $CreateUIDefinitionObject.parameters.outputs.psobject.properties) {
     $expression = $CreateUIOutput.Value 
-    $matched = $basicsOrSteps.Matches($expression)
+    $matched = @(
+        if ($expression -is [string]) {
+            $basicsOrSteps.Matches($expression)
+        }
+        else {
+            foreach ($prop in $expression.psobject.properties) {
+                # TODO this only goes one level deep on the object will have to see if deeper objects surface in the wild
+                if ($prop.value -is [string]) {
+                    $basicsOrSteps.Matches($prop.value)
+                }
+            }
+        }
+    )
+
     foreach ($match in $matched) {
         if (-not $match.Success) { continue }
         $controlName = $match.Groups['ControlName'].Value

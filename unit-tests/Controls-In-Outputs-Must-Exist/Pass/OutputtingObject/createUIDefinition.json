@@ -1,0 +1,54 @@
+  {
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+      "config": {
+        "basics": {
+          "description": "Demo"
+        }
+      },
+      "basics": [],
+      "steps": [
+        {
+          "name": "blade1",
+          "label": "Blade 1",
+          "bladeTitle": "Blad 1",
+          "elements": [
+            {
+              "name": "scaleClusterMode",
+              "type": "Microsoft.Common.DropDown",
+              "label": "Scale Cluster Mode",
+              "toolTip": "Just a demo",
+              "defaultValue": "Regular",
+              "constraints": {
+                "allowedValues": [
+                  {
+                    "label": "Regular",
+                    "value": "regular"
+                  },
+                  {
+                    "label": "Power",
+                    "value": "power"
+                  },
+                  {
+                    "label": "Turbo",
+                    "value": "turbo"
+                  }
+                ],
+                "required": true
+              },
+              "visible": true
+            }
+          ]
+        }
+
+      ],
+      "outputs": {
+        "location": "[location()]",
+        "myObject": {
+          "scaleClusterMode": "[steps('blade1').scaleClusterMode]"
+        }
+      }
+    }
+  }

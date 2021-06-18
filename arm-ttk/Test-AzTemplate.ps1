@@ -30,6 +30,7 @@ Each test script has access to a set of well-known variables:
 * MainTemplateParameters (a hashtable containing the parameters found in the main template)
 * MainTemplateVariables (a hashtable containing the variables found in the main template)
 * MainTemplateOutputs (a hashtable containing the outputs found in the main template)
+* InnerTemplates (indicates if the template contained or was in inner templates)
 
     #>
     [CmdletBinding(DefaultParameterSetName='NearbyTemplate')]
@@ -123,6 +124,7 @@ Each test script has access to a set of well-known variables:
 
 
         $builtInTestCases = @{}
+        $script:PassFailTotalPerRun = @{Pass=0;Fail=0;Total=0}
         # Next we'll define some human-friendly built-in groups.
         $builtInGroups = @{
             'all' = 'deploymentTemplate', 'createUIDefinition', 'deploymentParameters'
@@ -170,6 +172,7 @@ Each test script has access to a set of well-known variables:
 
 
         # Next we want to declare some internal functions:
+        
         #*Test-Case (executes a test, given a set of parameters)
         function Test-Case($TheTest, $TestParameters = @{}) {
             $testCommandParameters =
@@ -207,6 +210,34 @@ Each test script has access to a set of well-known variables:
                 } else {
                     . $myModule $TheTest @testInput
                 }
+
+                if ($TestParameters.InnerTemplates.Count) { # If an ARM template has inner templates
+                    foreach ($innerTemplate in $testParameters.InnerTemplates) {
+                        $foundInnerTemplate = $innerTemplate | Resolve-JSONContent -JsonText $ParentTemplateText
+                        $usedParameters = $false
+                        # Map TemplateText to the inner template text by converting to JSON (if the test command uses -TemplateText)
+                        if ($testCommandParameters.ContainsKey("TemplateText")) { 
+                            $templateObject = $testInput['TemplateText']   = $ParentTemplateText.Substring($foundInnerTemplate.Index, $foundInnerTemplate.Length)
+                            $usedParameters = $true
+                        }
+                        # And Map TemplateObject to the converted json (if the test command uses -TemplateObject)
+                        if ($testCommandParameters.ContainsKey("TemplateObject")) { 
+                            $templateObject = $testInput['TemplateObject'] = $innerTemplate.template
+                            $usedParameters = $true
+                        }
+
+                        if ($usedParameters) {
+                            if (-not $Pester) {
+                                . $myModule $TheTest @testInput 2>&1 3>&1 | # Run the test, and add data about the inner template context it was in.
+                                    Add-Member NoteProperty InnerTemplateName $innerTemplate.ParentObject[0].Name -Force -PassThru |
+                                    Add-Member NoteProperty InnerTemplateStart $foundInnerTemplate.Index -Force -PassThru |
+                                    Add-Member NoteProperty InnerTemplateLength $foundInnerTemplate.Length -Force -PassThru
+                            } else {
+                                . $myModule $TheTest @testInput
+                            }           
+                        }
+                    }
+                }
             } while ($false)
         }
 
@@ -234,30 +265,92 @@ Each test script has access to a set of well-known variables:
                     $testErrors = [Collections.ArrayList]::new()
                     $testWarnings = [Collections.ArrayList]::new()
                     $testOutput = [Collections.ArrayList]::new()
-                    foreach ($_ in $testCaseOutput) {
-                        $null=
-                            if ($_ -is [Exception] -or $_ -is [Management.Automation.ErrorRecord]) {
-                                $testErrors.Add($_)
+                    $testIssueLocations = [Collections.ArrayList]::new()
+                    $InnerTemplateStartLine = 0
+                    $InnerTemplateEndLine   = 0
+                    $innerGroup = 
+                        if ($testCaseOutput.InnerTemplateStart) {
+                            $InnerTemplateStartLine = 
+                                    [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Matches(
+                                        $parentTemplateText, $testCaseOutput.InnerTemplateStart
+                                    ).Count
+                            $InnerTemplateEndLine = 
+                                    [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Matches(
+                                        $parentTemplateText, $testCaseOutput.InnerTemplateStart + $testCaseOutput.InnerTemplateLength
+                                    ).Count
+
+                            "NestedTemplate $($testCaseOutput.InnerTemplateName) [ Lines $InnerTemplateStartLine - $InnerTemplateEndLine ]"
+                        } else {''}
+
+                    $displayGroup = if ($innerGroup) { $innerGroup } else { $GroupName } 
+
+
+                    $null= foreach ($testOut in $testCaseOutput) {                        
+                        if ($testOut -is [Exception] -or $testOut -is [Management.Automation.ErrorRecord]) {
+                            $testErrors.Add($testOut)
+                            if ($testOut.TargetObject -is [Text.RegularExpressions.Match]) {
+                                $wholeText = $testOut.TargetObject.Result('$_')
+                                $lineNumber = 
+                                    [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Matches(
+                                        $wholeText, $testOut.TargetObject.Index
+                                    ).Count + $(if ($InnerTemplateStartLine) { $InnerTemplateStartLine - 1 })
+
+                                $columnNumber = 
+                                    $testOut.TargetObject.Index -
+                                    $(
+                                        $m = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Match(
+                                            $wholeText, $testOut.TargetObject.Index)
+                                        $m.Index + $m.Length
+                                    ) + 1
+                                $testIssueLocations.Add([PSCustomObject]@{Line=$lineNumber;Column=$columnNumber;Index=$testOut.TargetObject.Index;Length=$testOut.TargetObject.Length})
                             }
-                            elseif ($_ -is [Management.Automation.WarningRecord]) {
-                                $testWarnings.Add($_)
-                            } else {
-                                $testOutput.Add($_)
+                            elseif ($testOut.TargetObject.PSTypeName -eq 'JSON.Content') {                                
+                                if ($GroupName -eq 'CreateUIDefinition') {
+                                    $null = $testIssueLocations.Add((
+                                        Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $createUIDefinitionText
+                                    ))                                        
+                                } elseif ($GroupName -eq 'DeploymentParameters') {
+                                    $null = $testIssueLocations.Add((
+                                        Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $parameterText
+                                    ))
+                                } else {
+                                    $resolvedLocation = Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $parameterText
+                                    $resolvedLocation.Line += $(if ($InnerTemplateStartLine) { $InnerTemplateStartLine - 1 })
+                                    $null = $testIssueLocations.Add($resolvedLocation)
+                                }
                             }
+                        }
+                        elseif ($testOut -is [Management.Automation.WarningRecord]) {
+                            $testWarnings.Add($testOut)
+                        } else {
+                            $testOutput.Add($testOut)
+                        }
                     }
 
-                    New-Object PSObject -Property ([Ordered]@{
+                    $script:PassFailTotalPerRun.Total++
+                    if ($testErrors.Count -lt 1) {
+                        $script:PassFailTotalPerRun.Pass++
+                    } else {
+                        $script:PassFailTotalPerRun.Fail++
+                    }
+
+                    [PSCustomObject][Ordered]@{
                         pstypename = 'Template.Validation.Test.Result'
                         Errors = $testErrors
                         Warnings = $testWarnings
                         Output = $testOutput
                         AllOutput = $testCaseOutput
                         Passed = $testErrors.Count -lt 1
-                        Group = $GroupName
+                        Group = $displayGroup
+                        Location = $testIssueLocations
                         Name = $dq
                         Timespan = $testTook
                         File = $fileInfo
-                    })
+                        TestInput = @{} + $TestInput
+                        Summary = if ($isLastFile -and -not $testQueue.Count) {
+                            [PSCustomObject]$script:PassFailTotalPerRun    
+                        }
+                    }
                 } else {
                     it $dq {
                         # Pester tests only fail on a terminating error,
@@ -277,7 +370,9 @@ Each test script has access to a set of well-known variables:
 
         #*Test-FileList (tests a list of files)
         function Test-FileList {
+            $lastFile = $FolderFiles[-1]                        
             foreach ($fileInfo in $FolderFiles) { # We loop over each file in the folder.
+                $isLastFile = $fileInfo -eq $lastFile
                 $matchingGroups =
                     @(if ($fileInfo.Schema) { # If a given file has a schema,
                         foreach ($key in $TestGroup.Keys) { # and it matches the name of the testgroup
@@ -300,7 +395,13 @@ Each test script has access to a set of well-known variables:
                                 if ($key -eq 'DeploymentTemplate' -and # Otherwise, if we're checking the deploymentTemplate
                                     'maintemplate', 'azuredeploy', 'prereq.azuredeploy' -contains $fn) { # and the file name is something we _know_ will be an ARM template
                                     $key; continue # then run the deployment tests regardless of schema.
-                                }
+                                } elseif (
+                                    $key -eq 'DeploymentTemplate' -and # Otherwise, if we're checking for the deploymentTemplate
+                                    $fileInfo.Object.resources # and the file has a .resources property.                                    
+                                ) {
+                                    Write-Warning "File '$($fileInfo.Name)' has no schema, but has .resources.  Treating as a DeploymentTemplate."
+                                    $key; continue # then run the deployment tests regardless of schema.
+                                }                                
                             }
                             if (-not ("$key".StartsWith('_') -or "$key".StartsWith('.'))) { continue } # Last, check if the test group is for a file extension.
                             if ($fileInfo.Extension -eq "$key".Replace('_', '.')) { # If it was, run tests associated with that extension.
@@ -332,9 +433,18 @@ Each test script has access to a set of well-known variables:
                             'mainTemplate.json', 'azureDeploy.json', 'prereq.azuredeploy.json' -contains $fileInfo.Name
                         }
                         
-                    $templateFileName = $fileInfo.Name
+                    $templateFileName = $fileInfo.Name                    
                     $TemplateObject = $fileInfo.Object
                     $TemplateText = $fileInfo.Text
+                    if ($InnerTemplates.Count) {
+                        foreach ($it in $innerTemplates) {
+                            $foundInnerTemplate = $it | Resolve-JSONContent -JsonText $TemplateText
+                            $TemplateText = $TemplateText.Remove($foundInnerTemplate.Index, $foundInnerTemplate.Length)
+                            $templateText = $templateText.Insert($foundInnerTemplate.Index, '"template": {}')
+                        }
+
+                        $TemplateObject = $TemplateText | ConvertFrom-Json
+                    }
                 }
                 foreach ($groupName in $matchingGroups) {
                     $testInput = @{}
@@ -452,6 +562,7 @@ Each test script has access to a set of well-known variables:
             foreach ($kv in $expandedTemplate.GetEnumerator()) {
                 $ExecutionContext.SessionState.PSVariable.Set($kv.Key, $kv.Value)
             }
+            
             $wellKnownVariables = @($expandedTemplate.Keys) + $cacheItemNames
 
             if ($testParameter) {

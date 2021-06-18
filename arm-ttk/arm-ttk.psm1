@@ -5,6 +5,8 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
 
 . $psScriptRoot\Import-Json.ps1
 . $PSScriptRoot\Find-JsonContent.ps1
+. $PSScriptRoot\Resolve-JSONContent.ps1
+
 #endregion JSON Functions
 
 #region Template Functions

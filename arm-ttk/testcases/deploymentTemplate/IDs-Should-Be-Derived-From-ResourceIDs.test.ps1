@@ -49,7 +49,8 @@ foreach ($id in $ids) {
         "tenantId",                    # Common Property name
         "timezoneId",                  # Microsoft.SQL/managedInstances
         "vlanId",                      # Unique Id to establish peering when setting up an ExpressRoute circuit
-        "workerSizeId"                 # Microsoft.Web/serverFarms (older apiVersions)
+        "workerSizeId",                # Microsoft.Web/serverFarms (older apiVersions)
+        "metricId"                     # Microsoft.ServiceBus/namespaces
     )
 
     if ($exceptions -contains $myIdFieldName) {
@@ -60,8 +61,8 @@ foreach ($id in $ids) {
         # Skip anything in parameters or outputs
         continue
     }
-    if ($id.JsonPath -match '\.metadata\.') {
-        # Skip anything beneath metadata
+
+    if ($id.JsonPath -match '\.metadata\.') { # Skip anything beneath metadata
         continue
     }
 
@@ -85,14 +86,30 @@ foreach ($id in $ids) {
         continue
     }
 
-    # Skip this check if id is inside resource property and type is Microsoft.DocumentDB/databaseAccounts/sqlDatabases
-    if ( $id.ParentObject.type -match '^Microsoft\.DocumentDB/databaseAccounts/sqlDatabases$' -and $id.JsonPath -match '\.(resource)\.' ) {
+    # Skip this check if id is inside resource property and type is Microsoft.DocumentDB/databaseAccounts/sqlDatabases, note that this includes child resources in the match
+    if ( $id.ParentObject.type -match '^Microsoft\.DocumentDB/databaseAccounts/sqlDatabases' -and $id.JsonPath -match '\.(resource)\.' ) {
+        continue
+    }
+
+    # Skip this check if id is inside location property of Microsoft.insights/webtests
+    if ($id.ParentObject.type -match '^Microsoft\.insights/webtests' -and $id.JSONPath -match '\.locations\.') {
+        continue
+    }
+
+    # Skip backend resource properties.
+    if ($id.ParentObject.type -match 'backends$' -and $id.JsonPath -match 'properties\.') {
         continue
     }
 
     # skip resourceId check within tags #274
     if ( $id.JSONPath -match "\.(tags)\.($myIdFieldName)" ) { 
         continue 
+    }
+
+    # Skip this check the resource type is Microsoft.Web/sites/config
+    # TODO we need a fn that will stitch together the full type when this a nested child resource - the latter is a little broad
+    if ( $id.ParentObject.type -match '^Microsoft\.sites/config' -or $id.ParentObject.type -match 'config') {
+        continue
     }
 
     if ($myId -isnot [string] -and ($myId -as [float] -eq $null)) {

@@ -48,7 +48,7 @@ Write-FormatView -Action {
     
     $errorLines = @(
         foreach ($_ in $testOut.Errors) {
-            "$_"
+            "$_" + $(if ($testOut.Location) { "Line $($testOut.Location.Line), Column $($testOut.Location.Column)"})
         })
     $warningLines = @(
         foreach ($_ in $testOut.Warnings) {
@@ -93,8 +93,8 @@ Write-FormatView -Action {
         foreach ($line in $testOut.AllOutput) {
             if ($line -is [Management.Automation.ErrorRecord] -or $line -is [Exception]) {
                 $msg = "$azoErrorStatus$(' ' * $indent)$line"
-                if ($line.TargetObject -is [Text.RegularExpressions.Match]) {
-                    $msg += (" Index:" + $line.TargetObject.Index)
+                if ($TestOut.Location) {
+                    $msg += " Line: $($testOut.Location.Line), Column: $($testOut.Location.Column)"
                 }
 
                 if ($CanUseColor) {
@@ -135,7 +135,11 @@ Write-FormatView -Action {
                     } } 
             }
         }
-    }) -join ''
+    }
+    if ($testOut.Summary) {
+        $testOut.Summary | Format-List | Out-String
+    }
+    ) -join ''
 } -TypeName 'Template.Validation.Test.Result'  |
     Out-FormatData -ModuleName arm-ttk |
     Set-Content -Path (Join-Path $myRoot "$myName.format.ps1xml") -Encoding UTF8

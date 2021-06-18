@@ -1,4 +1,4 @@
-﻿function Expand-AzTemplate
+function Expand-AzTemplate
 {
     <#
     .Synopsis
@@ -145,7 +145,8 @@
                 'FolderName', 'HasCreateUIDefinition', 'IsMainTemplate','FolderFiles',
                 'MainTemplatePath', 'MainTemplateObject', 'MainTemplateText',
                 'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 'MainTemplateOutputs', 'TemplateMetadata',
-                'isParametersFile', 'ParameterFileName', 'ParameterObject', 'ParameterText'
+                'isParametersFile', 'ParameterFileName', 'ParameterObject', 'ParameterText',
+                'InnerTemplates', 'ParentTemplateText', 'ParentTemplateObject'
 
             foreach ($_ in $WellKnownVariables) {
                 $ExecutionContext.SessionState.PSVariable.Set($_, $null)
@@ -165,6 +166,10 @@
             $TemplateText = [IO.File]::ReadAllText($resolvedTemplatePath)
             #*$TemplateObject (the template text, converted from JSON)
             $TemplateObject = Import-Json -FilePath $TemplateFullPath
+            #*$ParentTemplateText (the parent or original template (will be the same if no nested deployments is found))
+            $ParentTemplateText = [IO.File]::ReadAllText($resolvedTemplatePath)
+            #*$ParentTemplateObject (the parent or original template (will be the same if no nested deployments is found))
+            $ParentTemplateObject = Import-Json -FilePath $TemplateFullPath
 
             if($TemplateObject.metadata -ne $null){
                 $TemplateMetadata = $($TemplateObject.metadata)
@@ -219,8 +224,8 @@
                         if ($fileInfo.DirectoryName -eq '__macosx') {
                             return # (excluding files as side-effects of MAC zips)
                         }
+                        
                         # All FolderFile objects will have the following properties:
-
 
                         if ($fileInfo.Extension -eq '.json') {
                             $fileObject = [Ordered]@{
@@ -283,6 +288,21 @@
                 $FolderFiles = @(@($createUIDefFile) + @($otherFolderFiles) -ne $null)
             }
 
+            
+            $innerTemplates = @(if ($templateText -and $TemplateText.Contains('"template"')) {
+                Find-JsonContent -InputObject $templateObject -Key template |
+                    Where-Object { $_.expressionEvaluationOptions.scope -eq 'inner' }
+            })
+
+            if ($innerTemplates) {
+                foreach ($it in $innerTemplates) {
+                    $foundInnerTemplate = $it | Resolve-JSONContent -JsonText $TemplateText
+                    $TemplateText = $TemplateText.Remove($foundInnerTemplate.Index, $foundInnerTemplate.Length)
+                    $templateText = $templateText.Insert($foundInnerTemplate.Index, '"template": {}')
+                }
+
+                $TemplateObject = $TemplateText | ConvertFrom-Json
+            }            
 
             $out = [Ordered]@{}
             foreach ($v in $WellKnownVariables) {
