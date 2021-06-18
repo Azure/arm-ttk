@@ -126,7 +126,7 @@ Each test script has access to a set of well-known variables:
         $builtInTestCases = @{}
         # Next we'll define some human-friendly built-in groups.
         $builtInGroups = @{
-            'all' = 'deploymentTemplate', 'createUIDefinition', 'deploymentParameters', 'AllFiles'
+            'all' = 'deploymentTemplate', 'createUIDefinition', 'deploymentParameters'
             'mainTemplateTests' = 'deploymentTemplate', 'deploymentParameters'
         }
 
