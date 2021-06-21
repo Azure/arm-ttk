@@ -69,7 +69,7 @@
             }
             $OutObject['ParentObject'] = $parent
             $OutObject['PSTypeName']   = 'JSON.Content'
-            $OutObject['PropertyName'] = if ($property) {$Property[-1]}            
+            $OutObject['PropertyName'] = if ($property) {$Property[-1] -replace '^\[\d+\]\.'}
             $OutObject['JSONPath']     = @(
                 $np =0
                 foreach ($p in $property) {
@@ -106,7 +106,7 @@
                         ($NotLike -and $in.$key -notlike $Value) -or
                         ($NotMatch -and $in.$key -notmatch $Value) -or
                         ($in.$key -eq $Value -and -not ($NotLike -or $NotMatch))) {
-                        if ($InputObject -is [Collections.IList]) {
+                        if ($InputObject -is [Collections.IList] -and $Property) {
                             $property += "[$index].$($key)"
                         } else {
                             $property += $key
@@ -130,7 +130,7 @@
                         })
                     $propertyList = @() + $Property
                     foreach ($k in $matchingKeys) {
-                        if ($InputObject -is [Collections.IList]) {
+                        if ($InputObject -is [Collections.IList] -and $Property) {
                             $property += "[$index].$($k)"
                         } else {
                             $property += $k
