@@ -49,7 +49,8 @@ foreach ($id in $ids) {
         "tenantId",                    # Common Property name
         "timezoneId",                  # Microsoft.SQL/managedInstances
         "vlanId",                      # Unique Id to establish peering when setting up an ExpressRoute circuit
-        "workerSizeId"                 # Microsoft.Web/serverFarms (older apiVersions)
+        "workerSizeId",                # Microsoft.Web/serverFarms (older apiVersions)
+        "metricId"                     # Microsoft.ServiceBus/namespaces
     )
 
     if ($exceptions -contains $myIdFieldName) {
@@ -87,6 +88,16 @@ foreach ($id in $ids) {
 
     # Skip this check if id is inside resource property and type is Microsoft.DocumentDB/databaseAccounts/sqlDatabases, note that this includes child resources in the match
     if ( $id.ParentObject.type -match '^Microsoft\.DocumentDB/databaseAccounts/sqlDatabases' -and $id.JsonPath -match '\.(resource)\.' ) {
+        continue
+    }
+
+    # Skip this check if id is inside location property of Microsoft.insights/webtests
+    if ($id.ParentObject.type -match '^Microsoft\.insights/webtests' -and $id.JSONPath -match '\.locations\.') {
+        continue
+    }
+
+    # Skip backend resource properties.
+    if ($id.ParentObject.type -match 'backends$' -and $id.JsonPath -match 'properties\.') {
         continue
     }
 
