@@ -1,8 +1,8 @@
 name: update-cache
-#on: workflow_dispatch
-on: 
-  schedule:
-    - cron: '55 11 7,21 * *'
+on: workflow_dispatch
+#on: 
+#  schedule:
+#    - cron: '55 11 7,21 * *'
 jobs: 
   UpdateTTKCache: 
     runs-on: ubuntu-latest
