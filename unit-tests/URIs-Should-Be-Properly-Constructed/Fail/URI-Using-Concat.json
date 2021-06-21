@@ -1,9 +1,0 @@
-﻿{
-    "$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "resources":  [
-        {            
-            "aUri":  "[concat('foo', 'bar')]"
-        }
-    ]
-}
-

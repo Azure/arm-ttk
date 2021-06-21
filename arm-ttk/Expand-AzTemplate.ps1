@@ -113,7 +113,7 @@ function Expand-AzTemplate
             # Now let's try to resolve the template path.
             $resolvedTemplatePath =
                 # If the template path doesn't appear to be a path to a json file,
-                if ($TemplatePath -notlike '*.json') {
+                if ($TemplatePath -notmatch '\.json(c)?$') {
                     # see if it looks like a file
                     if ( test-path -path $templatePath -PathType leaf) {
                         $TemplatePath = $TemplatePath | Split-Path # if it does, reassign template path to it's directory.
@@ -180,7 +180,7 @@ function Expand-AzTemplate
 
             $isParametersFile = $resolvedTemplatePath -like '*.parameters.json'
 
-            if ($resolvedTemplatePath -like '*.json' -and 
+            if ($resolvedTemplatePath -match '\.json(c)?$' -and 
                 $TemplateObject.'$schema' -like '*CreateUIDefinition*') {
                 $createUiDefinitionFullPath = "$resolvedTemplatePath"
                 $createUIDefinitionText = [IO.File]::ReadAllText($createUiDefinitionFullPath)
@@ -228,7 +228,7 @@ function Expand-AzTemplate
                         
                         # All FolderFile objects will have the following properties:
 
-                        if ($fileInfo.Extension -eq '.json') {
+                        if ($fileInfo.Extension -in '.json', '.jsonc') {
                             $fileObject = [Ordered]@{
                                 Name = $fileInfo.Name #*Name (the name of the file)
                                 Extension = $fileInfo.Extension #*Extension (the file extension)
