@@ -18,7 +18,7 @@ describe Expand-AzTemplate {
     context 'ExpandedVariables' {
         $expanded = Expand-AzTemplate -TemplatePath (Join-Path $pwd .\ExpandVariables.json)
         $expanded.ExpandedTemplateText | ?<ARM_Variable> | Should -Be $null
-        $expanded.ExpandedTemplateObject.someProperty | Should -BeLike 'resourceGroup()*.location*'
+        $expanded.ExpandedTemplateObject.someProperty | Should -BeLike '*resourceGroup()*.location*'
     }
 }
 
