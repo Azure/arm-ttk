@@ -31,6 +31,8 @@ Each test script has access to a set of well-known variables:
 * MainTemplateVariables (a hashtable containing the variables found in the main template)
 * MainTemplateOutputs (a hashtable containing the outputs found in the main template)
 * InnerTemplates (indicates if the template contained or was in inner templates)
+* ExpandedTemplateText (the text of a template, with variables expanded)
+* ExpandedTemplateOjbect (the object of a template, with variables expanded)
 
     #>
     [CmdletBinding(DefaultParameterSetName='NearbyTemplate')]
