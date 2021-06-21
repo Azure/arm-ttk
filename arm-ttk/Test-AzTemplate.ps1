@@ -32,6 +32,24 @@ Each test script has access to a set of well-known variables:
 * MainTemplateOutputs (a hashtable containing the outputs found in the main template)
 * InnerTemplates (indicates if the template contained or was in inner templates)
 
+    .Example
+        Test-AzTemplate -TemplatePath ./FolderWithATemplate
+        # Tests files in /FolderWithATemplate
+    .Example
+        Test-AzTemplate -TemplatePath ./Templates/NameOfTemplate.json
+        # Tests /Template/NameOfTemplate.json.
+    .Example
+        Test-AzTemplate -TemplatePath ./FolderWithATemplate -Test 'DeploymentTemplate-Schema-Is-Correct' 
+        # Runs just the test 'DeploymentTemplate-Schema-Is-Correct'
+    .Example
+        Test-AzTemplate -TemplatePath ./FolderWithATemplate -Skip 'DeploymentTemplate-Schema-Is-Correct'
+        # Skips the test 'DeploymentTemplate-Schema-Is-Correct'
+    .Example
+        Test-AzTemplate -TemplatePath ./FolderWithATemplate -SkipByFile @{
+            '*azureDeploy*' = '*apiVersions*'
+            '*' = '*schema*'
+        }
+        # Skips tests named like *apiversions* from files named like azureDeploy, and skips schema tests for all files.
     #>
     [CmdletBinding(DefaultParameterSetName='NearbyTemplate')]
     param(
