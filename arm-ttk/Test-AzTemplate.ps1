@@ -30,11 +30,32 @@ Each test script has access to a set of well-known variables:
 * MainTemplateParameters (a hashtable containing the parameters found in the main template)
 * MainTemplateVariables (a hashtable containing the variables found in the main template)
 * MainTemplateOutputs (a hashtable containing the outputs found in the main template)
-* InnerTemplates (indicates if the template contained or was in inner templates)
-    
-    
+* InnerTemplates (indicates if the template contained or was in inner templates
+
     .Example
-        Test-AzTemplate -TemplatePath ./DirectoryWithTemplate -GroupName AllFiles
+        Test-AzTemplate -TemplatePath ./FolderWithATemplate
+        # Tests all files in /FolderWithATemplate
+    .Example
+        Test-AzTemplate -TemplatePath ./Templates/NameOfTemplate.json
+        # Tests the file at the location ./Templates/NameOfTemplate.json.
+    .Example
+        Test-AzTemplate -TemplatePath ./FolderWithATemplate -Test 'DeploymentTemplate-Schema-Is-Correct' 
+        # Runs the test 'DeploymentTemplate-Schema-Is-Correct' on all files in the folder /FolderWithATemplate
+    .Example
+        Test-AzTemplate -TemplatePath ./FolderWithATemplate -Skip 'DeploymentTemplate-Schema-Is-Correct'
+        # Skips the test 'DeploymentTemplate-Schema-Is-Correct'
+    .Example
+        Test-AzTemplate -TemplatePath ./FolderWithATemplate -SkipByFile @{
+            '*azureDeploy*' = '*apiVersions*'
+            '*' = '*schema*'
+        }
+        # Skips tests named like *apiversions* on files with the text "azureDeploy" in the filename, and skips with the text "schema" in the test name for all files.
+    .Example
+        Test-AzTemplate -TemplatePath ./FolderWithATemplate | Export-Clixml ./Results.clixml
+        # Tests all template files in ./FolderWithATemplate, and exports their results to clixml.
+    .Example
+        Test-AzTemplate -TemplatePath ./DirectoryWithTemplates -GroupName AllFiles
+        # Runs all tests included in the group "AllFiles" on all the files located in ./DirectoryWithTemplates
     
     #>
     [CmdletBinding(DefaultParameterSetName='NearbyTemplate')]
@@ -113,6 +134,12 @@ Each test script has access to a set of well-known variables:
     # If provided, will skip any tests in this list.
     [string[]]
     $Skip,
+
+    # If provided, will skip tests on a file-by-file basis.
+    # The key of this dictionary is a wildcard on a filename.
+    # The value of this dictionary is a list of wildcards to exclude.
+    [Collections.IDictionary]
+    $SkipByFile,
 
     # If provided, will use this file as the "main" template.
     [string]
@@ -254,7 +281,7 @@ Each test script has access to a set of well-known variables:
         #*Test-Group (executes a group of tests)
         function Test-Group {
             $testQueue = [Collections.Queue]::new(@($GroupName))
-            while ($testQueue.Count) {
+            :nextTestInGroup while ($testQueue.Count) {
                 $dq = $testQueue.Dequeue()
                 if ($TestGroup.$dq) {
                     foreach ($_ in $TestGroup.$dq) {
@@ -265,6 +292,15 @@ Each test script has access to a set of well-known variables:
 
                 if ($ValidTestList -and $ValidTestList -notcontains $dq) {
                     continue
+                }
+
+                if ($SkipByFile) {
+                    foreach ($sbp in $SkipByFile.GetEnumerator()) {
+                        if ($fileInfo.Name -notlike $sbp.Key) { continue }
+                        foreach ($v in $sbp.Value) {
+                            if ($dq -like $v) { continue nextTestInGroup }
+                        }
+                    }                    
                 }
 
                 if (-not $Pester) {
@@ -471,30 +507,34 @@ Each test script has access to a set of well-known variables:
                     foreach ($_ in $WellKnownVariables) {
                         $testInput[$_] = $ExecutionContext.SessionState.PSVariable.Get($_).Value
                     }
-                    $ValidTestList = if ($test) {
-                        $testList = @(Get-TestGroups ($test -replace '[_-]',' ') -includeTest)
-                        if (-not $testList) {
-                            Write-Warning "Test '$test' was not found, all tests will be run"
-                        }
-                        if ($skip) {
+                    $ValidTestList = 
+                        if ($test) {
+                            $testList = @(Get-TestGroups ($test -replace '[_-]',' ') -includeTest)
+                            if (-not $testList) {
+                                Write-Warning "Test '$test' was not found, all tests will be run"
+                            }
+                            if ($skip) {
+                                foreach ($tl in $testList) {
+                                    if ($skip -replace '[_-]', ' ' -notcontains $tl) {
+                                        $tl
+                                    }
+                                }
+                            } 
+                            else {
+                                $testList
+                            }
+                        } elseif ($skip) {
+                            $testList = @(Get-TestGroups -GroupName $groupName -includeTest)
                             foreach ($tl in $testList) {
                                 if ($skip -replace '[_-]', ' ' -notcontains $tl) {
                                     $tl
                                 }
                             }
                         } else {
-                            $testList
+                            $null
                         }
-                    } elseif ($skip) {
-                        $testList = @(Get-TestGroups -GroupName $groupName -includeTest)
-                        foreach ($tl in $testList) {
-                            if ($skip -replace '[_-]', ' ' -notcontains $tl) {
-                                $tl
-                            }
-                        }
-                    } else {
-                        $null
-                    }
+
+                    
                     if (-not $Pester) {
                         $context = "$($fileInfo.Name)->$groupName"
                         Test-Group
