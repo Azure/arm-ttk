@@ -34,13 +34,13 @@ Each test script has access to a set of well-known variables:
 
     .Example
         Test-AzTemplate -TemplatePath ./FolderWithATemplate
-        # Tests files in /FolderWithATemplate
+        # Tests all files in /FolderWithATemplate
     .Example
         Test-AzTemplate -TemplatePath ./Templates/NameOfTemplate.json
-        # Tests /Template/NameOfTemplate.json.
+        # Tests the file at the location ./Templates/NameOfTemplate.json.
     .Example
         Test-AzTemplate -TemplatePath ./FolderWithATemplate -Test 'DeploymentTemplate-Schema-Is-Correct' 
-        # Runs just the test 'DeploymentTemplate-Schema-Is-Correct'
+        # Runs the test 'DeploymentTemplate-Schema-Is-Correct' on all files in the folder /FolderWithATemplate
     .Example
         Test-AzTemplate -TemplatePath ./FolderWithATemplate -Skip 'DeploymentTemplate-Schema-Is-Correct'
         # Skips the test 'DeploymentTemplate-Schema-Is-Correct'
@@ -49,12 +49,13 @@ Each test script has access to a set of well-known variables:
             '*azureDeploy*' = '*apiVersions*'
             '*' = '*schema*'
         }
-        # Skips tests named like *apiversions* from files named like azureDeploy, and skips schema tests for all files.
+        # Skips tests named like *apiversions* on files with the text "azureDeploy" in the filename, and skips with the text "schema" in the test name for all files.
     .Example
         Test-AzTemplate -TemplatePath ./FolderWithATemplate | Export-Clixml ./Results.clixml
-        # Tests template files in ./FolderWithATemplate, and exports their results to clixml.
+        # Tests all template files in ./FolderWithATemplate, and exports their results to clixml.
     .Example
-        Test-AzTemplate -TemplatePath ./DirectoryWithTemplate -GroupName AllFile
+        Test-AzTemplate -TemplatePath ./DirectoryWithTemplates -GroupName AllFiles
+        # Runs all tests included in the group "AllFiles" on all the files located in ./DirectoryWithTemplates
     
     #>
     [CmdletBinding(DefaultParameterSetName='NearbyTemplate')]
