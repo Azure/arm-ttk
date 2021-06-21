@@ -25,11 +25,6 @@ $TemplateText,
 $TemplateFullPath
 )
 
-if ($TemplateFullPath -like '*fail*') {
-    Write-Error "This was expected to fail"
-}
-return 
-
 # Find all uses of the function 'ResourceID'
 $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName resourceId
 
