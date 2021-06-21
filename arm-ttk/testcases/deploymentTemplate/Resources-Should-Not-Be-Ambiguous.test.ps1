@@ -19,10 +19,16 @@ $TemplateObject,
 
 # The text of an Azure Resource Manager template
 [Parameter(Mandatory,Position=1)]
-$TemplateText
+$TemplateText,
+
+[Parameter(Mandatory,Position=1)]
+$TemplateFullPath
 )
 
-# return
+if ($TemplateFullPath -like '*fail*') {
+    Write-Error "This was expected to fail"
+}
+return 
 
 # Find all uses of the function 'ResourceID'
 $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName resourceId
