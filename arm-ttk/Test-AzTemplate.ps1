@@ -30,7 +30,7 @@ Each test script has access to a set of well-known variables:
 * MainTemplateParameters (a hashtable containing the parameters found in the main template)
 * MainTemplateVariables (a hashtable containing the variables found in the main template)
 * MainTemplateOutputs (a hashtable containing the outputs found in the main template)
-* InnerTemplates (indicates if the template contained or was in inner templates)
+* InnerTemplates (indicates if the template contained or was in inner templates
 
     .Example
         Test-AzTemplate -TemplatePath ./FolderWithATemplate
@@ -53,6 +53,9 @@ Each test script has access to a set of well-known variables:
     .Example
         Test-AzTemplate -TemplatePath ./FolderWithATemplate | Export-Clixml ./Results.clixml
         # Tests template files in ./FolderWithATemplate, and exports their results to clixml.
+    .Example
+        Test-AzTemplate -TemplatePath ./DirectoryWithTemplate -GroupName AllFile
+    
     #>
     [CmdletBinding(DefaultParameterSetName='NearbyTemplate')]
     param(
@@ -112,6 +115,12 @@ Each test script has access to a set of well-known variables:
     [Alias('TestGroups')]
     $TestGroup = [Ordered]@{},
 
+
+    # The name of one or more test groups.  This will run tests only from this group.
+    # Built-in valid groups are:  All, MainTemplateTests, DeploymentTemplate, DeploymentParameters, CreateUIDefinition.    
+    [string[]]
+    $GroupName,
+
     # Any additional parameters to pass to each test.
     # This can be used to supply custom information to validate.
     # For example, passing -TestParameter @{testDate=[DateTime]::Now.AddYears(-1)} 
@@ -151,6 +160,7 @@ Each test script has access to a set of well-known variables:
 
 
         $builtInTestCases = @{}
+        $script:PassFailTotalPerRun = @{Pass=0;Fail=0;Total=0}
         # Next we'll define some human-friendly built-in groups.
         $builtInGroups = @{
             'all' = 'deploymentTemplate', 'createUIDefinition', 'deploymentParameters'
@@ -362,6 +372,13 @@ Each test script has access to a set of well-known variables:
                         }
                     }
 
+                    $script:PassFailTotalPerRun.Total++
+                    if ($testErrors.Count -lt 1) {
+                        $script:PassFailTotalPerRun.Pass++
+                    } else {
+                        $script:PassFailTotalPerRun.Fail++
+                    }
+
                     [PSCustomObject][Ordered]@{
                         pstypename = 'Template.Validation.Test.Result'
                         Errors = $testErrors
@@ -375,6 +392,9 @@ Each test script has access to a set of well-known variables:
                         Timespan = $testTook
                         File = $fileInfo
                         TestInput = @{} + $TestInput
+                        Summary = if ($isLastFile -and -not $testQueue.Count) {
+                            [PSCustomObject]$script:PassFailTotalPerRun    
+                        }
                     }
                 } else {
                     it $dq {
@@ -395,17 +415,29 @@ Each test script has access to a set of well-known variables:
 
         #*Test-FileList (tests a list of files)
         function Test-FileList {
+            $lastFile = $FolderFiles[-1]
+            $isFirstFile = $true                        
             foreach ($fileInfo in $FolderFiles) { # We loop over each file in the folder.
+                $isLastFile = $fileInfo -eq $lastFile
                 $matchingGroups =
                     @(if ($fileInfo.Schema) { # If a given file has a schema,
-                        foreach ($key in $TestGroup.Keys) { # and it matches the name of the testgroup
+                        if ($isFirstFile) {   # see if it's the first file.
+                            'AllFiles'        # If it is, add it to the group 'AllFiles'.
+                            $isFirstFile = $false
+                        }
+                        
+                        foreach ($key in $TestGroup.Keys) { # Then see if the schema matches the name of the testgroup
                             if ("$key".StartsWith("_") -or "$key".StartsWith('.')) { continue }
                             if ($fileInfo.Schema -match $key) {
                                 $key # then run that group of tests.
                             }
                         }
+                        
                     } else {
                         foreach ($key in $TestGroup.Keys) { # If it didn't have a schema
+                            if ($key -eq 'AllFiles') {
+                                $key; continue
+                            }
                             if ($fileInfo.Extension -eq '.json') { # and it was a JSON file
                                 $fn = $fileInfo.Name -ireplace '\.json$',''
                                 if ($fn -match $key) { # check to see if it's name matches the key
@@ -418,7 +450,13 @@ Each test script has access to a set of well-known variables:
                                 if ($key -eq 'DeploymentTemplate' -and # Otherwise, if we're checking the deploymentTemplate
                                     'maintemplate', 'azuredeploy', 'prereq.azuredeploy' -contains $fn) { # and the file name is something we _know_ will be an ARM template
                                     $key; continue # then run the deployment tests regardless of schema.
-                                }
+                                } elseif (
+                                    $key -eq 'DeploymentTemplate' -and # Otherwise, if we're checking for the deploymentTemplate
+                                    $fileInfo.Object.resources # and the file has a .resources property.                                    
+                                ) {
+                                    Write-Warning "File '$($fileInfo.Name)' has no schema, but has .resources.  Treating as a DeploymentTemplate."
+                                    $key; continue # then run the deployment tests regardless of schema.
+                                }                                
                             }
                             if (-not ("$key".StartsWith('_') -or "$key".StartsWith('.'))) { continue } # Last, check if the test group is for a file extension.
                             if ($fileInfo.Extension -eq "$key".Replace('_', '.')) { # If it was, run tests associated with that extension.
@@ -556,6 +594,7 @@ Each test script has access to a set of well-known variables:
 
         # First, merge the built-in groups and test cases with any supplied by the user.
         foreach ($kv in $builtInGroups.GetEnumerator()) {
+            if ($GroupName -and $GroupName -notcontains $kv.Key) { continue }
             if (-not $testGroup[$kv.Key]) {
                 $TestGroup[$kv.Key] = $kv.Value
             }

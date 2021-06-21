@@ -168,7 +168,11 @@ $($ParentNode.CustomControl.CustomEntries.CustomEntry.CustomItem.ExpressionBindi
                     } } 
             }
         }
-    }) -join ''
+    }
+    if ($testOut.Summary) {
+        $testOut.Summary | Format-List | Out-String
+    }
+    ) -join ''
 </ScriptBlock>
               </ExpressionBinding>
             </CustomItem>
