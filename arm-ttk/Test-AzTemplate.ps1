@@ -31,7 +31,11 @@ Each test script has access to a set of well-known variables:
 * MainTemplateVariables (a hashtable containing the variables found in the main template)
 * MainTemplateOutputs (a hashtable containing the outputs found in the main template)
 * InnerTemplates (indicates if the template contained or was in inner templates)
-
+    
+    
+    .Example
+        Test-AzTemplate -TemplatePath ./DirectoryWithTemplate -GroupName AllFiles
+    
     #>
     [CmdletBinding(DefaultParameterSetName='NearbyTemplate')]
     param(
@@ -90,6 +94,12 @@ Each test script has access to a set of well-known variables:
     [Collections.IDictionary]
     [Alias('TestGroups')]
     $TestGroup = [Ordered]@{},
+
+
+    # The name of one or more test groups.  This will run tests only from this group.
+    # Built-in valid groups are:  All, MainTemplateTests, DeploymentTemplate, DeploymentParameters, CreateUIDefinition.    
+    [string[]]
+    $GroupName,
 
     # Any additional parameters to pass to each test.
     # This can be used to supply custom information to validate.
@@ -370,19 +380,29 @@ Each test script has access to a set of well-known variables:
 
         #*Test-FileList (tests a list of files)
         function Test-FileList {
-            $lastFile = $FolderFiles[-1]                        
+            $lastFile = $FolderFiles[-1]
+            $isFirstFile = $true                        
             foreach ($fileInfo in $FolderFiles) { # We loop over each file in the folder.
                 $isLastFile = $fileInfo -eq $lastFile
                 $matchingGroups =
                     @(if ($fileInfo.Schema) { # If a given file has a schema,
-                        foreach ($key in $TestGroup.Keys) { # and it matches the name of the testgroup
+                        if ($isFirstFile) {   # see if it's the first file.
+                            'AllFiles'        # If it is, add it to the group 'AllFiles'.
+                            $isFirstFile = $false
+                        }
+                        
+                        foreach ($key in $TestGroup.Keys) { # Then see if the schema matches the name of the testgroup
                             if ("$key".StartsWith("_") -or "$key".StartsWith('.')) { continue }
                             if ($fileInfo.Schema -match $key) {
                                 $key # then run that group of tests.
                             }
                         }
+                        
                     } else {
                         foreach ($key in $TestGroup.Keys) { # If it didn't have a schema
+                            if ($key -eq 'AllFiles') {
+                                $key; continue
+                            }
                             if ($fileInfo.Extension -eq '.json') { # and it was a JSON file
                                 $fn = $fileInfo.Name -ireplace '\.json$',''
                                 if ($fn -match $key) { # check to see if it's name matches the key
@@ -535,6 +555,7 @@ Each test script has access to a set of well-known variables:
 
         # First, merge the built-in groups and test cases with any supplied by the user.
         foreach ($kv in $builtInGroups.GetEnumerator()) {
+            if ($GroupName -and $GroupName -notcontains $kv.Key) { continue }
             if (-not $testGroup[$kv.Key]) {
                 $TestGroup[$kv.Key] = $kv.Value
             }
