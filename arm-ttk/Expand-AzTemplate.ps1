@@ -324,7 +324,7 @@ function Expand-AzTemplate
                     return "'$("$v".Replace("'","\'"))'"
                 } else {
                     if ("$templateVariableValue".StartsWith('[')) {
-                        return $templateVariableValue.Value
+                        return $templateVariableValue
                     } else {
                         return "'" + "$templateVariableValue".Replace("'","\'") + "'"
                     }
