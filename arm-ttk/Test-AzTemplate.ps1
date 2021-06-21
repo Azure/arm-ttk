@@ -50,6 +50,9 @@ Each test script has access to a set of well-known variables:
             '*' = '*schema*'
         }
         # Skips tests named like *apiversions* from files named like azureDeploy, and skips schema tests for all files.
+    .Example
+        Test-AzTemplate -TemplatePath ./FolderWithATemplate | Export-Clixml ./Results.clixml
+        # Tests template files in ./FolderWithATemplate, and exports their results to clixml.
     #>
     [CmdletBinding(DefaultParameterSetName='NearbyTemplate')]
     param(
