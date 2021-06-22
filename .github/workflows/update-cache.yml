@@ -14,6 +14,7 @@ jobs:
         with: 
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: true
+          allow-no-subscriptions: true
       - name: Update TTK Cache
         uses: Azure/powershell@v1
         with: 
