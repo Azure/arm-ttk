@@ -63,7 +63,7 @@ foreach ($av in $allApiVersions) {
         apiVersion
     #>
 
-    if($av.jsonPath -match "\.properties"){
+    if($av.jsonPath -ne "apiVersion" -and $av.jsonpath -notmatch "apiVersion\[\d+\]\.apiVersion"){
         continue
     }
 
@@ -78,7 +78,7 @@ foreach ($av in $allApiVersions) {
     # Next, resolve the full resource type
     $FullResourceTypes = 
     @(
-        if ($av.ParentObject -and $av.type -notlike '*/*') {
+        if ($av.ParentObject) {
             # by walking backwards over the parent resources 
             # (since the topmost resource will be the last item in the list)
             for ($i = $av.ParentObject.Count - 1; $i -ge 0; $i--) {
@@ -122,12 +122,7 @@ foreach ($av in $allApiVersions) {
     $validApiVersions = # This is made a little tricky by the fact that some resources don't directly have an API version        
     @(for ($i = $FullResourceTypes.Count - 1; $i -ge 0; $i--) {
             # so we need to walk backwards thru the list of items
-            $resourceTypeName = 
-                if ($fullResourceType[$i] -like '*/*') {
-                    $fullResourceType[$i]
-                } else {
-                    $FullResourceTypes[0..$i] -join '/' # construct the resource type name
-                }
+            $resourceTypeName = $FullResourceTypes[0..$i] -join '/' # construct the resource type name
             $apiVersionsOfType = $AllAzureResources.$resourceTypeName | # and see if there's an apiVersion.
             Select-Object -ExpandProperty apiVersions |
             Sort-Object -Descending
