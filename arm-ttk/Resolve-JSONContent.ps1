@@ -9,9 +9,9 @@
         Find-JSONContent
     .Example
         Resolve-JSONContent -JSONPath 'a.b' -JSONText '{
-            a: {
-                b: {
-                    c: [0,1,2]
+            "a": {
+                "b": {
+                    "c": [0,1,2]
                 }
             }
         }'
@@ -36,17 +36,20 @@
     )
     begin {
         $jsonProperty = [Regex]::new(@'
-(?:         # Match but don't store:
-[\{\,]      # A bracket or comma
-\s{0,}      # Optional Whitespace
-"           # the opening quote
-)            
-(?<Name>    # Capture the Name, which is:
-.+?         # Anything until...
-(?=(?<!\\)")# a closing quote (as long as it's not preceeded by a \) 
+(?<=             # After 
+[\{\,]           # a bracket or comma
+)
+\s{0,}           # Match optional Whitespace
+(?<Quoted>["'])? # the opening quote            
+(?<Name>         # Capture the Name, which is:
+.+?              # Anything until...
+)
+(?=
+    (?(Quoted)((?<!\\)\k<Quoted>)|([\s:]))
 )
 (?:         # Match but don't store:
-"\s{0,}     # a double-quote, optional whitespace:
+    (?(Quoted)(\k<Quoted>))
+\s{0,}     # a double-quote, optional whitespace:
 )
 :
 (?<JSON_Value>
@@ -104,6 +107,7 @@
 \s{0,}                            # Optionally match following whitespace
 )
 '@, 'IgnoreCase,IgnorePatternWhitespace', '00:00:05')
+
         
         $jsonList = [Regex]::new(@'
 (?>
@@ -182,9 +186,10 @@
 
     process {
         $cursor  = 0
-        $counter = 0         
+        $counter = 0
+        $indexMatch = $null         
          
-
+        $gotThisFar = @()
         :nextPathPart foreach ($part in $jsonPathParts.Matches($JSONPath)) {
             $propMatch = $null
             $listMatch = $null
@@ -192,36 +197,58 @@
                 foreach ($propMatch in $jsonProperty.Matches($JSONText, $cursor)) {
                     if ($propMatch.Groups['Name'].Value -eq $part.Groups['Property'].Value) {
                         $cursor = $propMatch.Groups['Name'].Index + $propMatch.Groups['Name'].Length
+                        $gotThisFar += $part
                         continue nextPathPart
                     }
                 }
-                
+                if ($VerbosePreference -ne 'silentlyContinue') {
+                    Write-Verbose "Unable to find $($gotThisFar -join '')$($part) around index $($cursor)"
+                }
+                $cursor = $null
             } elseif ($part.Groups['Index'].Success) {
                 $targetIndex = $part.Groups['Index'].Value
                 $listMatch = $jsonList.Match($JSONText, $cursor)
                 $values = $listMatch.Groups["JSON_Value"].Captures
+                if ($targetIndex -gt $values.Count) {
+                    if ($VerbosePreference -ne 'silentlyContinue') {
+                        Write-Verbose "$($gotThisFar -join '')$($part) is out of bounds.  Array has $($values.Count) items."
+                    }
+                    $cursor = $null
+                    $gotThisFar += $part
+                    continue nextPathPart
+                }
                 for ($i = 0; $i -lt $values.Count; $i++)  {
                     if ($i -eq $targetIndex) {
+                        $indexMatch = $values[$i]
                         $cursor = $values[$i].Index 
                         continue nextPathPart
                     }
+                }                
+            }
+
+            if (-not $cursor) {
+                if ($VerbosePreference -ne 'silentlyContinue') {
+                    Write-Verbose "Could not resolve $($gotThisFar -join '')$($part)"
                 }
-                
+                break
             }
         }
 
         if (-not $cursor) { return }
         
         if ($propMatch) { # If our last part of the path was a property        
+            $propMatchIndex  = $propMatch.Groups["Name"].Index - 1 # Subtract one for initial quote
+            $propMatchLength = ($propMatch.Groups["JSON_Value"].Index + $propMatch.Groups["JSON_Value"].Length) - 
+                                $propMatch.Groups["Name"].Index + 1  # Add one for initial quote
             [PSCustomObject][Ordered]@{
                 JSONPath = $JSONPath
                 JSONText = $JSONText
-                Index    = $propMatch.Groups["Name"].Index - 1 # Subtract one for initial quote
-                Length   = ($propMatch.Groups["JSON_Value"].Index + $propMatch.Groups["JSON_Value"].Length)  - 
-                    $propMatch.Groups["Name"].Index + 1  # Add one for initial quote
+                Index    = $propMatchIndex
+                Length   = $propMatchLength
                 Line     = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Matches(
-                                $JSONText, $propMatch.Groups["Name"].Index - 1
+                                $JSONText, $propMatchIndex
                            ).Count
+                Content  = $JSONText.Substring($propMatchIndex, $propMatchLength)
                 Column   = $propMatch.Groups["Name"].Index - 1 + $(
                                 $m = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Match(
                                     $JSONText, $propMatch.Groups["Name"].Index - 1)
@@ -230,18 +257,20 @@
                 PSTypeName = 'JSON.Content.Location'
             }
         } elseif ($listMatch) {
+            
             [PSCustomObject][Ordered]@{
                 PSTypeName = 'JSON.Content.Location'
                 JSONPath = $JSONPath
                 JSONText = $JSONText
-                Index    = $listMatch.Index
-                Length   = $listMatch.Length
+                Index    = $indexMatch.Index
+                Length   = $indexMatch.Length
+                Content  = $JSONText.Substring($indexMatch.Index, $indexMatch.Length)
                 Line     = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Matches(
-                                $JSONText, $listMatch.Index
+                                $JSONText, $indexMatch.Index
                            ).Count
                 Column   = $listMatch.Groups["ListItem"].Index + $(
                                 $m = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Match(
-                                    $JSONText, $listMatch.Index)
+                                    $JSONText, $indexMatch.Index)
                                 $m.Index + $m.Length
                             ) + 1
             }

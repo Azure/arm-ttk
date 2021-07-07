@@ -50,7 +50,8 @@ foreach ($id in $ids) {
         "timezoneId",                  # Microsoft.SQL/managedInstances
         "vlanId",                      # Unique Id to establish peering when setting up an ExpressRoute circuit
         "workerSizeId",                # Microsoft.Web/serverFarms (older apiVersions)
-        "metricId"                     # Microsoft.ServiceBus/namespaces
+        "metricId",                    # Microsoft.ServiceBus/namespaces
+        "requestedServiceObjectiveId"  # Microsoft.Sql/servers/databases
     )
 
     if ($exceptions -contains $myIdFieldName) {
@@ -92,7 +93,7 @@ foreach ($id in $ids) {
     }
 
     # Skip this check if id is inside location property of Microsoft.insights/webtests
-    if ($id.ParentObject.type -match '^Microsoft\.insights/webtests' -and $id.JSONPath -match '\.locations\.') {
+    if ($id.ParentObject.type -match '^Microsoft\.insights/webtests' -and $id.JSONPath -match '\.locations') {
         continue
     }
 

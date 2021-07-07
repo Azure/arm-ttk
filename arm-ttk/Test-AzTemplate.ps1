@@ -30,8 +30,33 @@ Each test script has access to a set of well-known variables:
 * MainTemplateParameters (a hashtable containing the parameters found in the main template)
 * MainTemplateVariables (a hashtable containing the variables found in the main template)
 * MainTemplateOutputs (a hashtable containing the outputs found in the main template)
-* InnerTemplates (indicates if the template contained or was in inner templates)
+* InnerTemplates (indicates if the template contained or was in inner templates
 
+    .Example
+        Test-AzTemplate -TemplatePath ./FolderWithATemplate
+        # Tests all files in /FolderWithATemplate
+    .Example
+        Test-AzTemplate -TemplatePath ./Templates/NameOfTemplate.json
+        # Tests the file at the location ./Templates/NameOfTemplate.json.
+    .Example
+        Test-AzTemplate -TemplatePath ./FolderWithATemplate -Test 'DeploymentTemplate-Schema-Is-Correct' 
+        # Runs the test 'DeploymentTemplate-Schema-Is-Correct' on all files in the folder /FolderWithATemplate
+    .Example
+        Test-AzTemplate -TemplatePath ./FolderWithATemplate -Skip 'DeploymentTemplate-Schema-Is-Correct'
+        # Skips the test 'DeploymentTemplate-Schema-Is-Correct'
+    .Example
+        Test-AzTemplate -TemplatePath ./FolderWithATemplate -SkipByFile @{
+            '*azureDeploy*' = '*apiVersions*'
+            '*' = '*schema*'
+        }
+        # Skips tests named like *apiversions* on files with the text "azureDeploy" in the filename, and skips with the text "schema" in the test name for all files.
+    .Example
+        Test-AzTemplate -TemplatePath ./FolderWithATemplate | Export-Clixml ./Results.clixml
+        # Tests all template files in ./FolderWithATemplate, and exports their results to clixml.
+    .Example
+        Test-AzTemplate -TemplatePath ./DirectoryWithTemplates -GroupName AllFiles
+        # Runs all tests included in the group "AllFiles" on all the files located in ./DirectoryWithTemplates
+    
     #>
     [CmdletBinding(DefaultParameterSetName='NearbyTemplate')]
     param(
@@ -91,6 +116,12 @@ Each test script has access to a set of well-known variables:
     [Alias('TestGroups')]
     $TestGroup = [Ordered]@{},
 
+
+    # The name of one or more test groups.  This will run tests only from this group.
+    # Built-in valid groups are:  All, MainTemplateTests, DeploymentTemplate, DeploymentParameters, CreateUIDefinition.    
+    [string[]]
+    $GroupName,
+
     # Any additional parameters to pass to each test.
     # This can be used to supply custom information to validate.
     # For example, passing -TestParameter @{testDate=[DateTime]::Now.AddYears(-1)} 
@@ -103,6 +134,12 @@ Each test script has access to a set of well-known variables:
     # If provided, will skip any tests in this list.
     [string[]]
     $Skip,
+
+    # If provided, will skip tests on a file-by-file basis.
+    # The key of this dictionary is a wildcard on a filename.
+    # The value of this dictionary is a list of wildcards to exclude.
+    [Collections.IDictionary]
+    $SkipByFile,
 
     # If provided, will use this file as the "main" template.
     [string]
@@ -244,7 +281,7 @@ Each test script has access to a set of well-known variables:
         #*Test-Group (executes a group of tests)
         function Test-Group {
             $testQueue = [Collections.Queue]::new(@($GroupName))
-            while ($testQueue.Count) {
+            :nextTestInGroup while ($testQueue.Count) {
                 $dq = $testQueue.Dequeue()
                 if ($TestGroup.$dq) {
                     foreach ($_ in $TestGroup.$dq) {
@@ -255,6 +292,15 @@ Each test script has access to a set of well-known variables:
 
                 if ($ValidTestList -and $ValidTestList -notcontains $dq) {
                     continue
+                }
+
+                if ($SkipByFile) {
+                    foreach ($sbp in $SkipByFile.GetEnumerator()) {
+                        if ($fileInfo.Name -notlike $sbp.Key) { continue }
+                        foreach ($v in $sbp.Value) {
+                            if ($dq -like $v) { continue nextTestInGroup }
+                        }
+                    }                    
                 }
 
                 if (-not $Pester) {
@@ -370,19 +416,29 @@ Each test script has access to a set of well-known variables:
 
         #*Test-FileList (tests a list of files)
         function Test-FileList {
-            $lastFile = $FolderFiles[-1]                        
+            $lastFile = $FolderFiles[-1]
+            $isFirstFile = $true                        
             foreach ($fileInfo in $FolderFiles) { # We loop over each file in the folder.
                 $isLastFile = $fileInfo -eq $lastFile
                 $matchingGroups =
                     @(if ($fileInfo.Schema) { # If a given file has a schema,
-                        foreach ($key in $TestGroup.Keys) { # and it matches the name of the testgroup
+                        if ($isFirstFile) {   # see if it's the first file.
+                            'AllFiles'        # If it is, add it to the group 'AllFiles'.
+                            $isFirstFile = $false
+                        }
+                        
+                        foreach ($key in $TestGroup.Keys) { # Then see if the schema matches the name of the testgroup
                             if ("$key".StartsWith("_") -or "$key".StartsWith('.')) { continue }
                             if ($fileInfo.Schema -match $key) {
                                 $key # then run that group of tests.
                             }
                         }
+                        
                     } else {
                         foreach ($key in $TestGroup.Keys) { # If it didn't have a schema
+                            if ($key -eq 'AllFiles') {
+                                $key; continue
+                            }
                             if ($fileInfo.Extension -eq '.json') { # and it was a JSON file
                                 $fn = $fileInfo.Name -ireplace '\.json$',''
                                 if ($fn -match $key) { # check to see if it's name matches the key
@@ -451,30 +507,34 @@ Each test script has access to a set of well-known variables:
                     foreach ($_ in $WellKnownVariables) {
                         $testInput[$_] = $ExecutionContext.SessionState.PSVariable.Get($_).Value
                     }
-                    $ValidTestList = if ($test) {
-                        $testList = @(Get-TestGroups ($test -replace '[_-]',' ') -includeTest)
-                        if (-not $testList) {
-                            Write-Warning "Test '$test' was not found, all tests will be run"
-                        }
-                        if ($skip) {
+                    $ValidTestList = 
+                        if ($test) {
+                            $testList = @(Get-TestGroups ($test -replace '[_-]',' ') -includeTest)
+                            if (-not $testList) {
+                                Write-Warning "Test '$test' was not found, all tests will be run"
+                            }
+                            if ($skip) {
+                                foreach ($tl in $testList) {
+                                    if ($skip -replace '[_-]', ' ' -notcontains $tl) {
+                                        $tl
+                                    }
+                                }
+                            } 
+                            else {
+                                $testList
+                            }
+                        } elseif ($skip) {
+                            $testList = @(Get-TestGroups -GroupName $groupName -includeTest)
                             foreach ($tl in $testList) {
                                 if ($skip -replace '[_-]', ' ' -notcontains $tl) {
                                     $tl
                                 }
                             }
                         } else {
-                            $testList
+                            $null
                         }
-                    } elseif ($skip) {
-                        $testList = @(Get-TestGroups -GroupName $groupName -includeTest)
-                        foreach ($tl in $testList) {
-                            if ($skip -replace '[_-]', ' ' -notcontains $tl) {
-                                $tl
-                            }
-                        }
-                    } else {
-                        $null
-                    }
+
+                    
                     if (-not $Pester) {
                         $context = "$($fileInfo.Name)->$groupName"
                         Test-Group
@@ -535,6 +595,7 @@ Each test script has access to a set of well-known variables:
 
         # First, merge the built-in groups and test cases with any supplied by the user.
         foreach ($kv in $builtInGroups.GetEnumerator()) {
+            if ($GroupName -and $GroupName -notcontains $kv.Key) { continue }
             if (-not $testGroup[$kv.Key]) {
                 $TestGroup[$kv.Key] = $kv.Value
             }

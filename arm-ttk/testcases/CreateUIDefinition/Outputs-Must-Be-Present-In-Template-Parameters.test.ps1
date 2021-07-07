@@ -31,6 +31,7 @@ foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk th
     $outputName = $output.Name
     if ($outputName -eq 'applicationresourcename' -or `
         $outputName -eq 'jitaccesspolicy' -or `
+        $outputName -eq 'managedidentity' -or `
         $outputName -eq 'managedresourcegroupid') { # If the output was one of the outputs used for Managed Apps and only found in the generated template, skip the test
             continue 
     }
