@@ -1,0 +1,6 @@
+﻿{
+  "variables": {
+    "rg": "[resourceGroup()]"
+  },
+  "someProperty": "[variables('rg').location]"
+}

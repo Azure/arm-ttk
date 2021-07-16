@@ -146,7 +146,8 @@ function Expand-AzTemplate
                 'MainTemplatePath', 'MainTemplateObject', 'MainTemplateText',
                 'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 'MainTemplateOutputs', 'TemplateMetadata',
                 'isParametersFile', 'ParameterFileName', 'ParameterObject', 'ParameterText',
-                'InnerTemplates', 'ParentTemplateText', 'ParentTemplateObject'
+                'InnerTemplates', 'ParentTemplateText', 'ParentTemplateObject',
+                'ExpandedTemplateText', 'ExpandedTemplateObject'
 
             foreach ($_ in $WellKnownVariables) {
                 $ExecutionContext.SessionState.PSVariable.Set($_, $null)
@@ -302,7 +303,47 @@ function Expand-AzTemplate
                 }
 
                 $TemplateObject = $TemplateText | ConvertFrom-Json
-            }            
+            }
+            
+            
+            $variableReferences = $TemplateText | ?<ARM_Variable> 
+            $expandedTemplateText = $TemplateText | ?<ARM_Variable> -ReplaceEvaluator {
+                param($match)
+
+                $templateVariableValue = $templateObject.variables.$($match.Groups['VariableName'])
+                if ($match.Groups["Property"].Success) {
+                    
+                    $v = $templateVariableValue
+                    foreach ($prop in $match.Groups["Property"] -split '\.' -ne '') {
+                        if ($prop -match '\[(?<Index>\d+)]$') {
+                            $v.($prop.Replace("$($matches.0)", ''))[[int]$matches.Index]
+                        } else {
+                            $v  = $v.$prop
+                        }
+                    }
+                    return "'$("$v".Replace("'","\'"))'"
+                } else {
+                    if ("$templateVariableValue".StartsWith('[')) {
+                        if ("$templateVariableValue".EndsWith(']')) {
+                            return "$templateVariableValue" -replace '^\[' -replace '\]$'
+                        } else {
+                            return $templateVariableValue
+                        }
+                    } else {
+                        return "'" + "$templateVariableValue".Replace("'","\'") + "'"
+                    }
+                    
+                    return "$($templateObject.variables.$($match.Groups['VariableName']))".Replace("'","\'")
+                }
+            }
+
+            if ($expandedTemplateText -ne $TemplateText) {
+                $expandedTemplateObject = try { $expandedTemplateText | ConvertFrom-Json -ErrorAction Stop -ErrorVariable err } catch {
+                    "$_" | Write-Verbose
+                }
+            } else {
+                $expandedTemplateObject = $null
+            }                                    
 
             $out = [Ordered]@{}
             foreach ($v in $WellKnownVariables) {
