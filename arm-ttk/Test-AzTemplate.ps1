@@ -254,7 +254,9 @@ Each test script has access to a set of well-known variables:
                         $usedParameters = $false
                         # Map TemplateText to the inner template text by converting to JSON (if the test command uses -TemplateText)
                         if ($testCommandParameters.ContainsKey("TemplateText")) { 
-                            $templateObject = $testInput['TemplateText']   = $ParentTemplateText.Substring($foundInnerTemplate.Index, $foundInnerTemplate.Length)
+                            $templateText   = $testInput['TemplateText']   = 
+                                $ParentTemplateText.Substring($foundInnerTemplate.Index, $foundInnerTemplate.Length) -replace 
+                                    '^[''"\w]+\s{0,}\:' # Clip the name of the property the template was embedded within, so $templateText is valid JSON
                             $usedParameters = $true
                         }
                         # And Map TemplateObject to the converted json (if the test command uses -TemplateObject)
