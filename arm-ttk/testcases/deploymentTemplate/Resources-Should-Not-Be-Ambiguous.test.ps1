@@ -19,10 +19,11 @@ $TemplateObject,
 
 # The text of an Azure Resource Manager template
 [Parameter(Mandatory,Position=1)]
-$TemplateText
-)
+$TemplateText,
 
-exit
+[Parameter(Mandatory,Position=1)]
+$TemplateFullPath
+)
 
 # Find all uses of the function 'ResourceID'
 $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName resourceId
@@ -38,9 +39,8 @@ $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName re
             $foundResourceType = $resourceIdParameters[$n].Replace('(','').Replace("'","") # Remove extraneous chars before looking for the resource
             if ($n -eq 0) { # If the resource type is the first parameter
                 $foundResource = # see if we can find a resource with that type.
-                    Find-JsonContent -InputObject $TemplateObject.resources -Key Type -Value $foundResourceType
-                if (-not $foundResource -or 
-                    $foundResource.condition) 
+                    @(Find-JsonContent -InputObject $TemplateObject.resources -Key Type -Value $foundResourceType)
+                if ((-not $foundResource) -or ($foundResource | Where-Object Condition)) 
                 { 
                     Write-Error "At least one parameter must preceed the resource type" -TargetObject $rid -ErrorId 'ResourceID.Missing.Name'
                     continue nextResourceId

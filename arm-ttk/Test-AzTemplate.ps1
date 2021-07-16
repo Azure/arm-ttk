@@ -353,22 +353,22 @@ Each test script has access to a set of well-known variables:
                                             $wholeText, $testOut.TargetObject.Index)
                                         $m.Index + $m.Length
                                     ) + 1
-                                $testIssueLocations.Add([PSCustomObject]@{Line=$lineNumber;Column=$columnNumber;Index=$testOut.TargetObject.Index;Length=$testOut.TargetObject.Length})
+                                $testOut | Add-Member NoteProperty Location ([PSCustomObject]@{Line=$lineNumber;Column=$columnNumber;Index=$testOut.TargetObject.Index;Length=$testOut.TargetObject.Length}) -Force
                             }
                             elseif ($testOut.TargetObject.PSTypeName -eq 'JSON.Content') {                                
-                                if ($GroupName -eq 'CreateUIDefinition') {
-                                    $null = $testIssueLocations.Add((
-                                        Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $createUIDefinitionText
-                                    ))                                        
-                                } elseif ($GroupName -eq 'DeploymentParameters') {
-                                    $null = $testIssueLocations.Add((
-                                        Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $parameterText
-                                    ))
-                                } else {
-                                    $resolvedLocation = Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $parameterText
-                                    $resolvedLocation.Line += $(if ($InnerTemplateStartLine) { $InnerTemplateStartLine - 1 })
-                                    $null = $testIssueLocations.Add($resolvedLocation)
-                                }
+                                
+                                $location = 
+                                    if ($GroupName -eq 'CreateUIDefinition') {                                        
+                                        Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $createUIDefinitionText                                       
+                                    } elseif ($GroupName -eq 'DeploymentParameters') {
+                                        Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $parameterText                                        
+                                    } else {
+                                        $resolvedLocation = Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $parameterText
+                                        $resolvedLocation.Line += $(if ($InnerTemplateStartLine) { $InnerTemplateStartLine - 1 })
+                                        $resolvedLocation
+                                    }
+
+                                $testOut | Add-Member NoteProperty Location $location -Force
                             }
                         }
                         elseif ($testOut -is [Management.Automation.WarningRecord]) {
@@ -393,7 +393,7 @@ Each test script has access to a set of well-known variables:
                         AllOutput = $testCaseOutput
                         Passed = $testErrors.Count -lt 1
                         Group = $displayGroup
-                        Location = $testIssueLocations
+                        
                         Name = $dq
                         Timespan = $testTook
                         File = $fileInfo
