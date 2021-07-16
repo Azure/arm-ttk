@@ -93,8 +93,8 @@ Write-FormatView -Action {
         foreach ($line in $testOut.AllOutput) {
             if ($line -is [Management.Automation.ErrorRecord] -or $line -is [Exception]) {
                 $msg = "$azoErrorStatus$(' ' * $indent)$line"
-                if ($TestOut.Location) {
-                    $msg += " Line: $($testOut.Location.Line), Column: $($testOut.Location.Column)"
+                if ($line.Location) {
+                    $msg += " Line: $($line.Location.Line), Column: $($line.Location.Column)"
                 }
 
                 if ($CanUseColor) {
