@@ -291,7 +291,7 @@ function Expand-AzTemplate
             
             $innerTemplates = @(if ($templateText -and $TemplateText.Contains('"template"')) {
                 Find-JsonContent -InputObject $templateObject -Key template |
-                    Where-Object { $_.expressionEvaluationOptions.scope -eq 'inner' -or $_.parameters.policyDefinitionID }
+                    Where-Object { $_.expressionEvaluationOptions.scope -eq 'inner' -or $_.jsonPath -like '*.policyRule.*' }
             })
 
             if ($innerTemplates) {
