@@ -302,7 +302,7 @@ Each test script has access to a set of well-known variables:
                                             $wholeText, $testOut.TargetObject.Index)
                                         $m.Index + $m.Length
                                     ) + 1
-                                $testOut | Add-Member NoteProperty Location ([PSCustomObject]@{Line=$lineNumber;Column=$columnNumber;Index=$testOut.TargetObject.Index;Length=$testOut.TargetObject.Length})                                
+                                $testOut | Add-Member NoteProperty Location ([PSCustomObject]@{Line=$lineNumber;Column=$columnNumber;Index=$testOut.TargetObject.Index;Length=$testOut.TargetObject.Length}) -Force
                             }
                             elseif ($testOut.TargetObject.PSTypeName -eq 'JSON.Content') {                                
                                 
@@ -316,6 +316,8 @@ Each test script has access to a set of well-known variables:
                                         $resolvedLocation.Line += $(if ($InnerTemplateStartLine) { $InnerTemplateStartLine - 1 })
                                         $resolvedLocation
                                     }
+
+                                $testOut | Add-Member NoteProperty Location $location -Force
                             }
                         }
                         elseif ($testOut -is [Management.Automation.WarningRecord]) {
