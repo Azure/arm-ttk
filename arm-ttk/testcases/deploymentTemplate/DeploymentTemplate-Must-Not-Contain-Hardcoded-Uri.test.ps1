@@ -43,15 +43,28 @@ $DisallowedHosts =
 $HardcodedHostFinder = # Create a regex to find any reference
     [Regex]::new(($DisallowedHosts -join '|' -replace '\.', '\.'), 'IgnoreCase')
 
+# Exception Regexs
 $preceededBySchema = # The exception to the rule is a schema reference, 
     [Regex]::new('https://schema\.', 'IgnoreCase,RightToLeft') # so make a regex to look back for the rest of it.
 
+    $IsDevOpsGalleryStorage = [Regex]::new('https://devopsgallerystorage\.blob\.', 'IgnoreCase,RightToLeft') # https://devopsgallerystorage.blob.core.windows.net/packages/azurerm.profile.2.8.0.nupkg
+
+# Exception Regexs (end)
+
 # Walk thru each host reference found 
 foreach ($match in $HardcodedHostFinder.Matches($TemplateText)) { 
-    # and see if it's preceeded by a schema.
+    
+    # and see if it's preceeded by a schema, i.e. if there wasn't a schema before, or it wasn't directly before
     $schemaMatch = $preceededBySchema.Match($TemplateText, $match.Index)
-    if (-not $schemaMatch.Success -or # If the wasn't a schema before, or it wasn't directly before
-        ($schemaMatch.Index + $schemaMatch.Length -ne $match.Index)) { # error.
+    $notTheSchema = (-not $schemaMatch.Success -or $schemaMatch.Index + $schemaMatch.Length -ne $match.Index)
+    
+    # The Azure Automation library packages are in a devopsgallerystorage blob container
+    $devOpsGalleryMatch = $IsDevOpsGalleryStorage.Match($templateText, $match.Index)
+    $notTheDevOpsGallery = (-not $devOpsGalleryMatch.Success -or $devOpsGalleryMatch.Index + $devOpsGalleryMatch.Length -ne $match.Index)
+
+    if ($notTheDevOpsGallery -and 
+        $notTheSchema 
+        ) { 
         Write-Error "Found hardcoded reference to $($match)" -ErrorId 'Hardcoded.Url.Reference' -TargetObject $match 
     }
 }
