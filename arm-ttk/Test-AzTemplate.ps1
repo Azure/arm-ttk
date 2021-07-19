@@ -321,13 +321,15 @@ Each test script has access to a set of well-known variables:
                     $InnerTemplateEndLine   = 0
                     $innerGroup = 
                         if ($testCaseOutput.InnerTemplateStart) {
+                            $innerTemplateStartIndex = ($($testCaseOutput | Select-Object -First 1).InnerTemplateStart) -as [int]
+                            $innerTemplateLength     = ($($testCaseOutput | Select-Object -First 1).InnerTemplateLength) -as [int]
                             $InnerTemplateStartLine = 
                                     [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Matches(
-                                        $parentTemplateText, $testCaseOutput.InnerTemplateStart
+                                        $parentTemplateText, $innerTemplateStartIndex
                                     ).Count
                             $InnerTemplateEndLine = 
                                     [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Matches(
-                                        $parentTemplateText, $testCaseOutput.InnerTemplateStart + $testCaseOutput.InnerTemplateLength
+                                        $parentTemplateText, $innerTemplateStartIndex + $innerTemplateLength
                                     ).Count
 
                             "NestedTemplate $($testCaseOutput.InnerTemplateName) [ Lines $InnerTemplateStartLine - $InnerTemplateEndLine ]"
