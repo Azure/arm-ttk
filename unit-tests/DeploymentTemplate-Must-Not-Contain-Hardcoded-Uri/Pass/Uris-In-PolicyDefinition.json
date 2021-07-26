@@ -1,0 +1,95 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.1.14562",
+      "templateHash": "2350252618174097128"
+    }
+  },
+  "parameters": {
+    "targetMG": {
+      "type": "string",
+      "metadata": {
+        "description": "Target Management Group"
+      }
+    },
+    "allowedLocations": {
+      "type": "array",
+      "defaultValue": [
+        "australiaeast",
+        "australiasoutheast",
+        "australiacentral"
+      ],
+      "metadata": {
+        "description": "An array of the allowed locations, all other locations will be denied by the created policy."
+      }
+    }
+  },
+  "functions": [],
+  "variables": {
+    "mgScope": "[tenantResourceId('Microsoft.Management/managementGroups', parameters('targetMG'))]",
+    "policyDefinitionName": "LocationRestriction"
+  },
+  "resources": [
+    {
+      "properties": {
+        "displayName": "Deploy network watcher when virtual networks are created",
+        "mode": "Indexed",
+        "description": "This policy creates a network watcher resource in regions with virtual networks. You need to ensure existence of a resource group named networkWatcherRG, which will be used to deploy network watcher instances.",
+        "metadata": {
+          "category": "Network"
+        },
+        "parameters": {},
+        "policyRule": {
+          "if": {
+            "field": "type",
+            "equals": "Microsoft.Network/virtualNetworks"
+          },
+          "then": {
+            "effect": "DeployIfNotExists",
+            "details": {
+              "type": "Microsoft.Network/networkWatchers",
+              "resourceGroupName": "networkWatcherRG",
+              "existenceCondition": {
+                "field": "location",
+                "equals": "[field('location')]"
+              },
+              "roleDefinitionIds": [
+                "/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7"
+              ],
+              "deployment": {
+                "properties": {
+                  "mode": "incremental",
+                  "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                      "location": {
+                        "type": "string"
+                      }
+                    },
+                    "resources": [
+                      {
+                        "apiVersion": "2016-09-01",
+                        "type": "Microsoft.Network/networkWatchers",
+                        "name": "[concat('networkWacher_', parameters('location'))]",
+                        "location": "[parameters('location')]"
+                      }
+                    ]
+                  },
+                  "parameters": {
+                    "location": {
+                      "value": "[field('location')]"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
