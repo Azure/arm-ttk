@@ -63,7 +63,7 @@ foreach ($av in $allApiVersions) {
         apiVersion
     #>
 
-    if($av.jsonPath -ne "apiVersion" -and $av.jsonpath -notmatch "apiVersion\[\d+\]\.apiVersion"){
+    if($av.jsonPath -ne "apiVersion" -and $av.jsonpath -notmatch "\.apiVersion$"){
         continue
     }
 
