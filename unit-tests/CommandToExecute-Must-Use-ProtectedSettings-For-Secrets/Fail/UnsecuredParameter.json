@@ -11,6 +11,7 @@
   },
   "resources": [
     {
+      "type": "Microsoft.Compute/virtualMachines/customScript",
       "settings": {
         "commandToExecute": "[parameters('adminPassword')]"
       }

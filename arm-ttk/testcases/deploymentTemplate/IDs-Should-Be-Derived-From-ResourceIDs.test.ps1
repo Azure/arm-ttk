@@ -35,6 +35,7 @@ foreach ($id in $ids) {
         "DataTypeId",                  # Microsoft.OperationalInsights/workspaces/dataSources
         "defaultMenuItemId",           # Microsoft.Portal/dashboards - it's a messy resource
         "keyVaultSecretId",            # Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
+        "keyVaultId",                  # KeyVaultIDs
         "keyId",                       # Microsoft.Cdn/profiles urlSigningKeys
         "objectId",                    # Common Property name
         "menuId",                      # Microsoft.Portal/dashboards
@@ -50,7 +51,8 @@ foreach ($id in $ids) {
         "timezoneId",                  # Microsoft.SQL/managedInstances
         "vlanId",                      # Unique Id to establish peering when setting up an ExpressRoute circuit
         "workerSizeId",                # Microsoft.Web/serverFarms (older apiVersions)
-        "metricId"                     # Microsoft.ServiceBus/namespaces
+        "metricId",                    # Microsoft.ServiceBus/namespaces
+        "requestedServiceObjectiveId"  # Microsoft.Sql/servers/databases
     )
 
     if ($exceptions -contains $myIdFieldName) {
@@ -92,7 +94,7 @@ foreach ($id in $ids) {
     }
 
     # Skip this check if id is inside location property of Microsoft.insights/webtests
-    if ($id.ParentObject.type -match '^Microsoft\.insights/webtests' -and $id.JSONPath -match '\.locations\.') {
+    if ($id.ParentObject.type -match '^Microsoft\.insights/webtests' -and $id.JSONPath -match '\.locations') {
         continue
     }
 
