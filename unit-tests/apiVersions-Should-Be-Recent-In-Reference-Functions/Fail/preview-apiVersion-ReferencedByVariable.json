@@ -13,6 +13,6 @@
         }
     ],
     "outputs": {
-        "NonPreviewVersionWhereSamePreviewDateExists" : "[listkeys(variables('sqlServerName'), '2020-02-01')]"
+        "NonPreviewVersionWhereSamePreviewDateExists" : "[listkeys(variables('sqlServerName'), '2017-12-01-preview')]"
     }
 }

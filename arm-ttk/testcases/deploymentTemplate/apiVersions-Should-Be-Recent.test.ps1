@@ -41,7 +41,7 @@ param(
 
 if (-not $TemplateObject.resources) {
     # If we don't have any resources
-    # then it's probably a partial template, and there's no apiVersions to check anyway, 
+    # then it's probably a partial template, and there's no apiVersions to check anyway,
     return # so return.
 }
 
@@ -54,13 +54,13 @@ foreach ($av in $allApiVersions) {
     <#
       if the apiVersion is not a direct descendent of the resource skip this one
       some RPs have a property named apiVersion in their properties body
-      The following paths would be valid to check      
+      The following paths would be valid to check
         resources[0].resources[0].apiVersion > this actually translates to apiVersion[0].apiVersion[0].apiVersion after Find-JSONContent
                 or
         apiVersion
     #>
 
-    if($av.jsonPath -ne "apiVersion" -and 
+    if($av.jsonPath -ne "apiVersion" -and
         $av.jsonpath -notmatch "apiVersion\[\d+\]\.apiVersion"){
         continue
     }
@@ -68,23 +68,23 @@ foreach ($av in $allApiVersions) {
     # Then walk over each object containing an ApiVersion.
     if ($av.ApiVersion -isnot [string]) {
         # If the APIVersion is not a string
-        # write an error 
+        # write an error
         Write-Error "Api Versions must be strings" -TargetObject $av -ErrorId ApiVersion.Not.String
         continue # and continue.
     }
 
     # Next, resolve the full resource type
-    $FullResourceTypes = 
+    $FullResourceTypes =
     @(
         if ($av.ParentObject) {
-            # by walking backwards over the parent resources 
+            # by walking backwards over the parent resources
             # (since the topmost resource will be the last item in the list)
             for ($i = $av.ParentObject.Count - 1; $i -ge 0; $i--) {
                 if (-not $av.ParentObject[$i].type) { continue }
                 $av.ParentObject[$i].type
             }
         }
-        $av.type # and adding this resource's type. 
+        $av.type # and adding this resource's type.
     )
 
 
@@ -100,24 +100,24 @@ foreach ($av in $allApiVersions) {
     }
 
     # To get the full type name, join them all with a slash
-    $FullResourceType = $FullResourceTypes -join '/' 
+    $FullResourceType = $FullResourceTypes -join '/'
 
     # Now, get the API version as a string
-    $apiString = $av.ApiVersion 
+    $apiString = $av.ApiVersion
     $hasDate = $apiString -match "(?<Year>\d{4,4})-(?<Month>\d{2,2})-(?<Day>\d{2,2})"
-    
+
     if (-not $hasDate) {
         # If we couldn't, write an error
-        
+
         Write-Error "Api versions must be a fixed date. $FullResourceType is not." -TargetObject $av -ErrorId ApiVersion.Not.Date
         continue # and move onto the next resource
     }
     $apiDate = [DateTime]::new($matches.Year, $matches.Month, $matches.Day) # now coerce the apiVersion into a DateTime
 
-    
+
 
     # Now find all of the valid versions from this API
-    $validApiVersions = # This is made a little tricky by the fact that some resources don't directly have an API version        
+    $validApiVersions = # This is made a little tricky by the fact that some resources don't directly have an API version
     @(for ($i = $FullResourceTypes.Count - 1; $i -ge 0; $i--) {
             # so we need to walk backwards thru the list of items
             $resourceTypeName = $FullResourceTypes[0..$i] -join '/' # construct the resource type name
@@ -138,7 +138,7 @@ foreach ($av in $allApiVersions) {
     foreach ($v in $validApiVersions) {
 
         $hasDate = $v -match "(?<Year>\d{4,4})-(?<Month>\d{2,2})-(?<Day>\d{2,2})"
-        $vDate = [DateTime]::new($matches.Year, $matches.Month, $matches.Day) 
+        $vDate = [DateTime]::new($matches.Year, $matches.Month, $matches.Day)
 
         # if the apiVersion is "recent" or the latest one add it to the list (note $validApiVersions is sorted)
         # note "recent" means is it new enough that it's allowed by the test
@@ -155,14 +155,14 @@ foreach ($av in $allApiVersions) {
         # Removing the error for this now - this is happening with the latest versions and outdated manifests
         # We can assume that if the version is indeed invalid, deployment will fail
         # Write-Error "$fullResourceType is using an invalid apiVersion." -ErrorId ApiVersion.Not.Valid
-        # Write-Output "ApiVersion not found for: $fullResourceType and version $($av.apiVersion)" 
+        # Write-Output "ApiVersion not found for: $fullResourceType and version $($av.apiVersion)"
         # Write-Output "Valid Api Versions found:`n$recentApiVersions"
     }
 
     if ($av.ApiVersion -like '*-*-*-*') {
         # If it's a preview or other special variant, e.g. 2016-01-01-preview
 
-        $moreRecent = $validApiVersions[0..$howOutOfDate] # see if there's a more recent non-preview version. 
+        $moreRecent = $validApiVersions[0..$howOutOfDate] # see if there's a more recent non-preview version.
         if ($howOutOfDate -gt 0 -and $moreRecent -notlike '*-*-*-*') {
             Write-Error "$FullResourceType uses a preview version ( $($av.apiVersion) ) and there are more recent versions available." -TargetObject $av -ErrorId ApiVersion.Preview.Not.Recent
             Write-Output "Valid Api Versions:`n$recentApiVersions"
@@ -177,9 +177,9 @@ foreach ($av in $allApiVersions) {
             $truncatedApiVersion = $($av.apiVersion).Substring(0, $($av.ApiVersion).LastIndexOf("-"))
             if ($nextApiVersion -eq $truncatedApiVersion){
                 Write-Error "$FullResourceType uses a preview version ( $($av.apiVersion) ) and there is a non-preview version for that apiVersion available." -TargetObject $av -ErrorId ApiVersion.Preview.Version.Has.NonPreview
-                Write-Output "Valid Api Versions:`n$recentApiVersions"                
-            } 
-        }     
+                Write-Output "Valid Api Versions:`n$recentApiVersions"
+            }
+        }
     }
 
     # Finally, check how long it's been since the ApiVersion's date
@@ -188,7 +188,7 @@ foreach ($av in $allApiVersions) {
         # if the used apiVersion is the second in the list, check to see if the first in the list is the same preview version (due to sorting)
         # for example: "2017-12-01-preview" and "2017-12-01" - the preview is sorted first so we think we're out of date
         $nonPreviewVersionInUse = $false
-        if ($howOutOfDate -eq 1) { 
+        if ($howOutOfDate -eq 1) {
             $trimmedApiVersion = $validApiVersions[0].ToString().Substring(0, $validApiVersions[0].ToString().LastIndexOf("-"))
             $nonPreviewVersionInUse = ($trimmedApiVersion -eq $av.apiVersion)
         }
@@ -198,4 +198,9 @@ foreach ($av in $allApiVersions) {
             Write-Output "Valid Api Versions:`n$recentApiVersions"
         }
     }
+
+    if(! $validApiVersions.Contains($av.apiVersion)){
+        Write-Warning "The apiVersion $($av.apiVersion) was not found for the resource type: $FullResourceType"
+    }
+
 }
