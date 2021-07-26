@@ -37,6 +37,7 @@ $PropertiesThatCanBeEmpty = 'resources',
                             'parameters',
                             'functions',
                             'properties',
+                            'template',
                             'defaultValue', # enables optional parameters
                             'accessPolicies',  # keyVault requires this
                             'value', # Microsoft.Resources/deployments - passing empty strings to a nested deployment
