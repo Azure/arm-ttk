@@ -113,7 +113,7 @@ function Expand-AzTemplate
             # Now let's try to resolve the template path.
             $resolvedTemplatePath =
                 # If the template path doesn't appear to be a path to a json file,
-                if ($TemplatePath -notlike '*.json') {
+                if ($TemplatePath -notmatch '\.json(c)?$') {
                     # see if it looks like a file
                     if ( test-path -path $templatePath -PathType leaf) {
                         $TemplatePath = $TemplatePath | Split-Path # if it does, reassign template path to it's directory.
@@ -146,7 +146,8 @@ function Expand-AzTemplate
                 'MainTemplatePath', 'MainTemplateObject', 'MainTemplateText',
                 'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 'MainTemplateOutputs', 'TemplateMetadata',
                 'isParametersFile', 'ParameterFileName', 'ParameterObject', 'ParameterText',
-                'InnerTemplates', 'ParentTemplateText', 'ParentTemplateObject'
+                'InnerTemplates', 'ParentTemplateText', 'ParentTemplateObject',
+                'ExpandedTemplateText', 'ExpandedTemplateObject'
 
             foreach ($_ in $WellKnownVariables) {
                 $ExecutionContext.SessionState.PSVariable.Set($_, $null)
@@ -179,7 +180,7 @@ function Expand-AzTemplate
 
             $isParametersFile = $resolvedTemplatePath -like '*.parameters.json'
 
-            if ($resolvedTemplatePath -like '*.json' -and 
+            if ($resolvedTemplatePath -match '\.json(c)?$' -and 
                 $TemplateObject.'$schema' -like '*CreateUIDefinition*') {
                 $createUiDefinitionFullPath = "$resolvedTemplatePath"
                 $createUIDefinitionText = [IO.File]::ReadAllText($createUiDefinitionFullPath)
@@ -227,7 +228,7 @@ function Expand-AzTemplate
                         
                         # All FolderFile objects will have the following properties:
 
-                        if ($fileInfo.Extension -eq '.json') {
+                        if ($fileInfo.Extension -in '.json', '.jsonc') {
                             $fileObject = [Ordered]@{
                                 Name = $fileInfo.Name #*Name (the name of the file)
                                 Extension = $fileInfo.Extension #*Extension (the file extension)
@@ -302,7 +303,47 @@ function Expand-AzTemplate
                 }
 
                 $TemplateObject = $TemplateText | ConvertFrom-Json
-            }            
+            }
+            
+            
+            $variableReferences = $TemplateText | ?<ARM_Variable> 
+            $expandedTemplateText = $TemplateText | ?<ARM_Variable> -ReplaceEvaluator {
+                param($match)
+
+                $templateVariableValue = $templateObject.variables.$($match.Groups['VariableName'])
+                if ($match.Groups["Property"].Success) {
+                    
+                    $v = $templateVariableValue
+                    foreach ($prop in $match.Groups["Property"] -split '\.' -ne '') {
+                        if ($prop -match '\[(?<Index>\d+)]$') {
+                            $v.($prop.Replace("$($matches.0)", ''))[[int]$matches.Index]
+                        } else {
+                            $v  = $v.$prop
+                        }
+                    }
+                    return "'$("$v".Replace("'","\'"))'"
+                } else {
+                    if ("$templateVariableValue".StartsWith('[')) {
+                        if ("$templateVariableValue".EndsWith(']')) {
+                            return "$templateVariableValue" -replace '^\[' -replace '\]$'
+                        } else {
+                            return $templateVariableValue
+                        }
+                    } else {
+                        return "'" + "$templateVariableValue".Replace("'","\'") + "'"
+                    }
+                    
+                    return "$($templateObject.variables.$($match.Groups['VariableName']))".Replace("'","\'")
+                }
+            }
+
+            if ($expandedTemplateText -ne $TemplateText) {
+                $expandedTemplateObject = try { $expandedTemplateText | ConvertFrom-Json -ErrorAction Stop -ErrorVariable err } catch {
+                    "$_" | Write-Verbose
+                }
+            } else {
+                $expandedTemplateObject = $null
+            }                                    
 
             $out = [Ordered]@{}
             foreach ($v in $WellKnownVariables) {

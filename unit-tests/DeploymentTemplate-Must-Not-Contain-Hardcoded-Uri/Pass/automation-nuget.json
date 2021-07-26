@@ -1,0 +1,51 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "automationAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the name of your Automation Account"
+            }
+        },
+        "automationRegion": {
+            "type": "string",            
+            "metadata": {
+                "description": "Specify the region for your automation account"
+            }
+        }
+    },
+    "variables": {
+        "azureRmProfile": {
+            "name": "AzureRm.Profile",
+            "url": "https://devopsgallerystorage.blob.core.windows.net/packages/azurerm.profile.2.7.0.nupkg"
+        }
+    },
+    "resources": [
+        {
+            "name": "[parameters('automationAccountName')]",
+            "type": "Microsoft.Automation/automationAccounts",
+            "apiVersion": "2015-10-31",
+            "location": "[parameters('automationRegion')]",
+            "properties": {
+                "sku": {
+                    "name": "OMS"
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-10-31",
+            "type": "Microsoft.Automation/automationAccounts/modules",
+            "name": "[concat(parameters('automationAccountName'), '/', variables('azureRmProfile').name)]",
+            "location": "[parameters('automationRegion')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Automation/automationAccounts', parameters('automationAccountName'))]"
+            ],
+            "properties": {
+                "contentLink": {
+                    "uri": "[variables('azureRmProfile').url]"
+                }
+            }
+        }
+    ]
+}

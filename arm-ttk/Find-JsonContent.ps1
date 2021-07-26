@@ -69,7 +69,7 @@
             }
             $OutObject['ParentObject'] = $parent
             $OutObject['PSTypeName']   = 'JSON.Content'
-            $OutObject['PropertyName'] = if ($property) {$Property[-1]}            
+            $OutObject['PropertyName'] = if ($property) {$Property[-1] -replace '^\[\d+\]\.'}
             $OutObject['JSONPath']     = @(
                 $np =0
                 foreach ($p in $property) {
@@ -90,7 +90,7 @@
         if (-not $InputObject) { return }
 
 
-        $index = -1
+        $index = -1       
         foreach ($in in $InputObject) {
             if (-not $in) { continue }
             $index++
@@ -106,7 +106,11 @@
                         ($NotLike -and $in.$key -notlike $Value) -or
                         ($NotMatch -and $in.$key -notmatch $Value) -or
                         ($in.$key -eq $Value -and -not ($NotLike -or $NotMatch))) {
-                        $property += $key
+                        if ($InputObject -is [Collections.IList] -and $Property) {
+                            $property += "[$index].$($key)"
+                        } else {
+                            $property += $key
+                        }                        
                         . $outputMatch $in
                     }
                 }
@@ -124,8 +128,17 @@
                         } else {
                             $key
                         })
-                    $property += $matchingKeys
-                    . $OutputMatch $in
+                    $propertyList = @() + $Property
+                    foreach ($k in $matchingKeys) {
+                        if ($InputObject -is [Collections.IList] -and $Property) {
+                            $property += "[$index].$($k)"
+                        } else {
+                            $property += $k
+                        }
+                        
+                        . $OutputMatch $in
+                        $property = $propertyList
+                    }
                 }
                 elseif (
                     ($NotMatch -and $propertyNames -notmatch $Key) -or
@@ -154,7 +167,7 @@
                     @(if ($Property) {
                         $property
                     }
-                    if ($InputObject.Count) {
+                    if ($InputObject -is [Collections.IList]) {
                         "[$index]"
                     })
                 foreach ($prop in $in.psobject.properties) {

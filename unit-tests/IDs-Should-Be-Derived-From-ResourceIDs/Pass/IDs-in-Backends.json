@@ -4,7 +4,7 @@
     "variables": {},
     "resources": [
         {
-            "name": "[concat('ApiApp_', parameters('webServiceName')]",
+            "name": "[concat('ApiApp_', parameters('webServiceName'))]",
             "type": "backends",
             "apiVersion": "2020-06-01-preview",
             "dependsOn": [
