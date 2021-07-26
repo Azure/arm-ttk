@@ -1,0 +1,17 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "resources": {
+        "SymbolicResourceName": {
+            "properties": {
+                "osProfile": {
+                    "adminUserName": "NotRoot"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                }
+            },
+            "apiVersion": "2019-12-01",
+            "type": "Microsoft.Compute/virtualMachines"
+        }
+    }
+}
