@@ -46,7 +46,10 @@ if (-not $TemplateObject.resources) {
 }
 
 # First, find all of the API versions in the main template resources.
-$allApiVersions = Find-JsonContent -Key apiVersion -Value * -Like -InputObject $TemplateObject.resources
+$allApiVersions = $TemplateObject.resources | 
+Find-JsonContent -Key apiVersion -Value * -Like
+
+
 
 
 foreach ($av in $allApiVersions) {
@@ -60,8 +63,11 @@ foreach ($av in $allApiVersions) {
         apiVersion
     #>
 
-
     if($av.jsonPath -ne "apiVersion" -and $av.jsonpath -notmatch "\.apiVersion$"){
+        continue
+    }
+
+    if ($av.jsonPath -match '\.properties\.apiVersion$') {
         continue
     }
 
