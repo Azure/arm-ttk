@@ -1,0 +1,24 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "parameters": {
+        "foo": {
+            "type": "string",
+            "defaultValue": "[variables('allDisks')]"
+        }
+    },
+    "variables": {
+        "disks": {
+            "copy": [
+                {
+                    "name": "diskConfig",
+                    "count": 2,
+                    "input": {
+                        "name": "[format('metadisk-{0,2:D2}', copyIndex('diskConfig',1))]",
+                        "diskSizeGB": "120"
+                    }
+                }
+            ]
+        },
+        "allDisks": "[variables('disks').diskConfig]"
+    }
+}
