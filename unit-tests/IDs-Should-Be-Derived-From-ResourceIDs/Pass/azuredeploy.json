@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "resources": [
+        {
+            "name": "networkInterface1",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-11-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipConfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[format('{0}/subnets/Default', resourceId('Microsoft.Network/virtualNetworks', 'cc-vnet'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "metadata": {
+        "_generator": {
+            "name": "bicep",
+            "version": "0.3.1.62928",
+            "templateHash": "229596444409662307"
+        }
+    }
+}
