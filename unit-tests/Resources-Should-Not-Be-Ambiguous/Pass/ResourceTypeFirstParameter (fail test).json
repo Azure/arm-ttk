@@ -2,6 +2,8 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
 
+// this is a failure test case, but the test is being removed due to #478
+
     "variables": {
         "trailingslash": "[resourceId('Microsoft.Network/networkSecurityGroups', 'nsg')]"
 
