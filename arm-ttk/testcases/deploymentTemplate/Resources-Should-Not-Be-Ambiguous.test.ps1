@@ -21,11 +21,12 @@ param(
     [Parameter(Mandatory, Position = 1)]
     $TemplateText,
 
-    [Parameter(Mandatory, Position = 1)]
+    [Parameter(Mandatory, Position = 2)]
     $TemplateFullPath
 )
 
-# Find all uses of the function 'ResourceID'
+# See #478 a number of scenarios not accounted for in the test.  Going to pull the test and the test cases for now.
+continue    
 
 # certain resources are visible at any scope so should be excluded from the test
 $proxyResourceTypes = @(
@@ -33,6 +34,8 @@ $proxyResourceTypes = @(
     'Microsoft.Authorization/policyDefinitions',
     'Microsoft.Authorization/policySetDefinitions'
 )
+
+# Find all uses of the function 'ResourceID'
 
 $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName resourceId
 
