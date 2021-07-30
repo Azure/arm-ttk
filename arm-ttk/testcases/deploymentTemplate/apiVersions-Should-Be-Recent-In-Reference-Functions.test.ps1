@@ -89,6 +89,8 @@ foreach ($foundRef in $foundReferences) {
     # Create a string of recent or allowed apiVersions for display in the error message
     $recentApiVersions = ""
 
+    $howOutOfDate = -1
+    $n = 0
     foreach ($v in $validApiVersions) {
 
         $hasDate = $v -match "(?<Year>\d{4,4})-(?<Month>\d{2,2})-(?<Day>\d{2,2})"
@@ -101,9 +103,12 @@ foreach ($foundRef in $foundReferences) {
             # due to sorting, which is incorrect
             $recentApiVersions += "        $v`n"
         }
+        if ($v -like "$apiVersion*") { # If this looks like the apiVersion,
+            $howOutOfDate = $n         # keep track of how out-of-date it is.
+        }
+        $n++
     }
-
-    $howOutOfDate = $validApiVersions.IndexOf($ApiVersion) # Find out how out of date we are.
+    
     # Is the apiVersion even in the list?
     if ($howOutOfDate -eq -1 -and $validApiVersions) {
         # Removing the error for this now - this is happening with the latest versions and outdated manifests
