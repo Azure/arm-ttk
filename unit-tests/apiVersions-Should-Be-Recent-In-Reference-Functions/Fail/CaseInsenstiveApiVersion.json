@@ -1,0 +1,30 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.210602",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "The location in which the resources should be deployed."
+            }
+        }
+    },
+    "variables": {
+        "userAssignedIdentityName": "msi"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+            "apiVersion": "2015-08-31-PREVIEW",
+            "name": "[variables('userAssignedIdentityName')]",
+            "location": "[parameters('location')]"
+        }
+    ],
+    "outputs": {
+        "foo": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2015-08-31-preview').principalId]"
+        }
+    }
+}
