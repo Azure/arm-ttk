@@ -35,9 +35,9 @@ foreach ($av in $allowedValues) { # Walk thru each thing we find.
     $p = $count * 100/ $allowedValues.Count
     Write-Progress -Id $progressId "Checking Controls $($controlName)" " " -PercentComplete $p
     $stepName = $av.ParentObject[1].name # If the grandparent object has a name field, we're in steps
-    $lookingFor= if ($stepName) { "*steps(*$stepName*).$controlName*"} else {"*basics(*$($controlName)*"} 
+    $lookingFor= if ($stepName) { $stepName } else { $controlName } 
     $theOutput = foreach ($out in $CreateUIDefinitionObject.parameters.outputs.psobject.properties) {
-        if ($out.Value | ?<CreateUIDefinition_Output> -ElementName $stepName) {
+        if ($out.Value | ?<CreateUIDefinition_Output> -ElementName $lookingFor) {
             $out; break
         }
     }
