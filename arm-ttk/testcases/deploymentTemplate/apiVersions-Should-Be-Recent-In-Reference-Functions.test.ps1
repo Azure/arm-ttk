@@ -103,7 +103,7 @@ foreach ($foundRef in $foundReferences) {
             # due to sorting, which is incorrect
             $recentApiVersions += "        $v`n"
         }
-        if ($v -like "$apiVersion*") { # If this looks like the apiVersion,
+        if ($v -like "$apiVersion") { # If this looks like the apiVersion,
             $howOutOfDate = $n         # keep track of how out-of-date it is.
         }
         $n++
