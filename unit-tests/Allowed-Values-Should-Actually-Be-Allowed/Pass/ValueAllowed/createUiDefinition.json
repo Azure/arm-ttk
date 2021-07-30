@@ -1,0 +1,34 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {
+                "name": "applianceCount",
+                "type": "Microsoft.Common.OptionsGroup",
+                "label": "Choose the amount of appliances you wish to create",
+                "defaultValue": "Add 2 appliances",
+                "toolTip": "Deploy one or two appliances within your resource group. If adding an appliance, on the next screen choose the vnet and subnet of your existing appliance.",
+                "constraints": {
+                    "allowedValues": [
+                        {
+                            "label": "Deploy two Imprivata appliances",
+                            "value": 2
+                        },
+                        {
+                            "label": "Deploy one Imprivata appliance",
+                            "value": 1
+                        }
+                    ],
+                    "required": true
+                },
+                "visible": true
+            }
+        ],
+        "outputs": {
+            "Location": "[location()]",
+            "applianceCount": "[basics('applianceCount')]"
+        }
+    }
+}
