@@ -206,7 +206,7 @@
                 }
                 $cursor = $null
             } elseif ($part.Groups['Index'].Success) {
-                $targetIndex = $part.Groups['Index'].Value
+                $targetIndex = $part.Groups['Index'].Value -as [int]
                 $listMatch = $jsonList.Match($JSONText, $cursor)
                 $values = $listMatch.Groups["JSON_Value"].Captures
                 if ($targetIndex -gt $values.Count) {
