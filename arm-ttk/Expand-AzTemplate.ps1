@@ -296,13 +296,19 @@ function Expand-AzTemplate
             })
 
             if ($innerTemplates) {
+                $anyProblems = $false
                 foreach ($it in $innerTemplates) {
                     $foundInnerTemplate = $it | Resolve-JSONContent -JsonText $TemplateText
+                    if (-not $foundInnerTemplate) { $anyProblems = $true; break }
                     $TemplateText = $TemplateText.Remove($foundInnerTemplate.Index, $foundInnerTemplate.Length)
                     $TemplateText = $TemplateText.Insert($foundInnerTemplate.Index, '"template": {}')
                 }
 
-                $TemplateObject = $TemplateText | ConvertFrom-Json
+                if (-not $anyProblems) {
+                    $TemplateObject = $TemplateText | ConvertFrom-Json
+                } else {
+                    Write-Warning "Could not extract inner templates.  Please file an issue and attach your template."
+                }
             }
             
             
