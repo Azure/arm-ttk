@@ -34,7 +34,7 @@
     [string]
     $JSONText
     )
-    begin {
+    begin {        
         $jsonProperty = [Regex]::new(@'
 (?<=             # After 
 [\{\,]           # a bracket or comma
@@ -65,20 +65,21 @@
         \{                        # An open brace
 (?>                               # Followed by...
     [^\{\}]+|                     # any number of non-brace character OR
-    \{(?<Depth>)|                 # an open brace (in which case increment depth) OR
-    \}(?<-Depth>)                 # a closed brace (in which case decrement depth)
-)*(?(Depth)(?!))                  # until depth is 0.
+    \{(?<BraceDepth>)|            # an open brace (in which case increment depth) OR
+    \}(?<-BraceDepth>)            # a closed brace (in which case decrement depth)
+)*(?(BraceDepth)(?!))             # until depth is 0.
 \}                                # followed by a closing brace
     )
     |                             # OR
     (?<List>                      # a list, which is
         \[                        # An open bracket
-(?>                               # Followed by...
-    [^\[\]]+|                     # any number of non-bracket character OR
-    \[(?<Depth>)|                 # an open bracket (in which case increment depth) OR
-    \](?<-Depth>)                 # a closed bracket (in which case decrement depth)
-)*(?(Depth)(?!))                  # until depth is 0.
-\]                                # followed by a closing bracket
+        (?>                       # Followed by...
+          (?<!\[)\[(?<Depth>) |   # an open single bracket (in which case increment depth) OR
+          \](?<-Depth>)       |   # a closed bracket (in which case decrement depth)    
+          [^\[\]]+            |   # any number of non-bracket character OR
+          (?<=\[)\[               # a double left bracket
+        )*(?(Depth)(?!))          # until depth is 0.
+        \]                        # followed by a closing bracket
     )
     |                             # OR
     (?<String>                    # A string, which is
@@ -106,7 +107,7 @@
 )
 \s{0,}                            # Optionally match following whitespace
 )
-'@, 'IgnoreCase,IgnorePatternWhitespace', '00:00:05')
+'@, 'Singleline,IgnoreCase,IgnorePatternWhitespace', '00:00:05')
 
         
         $jsonList = [Regex]::new(@'
@@ -136,12 +137,13 @@
     |                             # OR
     (?<List>                      # a list, which is
         \[                        # An open bracket
-(?>                               # Followed by...
-    [^\[\]]+|                     # any number of non-bracket character OR
-    \[(?<Depth>)|                 # an open bracket (in which case increment depth) OR
-    \](?<-Depth>)                 # a closed bracket (in which case decrement depth)
-)*(?(Depth)(?!))                  # until depth is 0.
-\]                                # followed by a closing bracket
+        (?>                       # Followed by...
+          (?<!\[)\[(?<Depth>) |   # an open single bracket (in which case increment depth) OR
+          \](?<-Depth>)       |   # a closed bracket (in which case decrement depth)    
+          [^\[\]]+            |   # any number of non-bracket character OR
+          (?<=\[)\[               # a double left bracket
+        )*(?(Depth)(?!))          # until depth is 0.
+        \]                        # followed by a closing bracket
     )
     |                             # OR
     (?<String>                    # A string, which is
