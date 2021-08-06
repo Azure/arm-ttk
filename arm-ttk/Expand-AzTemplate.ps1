@@ -309,7 +309,7 @@ function Expand-AzTemplate
                 if (-not $anyProblems) {
                     $TemplateObject = $TemplateText | ConvertFrom-Json
                 } else {
-                    Write-Warning "Could not extract inner templates.  Please file an issue and attach your template."
+                    Write-Error "Could not extract inner templates for '$TemplatePath'." -ErrorId InnerTemplate.Extraction.Error
                 }
             }
             
