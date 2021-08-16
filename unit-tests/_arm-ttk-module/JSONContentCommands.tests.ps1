@@ -88,4 +88,17 @@ describe Resolve-JSONContent {
         $resolved.Line | Should -Be 4
         $resolved.Content | Should -Be "1"
     }
+
+    it 'Can resolve a JSON property with an ARM double-bracket escape sequence' {
+        $resolved = Resolve-JSONContent -JSONPath 'a[0].b.c' -JSONText @'
+{
+    "a": [{
+        'b': {
+            c: "[[0,1,2]"
+        }
+    }]
+}
+'@
+        $resolved.Line | Should -Be 4        
+    }
 }
