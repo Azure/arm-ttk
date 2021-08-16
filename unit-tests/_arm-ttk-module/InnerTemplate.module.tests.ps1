@@ -33,7 +33,7 @@ describe InnerTemplates {
     }
 
     it 'Will expand templates containing bracket escape sequences' {
-        $templatePath = $here | Join-Path -ChildPath InnerTemplatesWithEscapeSequence.json
+        $templatePath = $here | Join-Path -ChildPath InnerTemplateWithEscapeSequence.json
         $expanded = Expand-AzTemplate -TemplatePath $templatePath
         $expanded.innerTemplates.Count | Should -be 1
     }
