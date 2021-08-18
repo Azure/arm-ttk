@@ -292,17 +292,25 @@ function Expand-AzTemplate
             
             $innerTemplates = @(if ($templateText -and $TemplateText.Contains('"template"')) {
                 Find-JsonContent -InputObject $templateObject -Key template |
-                    Where-Object { $_.expressionEvaluationOptions.scope -eq 'inner' -or $_.jsonPath -like '*.policyRule.*' }
+                    Where-Object { $_.expressionEvaluationOptions.scope -eq 'inner' -or $_.jsonPath -like '*.policyRule.*' } |
+                    Sort-Object JSONPath -Descending
             })
 
             if ($innerTemplates) {
+                $anyProblems = $false
+                $originalTemplateText = "$TemplateText"
                 foreach ($it in $innerTemplates) {
                     $foundInnerTemplate = $it | Resolve-JSONContent -JsonText $TemplateText
+                    if (-not $foundInnerTemplate) { $anyProblems = $true; break }
                     $TemplateText = $TemplateText.Remove($foundInnerTemplate.Index, $foundInnerTemplate.Length)
                     $TemplateText = $TemplateText.Insert($foundInnerTemplate.Index, '"template": {}')
                 }
 
-                $TemplateObject = $TemplateText | ConvertFrom-Json
+                if (-not $anyProblems) {
+                    $TemplateObject = $TemplateText | ConvertFrom-Json
+                } else {
+                    Write-Error "Could not extract inner templates for '$TemplatePath'." -ErrorId InnerTemplate.Extraction.Error
+                }
             }
             
             

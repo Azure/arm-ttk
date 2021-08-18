@@ -1,0 +1,116 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "_artifactsLocation": {
+      "type": "string",
+      "defaultValue": "[substring(deployment().properties.templateLink.uri, 0, lastIndexOf(deployment().properties.templateLink.uri, '/'))]"
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "defaultValue": ""
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[deployment().location]"
+    },
+    "diagnosticPolicies": {
+      "type": "array",
+      "defaultValue": [
+        "diagnostics-aa-deploy-policy",
+        "diagnostics-adf-deploy-policy",
+        "diagnostics-agw-deploy-policy"
+      ]
+    }
+  },
+  "resources": [
+    {
+      "name": "getManagementGroupName",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-01-01",
+      "location": "[parameters('location')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "Inner"
+        },
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [ ]
+        }
+      }
+    },
+    {
+      "name": "[parameters('diagnosticPolicies')[copyIndex()]]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-08-01",
+      "location": "[parameters('location')]",
+      "properties": {
+        "mode": "Incremental",
+        "parameters": { },
+        "templateLink": {
+          "uri": "[format('{0}{1}.json{2}', parameters('_artifactsLocation'), parameters('diagnosticPolicies')[copyIndex()], parameters('_artifactsLocationSasToken'))]"
+        }
+      },
+      "copy": {
+        "name": "diagnosticPolicies",
+        "count": "[length(parameters('diagnosticPolicies'))]"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/policySetDefinitions",
+      "apiVersion": "2019-09-01",
+      "name": "diagnostics-loganalytics-deploy-initiative",
+      "dependsOn": [
+        "diagnosticPolicies"
+      ],
+      "properties": {
+        "displayName": "Deploy Diagnostics & Metrics for Azure Resource to a Log Analytics workspace",
+        "description": "Apply diagnostic & metric settings for Azure Resources to stream data to a Log Analytics workspace when any Azure Resource which is missing this diagnostic settings is created or updated.",
+        "policyType": "Custom",
+        "metadata": {
+          "category": "Monitoring",
+          "version": "1.0.0"
+        },
+        "parameters": {
+          "profileName": {
+            "type": "string",
+            "metadata": {
+              "displayName": "Profile name",
+              "description": "The diagnostic settings profile name"
+            },
+            "defaultValue": "setbypolicy_logAnalytics"
+          },
+          "logAnalytics": {
+            "type": "string",
+            "metadata": {
+              "displayName": "Log Analytics workspace",
+              "description": "Select Log Analytics workspace from dropdown list. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
+              "strongType": "omsWorkspace",
+              "assignPermissions": true
+            }
+          }
+        },
+        "copy": [
+          {
+            "name": "policyDefinitions",
+            "count": "[length(parameters('diagnosticPolicies'))]",
+            "input": {
+              "policyDefinitionId": "[extensionResourceId(tenantResourceId('Microsoft.Management/managementGroups', split(reference('getManagementGroupName', '2020-10-01', 'Full').scope, '/')[2]), 'Microsoft.Authorization/policyDefinitions', parameters('diagnosticPolicies')[copyIndex('policyDefinitions')])]",
+              "policyDefinitionReferenceId": "[parameters('diagnosticPolicies')[copyIndex('policyDefinitions')]]",
+              "parameters": {
+                "profileName": {
+                  "value":  "[[[parameters('profileName')]"
+                },
+                "logAnalytics": {
+                  "value": "[[[parameters('logAnalytics')]"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
