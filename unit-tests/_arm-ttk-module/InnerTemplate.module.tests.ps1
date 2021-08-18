@@ -25,4 +25,16 @@ describe InnerTemplates {
             Select-Object -ExpandProperty Count |
             Should -Be 1
     }
+
+    it 'Will expand innermost templates first' {
+        $templatePath = $here | Join-Path -ChildPath NestedInnerTemplates.json
+        $expanded = Expand-AzTemplate -TemplatePath $templatePath
+        $expanded.innerTemplates.Count | Should -be 4
+    }
+
+    it 'Will expand templates containing bracket escape sequences' {
+        $templatePath = $here | Join-Path -ChildPath InnerTemplateWithEscapeSequence.json
+        $expanded = Expand-AzTemplate -TemplatePath $templatePath
+        $expanded.innerTemplates.Count | Should -be 1
+    }
 }
