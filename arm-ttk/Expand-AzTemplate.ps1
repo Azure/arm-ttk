@@ -348,7 +348,7 @@ function Expand-AzTemplate
 
                 if ($expandedTemplateText -ne $TemplateText) {
                     $expandedTemplateObject = try { $expandedTemplateText | ConvertFrom-Json -ErrorAction Stop -ErrorVariable err } catch {
-                        "$_" | Write-Verbose
+                        "$_" | Write-Debug
                     }
                 } else {
                     $expandedTemplateObject = $null
