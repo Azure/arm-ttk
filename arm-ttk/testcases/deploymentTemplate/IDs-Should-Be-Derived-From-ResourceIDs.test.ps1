@@ -58,7 +58,8 @@ foreach ($id in $ids) {
         "vlanId",                      # Unique Id to establish peering when setting up an ExpressRoute circuit
         "workerSizeId",                # Microsoft.Web/serverFarms (older apiVersions)
         "metricId",                    # Microsoft.ServiceBus/namespaces
-        "requestedServiceObjectiveId"  # Microsoft.Sql/servers/databases
+        "requestedServiceObjectiveId", # Microsoft.Sql/servers/databases
+        "groupId"                      # Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints
     )
 
     if ($exceptions -contains $myIdFieldName) {
