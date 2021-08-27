@@ -1,0 +1,4 @@
+InsightsMetrics 
+    | extend Tags = todynamic(Tags) 
+    | extend SqlInstance = tostring(Tags.sql_instance) 
+    | where TimeGenerated > ago(10m) and isnotempty(SqlInstance) and Namespace == 'sqlserver_server_properties' and Name == 'uptime'
