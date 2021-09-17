@@ -11,6 +11,26 @@
                     "apiVersion": "2017-04-01"
                 }
             ]
+        },
+        {
+            "type": "Microsoft.ServiceBus/namespaces",
+            "apiVersion": "2018-01-01-preview",
+            "resources": [
+                {
+                    "type": "authorizationRules",
+                    "apiVersion": "2017-04-01"
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.ServiceBus/namespaces",
+            "apiVersion": "2018-01-01-preview",
+            "resources": [
+                {
+                    "type": "queues/authorizationRules",
+                    "apiVersion": "2017-04-01"
+                }
+            ]
         }
     ]
 }
