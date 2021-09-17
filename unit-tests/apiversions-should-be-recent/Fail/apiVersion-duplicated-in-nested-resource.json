@@ -1,0 +1,38 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "resources": [
+        {
+            "type": "Microsoft.ServiceBus/namespaces",
+            "apiVersion": "2018-01-01-preview",
+            "resources": [
+                {
+                    "type": "Microsoft.ServiceBus/namespaces/queues/authorizationRules",
+                    "apiVersion": "2017-04-01"
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.ServiceBus/namespaces",
+            "apiVersion": "2018-01-01-preview",
+            "resources": [
+                {
+                    "type": "authorizationRules",
+                    "apiVersion": "2017-04-01"
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.ServiceBus/namespaces",
+            "apiVersion": "2018-01-01-preview",
+            "resources": [
+                {
+                    "type": "queues/authorizationRules",
+                    "apiVersion": "2017-04-01"
+                }
+            ]
+        }
+    ]
+}
+
+

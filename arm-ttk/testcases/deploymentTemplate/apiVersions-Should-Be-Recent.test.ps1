@@ -106,7 +106,17 @@ foreach ($av in $allApiVersions) {
     }
 
     # To get the full type name, join them all with a slash
-    $FullResourceType = $FullResourceTypes -join '/'
+    $FullResourceType = @(for ($i = 0; $i -lt $FullResourceTypes.Length; $i++) {
+        # If it is not the last segment of a resource type
+        if ($i -lt ($FullResourceTypes.Length - 1)) {
+            # and it is is not included in a subsequent section
+            if (-not ($FullResourceTypes[($i+1)..$FullResourceTypes.Length] -match "^$($fullResourceTypes[$i])")) {
+                $fullResourceTypes[$i] # include it.
+            }            
+        } else {
+            $FullResourceTypes[$i] # Always include the last segment.
+        }       
+    }) -join '/'     
 
     # Now, get the API version as a string
     $apiString = $av.ApiVersion
