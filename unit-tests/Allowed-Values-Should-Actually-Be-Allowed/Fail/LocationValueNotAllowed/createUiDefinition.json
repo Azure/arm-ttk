@@ -1,0 +1,82 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "config": {
+            "isWizard": false,
+            "basics": {
+                "description": "You can use **Application** to do something.",
+                "resourceGroup": {
+                    "allowExisting": true
+                },
+                "location": {
+                    "allowedValues": [
+                        "eastus",
+                        "eastus2",
+                        "southcentralus"
+                    ]
+                }
+            }
+        },
+        "basics": [
+            {
+                "name": "actionSection",
+                "type": "Microsoft.Common.Section",
+                "label": "Create New or Update Existing Application",
+                "elements": [
+                    {
+                        "name": "actionText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                          "text": "Create a new deployment of the application or update an existing deployment."
+          
+                        }
+                      },
+                    {
+                        "name": "createOrUpdate",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Select one:",
+                        "toolTip": "Create a new or update an existing application",
+                        "constraints": {
+                        "allowedValues": [
+                            {
+                            "label": "Create",
+                            "value": "Create"
+                            },
+                            {
+                            "label": "Update",
+                            "value": "Update"
+                            }
+                        ],
+                        "required": true
+                        },
+                        "visible": true
+                    }
+                ]
+            }
+         ],
+        "steps": [
+            {
+                "name": "tags",
+                "label": "Tags",
+                "elements": [
+                    {
+                        "name": "infoMessage",
+                        "type": "Microsoft.Common.InfoBox",
+                        "visible": true,
+                        "options": {
+                            "icon": "Info",
+                            "text": "Welcome to the Azure Ice Cream Shop"
+                        }
+                    }
+                ]
+            }
+        ],
+        "outputs": {
+            "location": "[location()]",
+            "createOrUpdate": "[basics('actionSection').createOrUpdate]"
+        }
+    }
+}
