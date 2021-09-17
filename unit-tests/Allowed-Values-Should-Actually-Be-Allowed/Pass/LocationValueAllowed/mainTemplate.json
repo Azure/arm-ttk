@@ -5,7 +5,10 @@
         "location": {
             "type": "string",
             "allowedValues": [
-                "test"
+                "test",
+                "eastus",
+                "eastus2",
+                "southcentralus"
             ]
         },
         "createOrUpdate": {
