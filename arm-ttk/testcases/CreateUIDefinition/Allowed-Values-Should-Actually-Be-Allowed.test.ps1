@@ -26,20 +26,30 @@ Write-Progress -Id $progressId "Finding Controls" " "
 # Find any item property in CreateUIDefinition that uses allowedValues
 $allowedValues = @($CreateUIDefinitionObject | 
     Find-JsonContent -Key allowedValues -Value * -Like)
+
 foreach ($av in $allowedValues) { # Walk thru each thing we find.
     
     # First we need to find the control's associated output.
     $parent = $av.ParentObject[0] 
     $controlName = $parent.Name
-    $count++
-    $p = $count * 100/ $allowedValues.Count
-    Write-Progress -Id $progressId "Checking Controls $($controlName)" " " -PercentComplete $p
-    $stepName = $av.ParentObject[1].name # If the grandparent object has a name field, we're in steps
-    $lookingFor= @{controlName=$controlName}
-    if ($stepName) { $lookingFor.StepName = $stepName }     
-    $theOutput = foreach ($out in $CreateUIDefinitionObject.parameters.outputs.psobject.properties) {
-        if ($out.Value | ?<CreateUIDefinition_Output> @lookingFor) {
-            $out; break
+    if ($controlName) {
+        $count++
+        $p = $count * 100/ $allowedValues.Count
+        Write-Progress -Id $progressId "Checking Controls $($controlName)" " " -PercentComplete $p
+        $stepName = $av.ParentObject[1].name # If the grandparent object has a name field, we're in steps
+        $lookingFor= @{controlName=$controlName}
+        if ($stepName) { $lookingFor.StepName = $stepName }
+        $theOutput = foreach ($out in $CreateUIDefinitionObject.parameters.outputs.psobject.properties) {
+            if ($out.Value | ?<CreateUIDefinition_Output> @lookingFor) {
+                $out; break
+            }
+        }
+    } elseif ($av.JSONPath -like '*.config.*') {
+        $configName = @($av.JSONPath -split '\.')[-2]
+        $theOutput = foreach ($out in $CreateUIDefinitionObject.parameters.outputs.psobject.properties) {
+            if ($out.Value -like "*$configName(*") {
+                $out; break
+            }
         }
     }
 
@@ -72,14 +82,16 @@ foreach ($av in $allowedValues) { # Walk thru each thing we find.
         }
     })
 
+    
 
     if ($MainTemplateParam.allowedValues) { # If the main template parameter has allowed values
+        $paramName = if ($parent.name) { $parent.name } elseif ($configName) { $configName }
         :CheckNextValue # then we want to check each value in order to see if it's permitted.
             foreach ($rv in $reallyAllowedValues) {
                 foreach ($v in $MainTemplateParam.allowedValues) {
                     if ($v -like "*$rv*") { continue CheckNextValue }
                 }
-                Write-Error "CreateUIDefinition parameter $($parent.Name) with value $rv is not allowed in the main template parameter $($theOutput.Name)" -ErrorId Allowed.Value.Mismatch
+                Write-Error "CreateUIDefinition parameter '$paramName' with value $rv is not allowed in the main template parameter $($theOutput.Name)" -ErrorId Allowed.Value.Mismatch
             }
     } 
 
