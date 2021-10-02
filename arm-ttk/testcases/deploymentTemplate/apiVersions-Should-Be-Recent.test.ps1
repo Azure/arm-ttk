@@ -172,6 +172,8 @@ foreach ($av in $allApiVersions) {
             $recentApiVersions += "        $v`n"
         }
     }
+    #if latest stable is already in list, deduplicate
+    $recentApiVersions = $recentApiVersions | Select-Object -Unique
 
     $howOutOfDate = $validApiVersions.IndexOf($av.ApiVersion) # Find out how out of date we are.
     # Is the apiVersion even in the list?
