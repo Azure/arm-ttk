@@ -153,6 +153,7 @@ foreach ($av in $allApiVersions) {
     # Create a string of recent or allowed apiVersions for display in the error message
     $recentApiVersions = ""
 
+    #add latest stable apiVersion to acceptable list by default
     $stableApiVersions = $validApiVersions | where-object { $_ -notmatch 'preview' } 
     $latestStableApiVersion = $stableApiVersions | Select-Object -First 1
 
