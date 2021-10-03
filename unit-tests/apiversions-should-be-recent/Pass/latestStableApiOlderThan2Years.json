@@ -1,0 +1,34 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "slackConnectionName": {
+        "type": "string",
+        "defaultValue": "SlackConnection",
+        "metadata": {
+          "description": "The name for the Slack connection."
+        }
+      },
+      "location": {
+        "type": "string",
+        "metadata": {
+          "description": "Location for all resources."
+        }
+      }
+    },
+    "variables": {},
+    "resources": [
+      {
+        "type": "Microsoft.Web/connections",
+        "apiVersion": "2016-06-01",
+        "location": "[parameters('location')]",
+        "name": "[parameters('slackConnectionName')]",
+        "properties": {
+          "api": {
+            "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', parameters('location'), 'slack')]"
+          },
+          "displayName": "slack"
+        }
+      }
+    ]
+  }
