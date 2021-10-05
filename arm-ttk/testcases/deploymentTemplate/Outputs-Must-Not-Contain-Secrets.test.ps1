@@ -35,7 +35,7 @@ This test should flag using runtime functions that list secrets or secure parame
     ,      # comma
 )          # and the (?>  ) syntax says this is not included in the match because we need to check for expressions explicitly below
 \s{0,}
-list\w{1,}
+list\w{0,}
 \s{0,}
 \(
 '@, 'Multiline,IgnoreCase,IgnorePatternWhitespace')

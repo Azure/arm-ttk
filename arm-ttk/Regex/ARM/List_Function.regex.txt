@@ -12,7 +12,7 @@
     \s{0,} # We also don't need to include any preceeding whitespace in the match itself
 )
 (?<ListFunctionName>  # We want to capture the list function name
-list\w{1,}            # which will be list followed by any number of word characters
+list\w{0,}            # which will be list followed by any number of word characters
 )
 (?=        # We want to check for but not match a couple more things, so we use a lookahead (?=)
     \s{0,} # the list function can be followed by optional whitespace
