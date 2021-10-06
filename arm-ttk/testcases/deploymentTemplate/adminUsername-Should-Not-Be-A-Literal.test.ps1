@@ -10,6 +10,8 @@ param(
     $TemplateObject
 )
 
+$RULE_ID_START = "BP-1-"
+
 # Find all references to an adminUserName
 # Filtering the complete $TemplateObject directly fails with "The script failed due to call depth overflow." errors
 
@@ -35,7 +37,7 @@ if ("resources" -in $TemplateObject.PSobject.Properties.Name) {
         }
         if ($trimmedUserName -notmatch '\[[^\]]+\]') {
             # If they aren't expressions
-            Write-Error -TargetObject $ref -Message "AdminUsername `"$trimmedUserName`" is not an expression" -ErrorId AdminUsername.Is.Literal # write an error
+            Write-Error -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -CurrentRuleNumber 1 -TargetObject $ref) -Message "AdminUsername `"$trimmedUserName`" is not an expression" -ErrorId AdminUsername.Is.Literal # write an error
             continue # and move onto the next
         }
     }
@@ -52,7 +54,7 @@ if ("variables" -in $TemplateObject.PSobject.Properties.Name) {
         $trimmedUserName = "$($ref.adminUserName)".Trim()
         if ($trimmedUserName -notmatch '\[[^\]]+\]') {
             # If they aren't expressions
-            Write-Error -TargetObject $ref -Message "AdminUsername `"$trimmedUserName`" is variable which is not an expression" -ErrorId AdminUsername.Var.Is.Literal # write an error
+            Write-Error -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -CurrentRuleNumber 2 -TargetObject $ref) -Message "AdminUsername `"$trimmedUserName`" is variable which is not an expression" -ErrorId AdminUsername.Var.Is.Literal # write an error
             continue # and move onto the next
         }
     }
@@ -71,7 +73,7 @@ if ("variables" -in $TemplateObject.PSobject.Properties.Name) {
             if (-not $variableValueExpression) {
                 Write-Error @"
 AdminUsername references variable '$($UserNameHasVariable.variableName)', which has a literal value.
-"@ -ErrorId AdminUserName.Is.Variable.Literal # write an error
+"@ -ErrorId AdminUserName.Is.Variable.Literal -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -CurrentRuleNumber 3) # write an error
             }
         }
     }

@@ -6,7 +6,6 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
 . $psScriptRoot\Import-Json.ps1
 . $PSScriptRoot\Find-JsonContent.ps1
 . $PSScriptRoot\Resolve-JSONContent.ps1
-
 #endregion JSON Functions
 
 #region Template Functions
@@ -19,6 +18,10 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
 #region Cache Functions
 . $psScriptRoot\Update-TTKCache.ps1
 #endregion Cache Functions
+
+#region Rule Functions
+. $psScriptRoot\Set-RuleID.ps1
+#endregion Rule Functions
 
 # Set-Alias Format-AzTemplate Sort-AzTemplate
 

@@ -8,10 +8,12 @@ param(
 [PSObject]$TemplateObject
 )
 
+$RULE_ID_START = "BP-9-"
+
 $templateSchema = $TemplateObject.'$schema'
 
 if (-not $templateSchema) {
-    Write-Error 'DeploymentTemplate Missing .$schema property' -ErrorId Template.Missing.Schema
+    Write-Error 'DeploymentTemplate Missing .$schema property' -ErrorId Template.Missing.Schema -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -CurrentRuleNumber 1)
     return
 }
 
@@ -27,7 +29,7 @@ if ($validSchemas -notcontains $templateSchema) {
     Write-Error "DeploymentTemplate has an unexpected Schema.
 It should be one of the following:
 $($validSchemas -join ([Environment]::NewLine))
-" -ErrorId Template.Bad.Schema
+" -ErrorId Template.Bad.Schema -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -CurrentRuleNumber 2)
     return
 }
 

@@ -11,6 +11,8 @@ param(
 $TemplateObject
 )
 
+$RULE_ID_START = "BP-26-"
+
 <#
 Skipping this test for now... there are a few issues:
 - this only applies to Stock Images, or images that do not use a "plan" object, but there are some images (e.g. MSDN) that don't have a "plan" object and do not allow for "latest"
