@@ -85,7 +85,7 @@ list\w{1,}
             $matchIndex = $findListFunc.Match($nestedTemplateText).Index
             $preceededBy = $exprStrOrQuote.Match($nestedTemplateText, $matchIndex).Value
             if ($preceededBy -eq '[') {
-                Write-Error -Message "Microsoft.Resources/deployments/$($dr.name) is an outer scope nested deployment that contains a list*() function: $($matched.Value)" -ErrorId NestedDeployment.Contains.ListFunction -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $dr)
+                Write-Error -Message "Microsoft.Resources/deployments/$($dr.name) is an outer scope nested deployment that contains a list*() function: $($matched.Value)" -ErrorId NestedDeployment.Contains.ListFunction -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 2 -TargetObject $dr)
             }
         }
     }
