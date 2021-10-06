@@ -77,7 +77,7 @@ foreach ($av in $allApiVersions) {
     if ($av.ApiVersion -isnot [string]) {
         # If the APIVersion is not a string
         # write an error
-        Write-Error "Api Versions must be strings" -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -CurrentRuleNumber 1 -TargetObject $av) -ErrorId ApiVersion.Not.String
+        Write-Error "Api Versions must be strings" -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $av) -ErrorId ApiVersion.Not.String
         continue # and continue.
     }
 
@@ -127,7 +127,7 @@ foreach ($av in $allApiVersions) {
     if (-not $hasDate) {
         # If we couldn't, write an error
 
-        Write-Error "Api versions must be a fixed date. $FullResourceType is not." -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -CurrentRuleNumber 2 -TargetObject $av) -ErrorId ApiVersion.Not.Date
+        Write-Error "Api versions must be a fixed date. $FullResourceType is not." -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 2 -TargetObject $av) -ErrorId ApiVersion.Not.Date
         continue # and move onto the next resource
     }
     $apiDate = [DateTime]::new($matches.Year, $matches.Month, $matches.Day) # now coerce the apiVersion into a DateTime
@@ -182,7 +182,7 @@ foreach ($av in $allApiVersions) {
 
         $moreRecent = $validApiVersions[0..$howOutOfDate] # see if there's a more recent non-preview version.
         if ($howOutOfDate -gt 0 -and $moreRecent -notlike '*-*-*-*') {
-            Write-Error "$FullResourceType uses a preview version ( $($av.apiVersion) ) and there are more recent versions available." -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -CurrentRuleNumber 3 -TargetObject $av) -ErrorId ApiVersion.Preview.Not.Recent
+            Write-Error "$FullResourceType uses a preview version ( $($av.apiVersion) ) and there are more recent versions available." -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 3 -TargetObject $av) -ErrorId ApiVersion.Preview.Not.Recent
             Write-Output "Valid Api Versions:`n$recentApiVersions"
         }
 
@@ -194,7 +194,7 @@ foreach ($av in $allApiVersions) {
             # strip the qualifier on the apiVersion and see if it matches the next one in the sorted array
             $truncatedApiVersion = $($av.apiVersion).Substring(0, $($av.ApiVersion).LastIndexOf("-"))
             if ($nextApiVersion -eq $truncatedApiVersion){
-                Write-Error "$FullResourceType uses a preview version ( $($av.apiVersion) ) and there is a non-preview version for that apiVersion available." -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -CurrentRuleNumber 4 -TargetObject $av) -ErrorId ApiVersion.Preview.Version.Has.NonPreview
+                Write-Error "$FullResourceType uses a preview version ( $($av.apiVersion) ) and there is a non-preview version for that apiVersion available." -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 4 -TargetObject $av) -ErrorId ApiVersion.Preview.Version.Has.NonPreview
                 Write-Output "Valid Api Versions:`n$recentApiVersions"
             }
         }
@@ -212,7 +212,7 @@ foreach ($av in $allApiVersions) {
         }
         if (-not $nonPreviewVersionInUse) {
             # If it's older than two years, and there's nothing more recent
-            Write-Error "Api versions must be the latest or under $($NumberOfDays / 365) years old ($NumberOfDays days) - API version $($av.ApiVersion) of $FullResourceType is $([Math]::Floor($timeSinceApi.TotalDays)) days old" -ErrorId ApiVersion.OutOfDate -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -CurrentRuleNumber 5)
+            Write-Error "Api versions must be the latest or under $($NumberOfDays / 365) years old ($NumberOfDays days) - API version $($av.ApiVersion) of $FullResourceType is $([Math]::Floor($timeSinceApi.TotalDays)) days old" -ErrorId ApiVersion.OutOfDate -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 5)
             Write-Output "Valid Api Versions:`n$recentApiVersions"
         }
     }

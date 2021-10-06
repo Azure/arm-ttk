@@ -59,7 +59,7 @@ if ($items) {
     $sortedItems = $sortedItems | Sort-Object -Property lineNumber
     foreach ($item in $sortedItems) {
         Write-Error "Using `"$($item.item)`" is not allowed - found on line: $($item.lineNumber) for property: $($item.PropertyName)" `
-            -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -CurrentRuleNumber 1 -TargetObject $item) -ErrorId ResourceId.Should.Not.Contain.Function
+            -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $item) -ErrorId ResourceId.Should.Not.Contain.Function
 
     }
 }

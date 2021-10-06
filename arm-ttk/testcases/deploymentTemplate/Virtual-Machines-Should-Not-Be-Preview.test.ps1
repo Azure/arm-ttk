@@ -29,6 +29,6 @@ foreach ($sp in $storageProfiles) {
         $storageProfile.imageReference.version -like '*preview' -or `
         $storageProfile.imageReference.sku -like '*preview' -or `
         $storageProfile.imageReference.offer -like '*preview*') {
-        Write-Error "StorageProfile for resource '$($sp.ParentObject.Name)' must not use a preview version" -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -CurrentRuleNumber 1 -TargetObject $sp) -ErrorId VM.Using.Preview.Image
+        Write-Error "StorageProfile for resource '$($sp.ParentObject.Name)' must not use a preview version" -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $sp) -ErrorId VM.Using.Preview.Image
     }
 }

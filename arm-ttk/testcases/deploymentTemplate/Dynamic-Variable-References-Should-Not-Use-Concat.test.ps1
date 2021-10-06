@@ -35,5 +35,5 @@ $DynamicCompatReference = [Regex]::new(
 foreach ($match in $DynamicCompatReference.Matches($TemplateText)) {
     $rewriteMsg = "variables('$($match.Groups['VariableName'])')[parameters('$($match.Groups['ParameterName'])']"
     
-    Write-Error "Dynamic Variable References should not use concat.  Suggested: $rewriteMsg" -ErrorId 'DynamicVariable.Reference.Using.Concat' -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -CurrentRuleNumber 1 -TargetObject $match)
+    Write-Error "Dynamic Variable References should not use concat.  Suggested: $rewriteMsg" -ErrorId 'DynamicVariable.Reference.Using.Concat' -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $match)
 }

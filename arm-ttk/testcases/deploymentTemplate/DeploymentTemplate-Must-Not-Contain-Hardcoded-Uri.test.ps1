@@ -67,6 +67,6 @@ foreach ($match in $HardcodedHostFinder.Matches($TemplateText)) {
     if ($notTheDevOpsGallery -and 
         $notTheSchema 
         ) { 
-        Write-Error "Found hardcoded reference to $($match)" -ErrorId 'Hardcoded.Url.Reference' -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -CurrentRuleNumber 1 -TargetObject $match) 
+        Write-Error "Found hardcoded reference to $($match)" -ErrorId 'Hardcoded.Url.Reference' -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $match) 
     }
 }
