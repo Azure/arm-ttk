@@ -10,7 +10,7 @@ param(
 $TemplateObject
 )
 
-$RULE_ID_START = "BP-27-"
+$RULE_ID = "000031"
 
 $vms = $TemplateObject.resources | Find-JsonContent -Key type -Value Microsoft.Compute/virtualMachines
 
@@ -28,7 +28,7 @@ foreach ($vm in $vms) {
     }
 
     if (-not $hardwareProfile) { # If the hardwareProfile didn't resolve
-        Write-Error "Could not resolve hardware profile" -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $vm) # write an error
+        Write-Error "Could not resolve hardware profile" -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $vm) # write an error
         continue # and move onto the next
     }
 
@@ -39,10 +39,10 @@ foreach ($vm in $vms) {
         if ($vmSize -match "\s{0,}\[.*?variables\s{0,}\(\s{0,}'") {
             $resolvedVmSize = Expand-AzTemplate -Expression $vmSize -InputObject $TemplateObject
             if ($resolvedVmSize -notmatch "\s{0,}\[.*?parameters\s{0,}\(\s{0,}'") {
-                Write-Error "VM Size must be a parameter" -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 2 -TargetObject $vm)
+                Write-Error "VM Size must be a parameter" -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $vm)
             }
         } else {
-            Write-Error "VM Size must be a parameter" -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 2 -TargetObject $vm)
+            Write-Error "VM Size must be a parameter" -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $vm)
         }
     }
 }

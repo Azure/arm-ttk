@@ -16,7 +16,7 @@ param(
     $TemplateText
 )
 
-$RULE_ID_START = "BP-16-"
+$RULE_ID = "000044"
 
 $lineBreaks = [Regex]::Matches($TemplateText, "`n|$([Environment]::NewLine)")
 
@@ -30,14 +30,14 @@ foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
 
     $foundRefs = $TemplateText | ?<ARM_Parameter> -Parameter $escapedName
     if (-not $foundRefs) { # If we didn't, error
-        Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $parameter)
+        Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $parameter)
     } else {
         foreach ($fr in $foundRefs) { # Walk thru each reference
             $foundQuote =$exprStrOrQuote.Match($TemplateText, $fr.Index + 1) # make sure we hit a [ before a quote
             if ($foundQuote.Value -eq '"') { # if we don't, error
                 $lineNumber = @($lineBreaks | ? { $_.Index -lt $fr.Index }).Count + 1    
                 $parameter | Add-Member -MemberType NoteProperty -Name lineNumber -Value $lineNumber
-                Write-Error -Message "Parameter reference is not contained within an expression: $($Parameter.Name) on line: $lineNumber" -ErrorId Parameters.Must.Be.Referenced.In.Expression -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 2 -TargetObject $parameter)
+                Write-Error -Message "Parameter reference is not contained within an expression: $($Parameter.Name) on line: $lineNumber" -ErrorId Parameters.Must.Be.Referenced.In.Expression -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $parameter)
             }
         }
     }

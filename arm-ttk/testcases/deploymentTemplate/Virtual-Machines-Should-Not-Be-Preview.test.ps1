@@ -10,7 +10,7 @@ param(
     $TemplateObject
 )
 
-$RULE_ID_START = "BP-25-"
+$RULE_ID = "000053"
 
 $storageProfiles = Find-JsonContent -Key storageProfile -InputObject $TemplateObject | 
 Where-Object {
@@ -29,6 +29,6 @@ foreach ($sp in $storageProfiles) {
         $storageProfile.imageReference.version -like '*preview' -or `
         $storageProfile.imageReference.sku -like '*preview' -or `
         $storageProfile.imageReference.offer -like '*preview*') {
-        Write-Error "StorageProfile for resource '$($sp.ParentObject.Name)' must not use a preview version" -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $sp) -ErrorId VM.Using.Preview.Image
+        Write-Error "StorageProfile for resource '$($sp.ParentObject.Name)' must not use a preview version" -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $sp) -ErrorId VM.Using.Preview.Image
     }
 }

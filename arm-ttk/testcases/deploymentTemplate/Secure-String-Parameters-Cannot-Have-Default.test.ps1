@@ -11,7 +11,7 @@ param(
     $TemplateObject
 )
 
-$RULE_ID_START = "BP-22-"
+$RULE_ID = "000050"
 
 $usedNewGuid = [Regex]::new(@'
 \[             # Starting bracket
@@ -37,7 +37,7 @@ foreach ($parameterProp in $templateObject.parameters.psobject.properties) {
             $parameter.defaultValue -notmatch $usedNewGuid) {
             # Will return true when defaultvalue is not null or blank (blank values are OK).
             Write-Error -Message "Parameter $name is a SecureString and must not have a default value unless it is an expression that contains the newGuid() function." `
-                -ErrorId SecureString.Must.Not.Have.Default -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $parameter)
+                -ErrorId SecureString.Must.Not.Have.Default -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $parameter)
         }
     }
 }

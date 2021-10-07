@@ -11,7 +11,7 @@ param(
 $TemplateObject
 )
 
-$RULE_ID_START = "BP-6-"
+$RULE_ID = "000034"
 
 $resourcesWithDependencies = $TemplateObject.resources | 
     Find-JsonContent -Key dependsOn -Value '*' -Like
@@ -19,12 +19,12 @@ $resourcesWithDependencies = $TemplateObject.resources |
 foreach ($dependentResource in $resourcesWithDependencies) {
     if ($dependentResource.DependsOn -match '^\s{0,}\[') {
         if ($dependentResource.DependsOn -match '^\s{0,}\[\s{0,}if\s{0,}\(') {
-            Write-Error "Resource Dependencies must not start with if()" -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $dependentResource) -ErrorId "Resource.DependsOn.Conditional"    
+            Write-Error "Resource Dependencies must not start with if()" -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $dependentResource) -ErrorId "Resource.DependsOn.Conditional"    
         }
         if ($dependentResource.DependsOn -match '^\s{0,}\[\s{0,}concat\s{0,}\(' -and 
             -not ($dependentResource.DependsOn | ?<ARM_Template_Function> -FunctionName copyIndex)
         ) {
-            Write-Error "Depends On Must not start with [concat(" -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 2 -TargetObject $dependentResource) -ErrorId "Resource.DependsOn.StartsWithConcat"
+            Write-Error "Depends On Must not start with [concat(" -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $dependentResource) -ErrorId "Resource.DependsOn.StartsWithConcat"
         }
     }
 }

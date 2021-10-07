@@ -40,7 +40,7 @@ $DisallowedHosts =
     )
 )
 
-$RULE_ID_START = "BP-8-"
+$RULE_ID = "000036"
 
 $HardcodedHostFinder = # Create a regex to find any reference
     [Regex]::new(($DisallowedHosts -join '|' -replace '\.', '\.'), 'IgnoreCase')
@@ -67,6 +67,6 @@ foreach ($match in $HardcodedHostFinder.Matches($TemplateText)) {
     if ($notTheDevOpsGallery -and 
         $notTheSchema 
         ) { 
-        Write-Error "Found hardcoded reference to $($match)" -ErrorId 'Hardcoded.Url.Reference' -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $match) 
+        Write-Error "Found hardcoded reference to $($match)" -ErrorId 'Hardcoded.Url.Reference' -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $match) 
     }
 }

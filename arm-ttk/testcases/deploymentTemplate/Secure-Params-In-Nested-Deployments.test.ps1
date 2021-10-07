@@ -14,7 +14,7 @@ param(
     $TemplateObject
 )
 
-$RULE_ID_START = "BP-21-"
+$RULE_ID = "000049"
 
 $deploymentResources = $TemplateObject.resources | 
 Find-JsonContent -Key type -Value 'Microsoft.Resources/deployments'
@@ -57,7 +57,7 @@ $name                # the parameter name
                     $matchIndex = $findParam.Match($nestedTemplateText).Index
                     $preceededBy = $exprStrOrQuote.Match($nestedTemplateText, $matchIndex).Value
                     if ($preceededBy -eq '[') {
-                        Write-Error -Message "Microsoft.Resources/deployments/$($dr.name) is an outer scope nested deployment that contains a $($parameterProp.Value.Type) type parameter: `"$name`"" -ErrorId NestedDeployment.Contains.SecureParameter -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $parameterProp)
+                        Write-Error -Message "Microsoft.Resources/deployments/$($dr.name) is an outer scope nested deployment that contains a $($parameterProp.Value.Type) type parameter: `"$name`"" -ErrorId NestedDeployment.Contains.SecureParameter -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $parameterProp)
                     }
                 }
             }
@@ -85,7 +85,7 @@ list\w{1,}
             $matchIndex = $findListFunc.Match($nestedTemplateText).Index
             $preceededBy = $exprStrOrQuote.Match($nestedTemplateText, $matchIndex).Value
             if ($preceededBy -eq '[') {
-                Write-Error -Message "Microsoft.Resources/deployments/$($dr.name) is an outer scope nested deployment that contains a list*() function: $($matched.Value)" -ErrorId NestedDeployment.Contains.ListFunction -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 2 -TargetObject $dr)
+                Write-Error -Message "Microsoft.Resources/deployments/$($dr.name) is an outer scope nested deployment that contains a list*() function: $($matched.Value)" -ErrorId NestedDeployment.Contains.ListFunction -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $dr)
             }
         }
     }

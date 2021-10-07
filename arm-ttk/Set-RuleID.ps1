@@ -4,26 +4,23 @@ function Set-RuleID
     .Synopsis
         Sets the rule IDs
     .Description
-        Returns a TargetObject for Write-Error that has a RuleID defined
+        Returns a TargetObject for Write-Error that has a ruleID defined
     .Example
-        Define-RuleID -RuleIDStart "BP-1-" -RuleNumber 2 -TargetObject <anObject>
-        Define-RuleID -RuleIDStart "BP-6-" -RuleNumber 1
+        Define-RuleID -RuleID "000006" -TargetObject <anObject>
+        Define-RuleID -RuleID "000050"
     #>
 
     param(
-        [string] $RuleIDStart,
-        [int] $RuleNumber,
+        [string] $RuleID,
         [PSObject] $TargetObject
         )
 
-    $newRuleID = $RuleIDStart + $RuleNumber
-
     if(!$TargetObject) {
         $TargetObject = New-Object -Type PSObject -Property @{
-                        'ruleID'   = $newRuleID
+                        'ruleID'   = $RuleID
                     }
     } else {
-        $TargetObject | Add-Member -MemberType NoteProperty -Name ruleID -Value $newRuleID -Force
+        $TargetObject | Add-Member -MemberType NoteProperty -Name ruleID -Value $RuleID -Force
     }
 
     return $TargetObject

@@ -11,7 +11,7 @@ param(
     $TemplateText
 )
 
-$RULE_ID_START = "BP-23-"
+$RULE_ID = "000051"
 
 # Check for any text to remove empty property values - PowerShell handles empty differently in objects so check the JSON source (i.e. text)
 # Empty strings, arrays, objects and null property values are not allowed, they have specific meaning in a declarative model
@@ -67,7 +67,7 @@ if ($emptyItems) {
             }
             $lineNumber = @($lineBreaks | ? { $_.Index -lt $emptyItem.Index }).Count + 1
             $emptyItem | Add-Member -MemberType NoteProperty -Name lineNumber -Value $lineNumber
-            Write-Error "Empty property: $emptyItem found on line: $lineNumber" -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $emptyItem)
+            Write-Error "Empty property: $emptyItem found on line: $lineNumber" -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $emptyItem)
         } 
     }
 }

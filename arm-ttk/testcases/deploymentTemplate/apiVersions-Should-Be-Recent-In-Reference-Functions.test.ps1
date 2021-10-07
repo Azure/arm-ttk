@@ -31,7 +31,7 @@ param(
     $TestDate = [DateTime]::Now
 )
 
-$RULE_ID_START = "BP-2-"
+$RULE_ID = "000030"
 
 $foundReferences = $TemplateText | 
     ?<ARM_Template_Function> -FunctionName 'reference|list\w{1,}'
@@ -125,7 +125,7 @@ foreach ($foundRef in $foundReferences) {
 
         $moreRecent = $validApiVersions[0..$howOutOfDate] # see if there's a more recent non-preview version. 
         if ($howOutOfDate -gt 0 -and $moreRecent -notlike '*-*-*-*') {
-            Write-Error "$($foundRef.Value)  uses a preview version ( $($apiVersion) ) and there are more recent versions available." -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $foundRef) -ErrorId ApiReference.Version.Preview.Not.Recent
+            Write-Error "$($foundRef.Value)  uses a preview version ( $($apiVersion) ) and there are more recent versions available." -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $foundRef) -ErrorId ApiReference.Version.Preview.Not.Recent
             Write-Output "Valid Api Versions $potentialResourceType :`n$recentApiVersions"
         }
 
@@ -137,7 +137,7 @@ foreach ($foundRef in $foundReferences) {
             # strip the qualifier on the apiVersion and see if it matches the next one in the sorted array
             $truncatedApiVersion = $($apiVersion).Substring(0, $($ApiVersion).LastIndexOf("-"))
             if ($nextApiVersion -eq $truncatedApiVersion){
-                Write-Error "$($foundRef.Value) uses a preview version ( $($apiVersion) ) and there is a non-preview version for that apiVersion available." -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 2 -TargetObject $foundRef) -ErrorId ApiReference.Version.Preview.Version.Has.NonPreview
+                Write-Error "$($foundRef.Value) uses a preview version ( $($apiVersion) ) and there is a non-preview version for that apiVersion available." -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $foundRef) -ErrorId ApiReference.Version.Preview.Version.Has.NonPreview
                 Write-Output "Valid Api Versions for $potentialResourceType :`n$recentApiVersions"                
             } 
         }     
@@ -155,7 +155,7 @@ foreach ($foundRef in $foundReferences) {
         }
         if (-not $nonPreviewVersionInUse) {
             # If it's older than two years, and there's nothing more recent
-            Write-Error "Api versions must be the latest or under $($NumberOfDays / 365) years old ($NumberOfDays days) - API version used by:`n            $($foundRef.Value)`n        is $([Math]::Floor($timeSinceApi.TotalDays)) days old" -ErrorId ApiReference.Version.OutOfDate -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 3 -TargetObject $foundRef)
+            Write-Error "Api versions must be the latest or under $($NumberOfDays / 365) years old ($NumberOfDays days) - API version used by:`n            $($foundRef.Value)`n        is $([Math]::Floor($timeSinceApi.TotalDays)) days old" -ErrorId ApiReference.Version.OutOfDate -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $foundRef)
             Write-Output "Valid Api Versions for $potentialResourceType :`n$recentApiVersions"
         }
     }

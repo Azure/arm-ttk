@@ -10,7 +10,7 @@ param(
 $TemplateObject
 )
 
-$RULE_ID_START = "BP-5-"
+$RULE_ID = "000033"
 
 # Find all references to an commandToExecute.
 $commandsToExecute = $TemplateObject | 
@@ -25,7 +25,7 @@ foreach ($command in $commandsToExecute) {
     $commandUsesAListFunction = "$($command.commandToExecute)" | ?<ARM_List_Function>
 
     if ($commandUsesAListFunction) {
-        Write-Error "CommandToExecute uses '$commandUsesAListFunction', but is not in .protectedSettings" -ErrorId CommandToExecute.Unprotected.List -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 1 -TargetObject $command)
+        Write-Error "CommandToExecute uses '$commandUsesAListFunction', but is not in .protectedSettings" -ErrorId CommandToExecute.Unprotected.List -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $command)
         continue
     }
 
@@ -37,7 +37,7 @@ foreach ($command in $commandsToExecute) {
     foreach ($ref in $commandToExecuteReferencedParameters) {
         $refType = $TemplateObject.Parameters.$ref.type
         if ($refType -in 'SecureString', 'SecureObject') {   
-            Write-Error "CommandToExecute references parameter '$ref' of type '$refType', but is not in .protectedSettings" -ErrorId CommandToExecute.Unprotected.Parameter -TargetObject (Set-RuleID -RuleIDStart $RULE_ID_START -RuleNumber 2 -TargetObject $command)
+            Write-Error "CommandToExecute references parameter '$ref' of type '$refType', but is not in .protectedSettings" -ErrorId CommandToExecute.Unprotected.Parameter -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $command)
             continue
         }
     }

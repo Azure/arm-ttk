@@ -11,7 +11,7 @@ param(
 $TemplateObject
 )
 
-$RULE_ID_START = "BP-26-"
+$RULE_ID = "000054"
 
 <#
 Skipping this test for now... there are a few issues:
