@@ -59,7 +59,8 @@ foreach ($id in $ids) {
         "workerSizeId",                # Microsoft.Web/serverFarms (older apiVersions)
         "metricId",                    # Microsoft.ServiceBus/namespaces
         "requestedServiceObjectiveId", # Microsoft.Sql/servers/databases
-        "groupId"                      # Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints
+        "groupId",                     # Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints
+        "sid"                          # Microsoft.Sql/servers/administrators/activeDirectory
     )
 
     if ($exceptions -contains $myIdFieldName) {
