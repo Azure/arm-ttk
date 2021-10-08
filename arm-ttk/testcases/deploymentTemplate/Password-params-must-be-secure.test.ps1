@@ -14,6 +14,8 @@ param(
     $TemplateObject
 )
 
+$RULE_ID = "000055"
+
 <#
 This test should flag any parameters that look like they might be used as passwords and are not using a secure* type declaration
 
@@ -55,7 +57,7 @@ foreach ($parameter in $templateObject.parameters.psobject.properties) {
                 Write-Warning "Skipping parameter `"$name`""
             }
             else {
-                Write-Error -Message "Parameter `"$name`" is of type `"$type`" but should be secure." -ErrorId Password.Param.Not.Secure -TargetObject $parameter
+                Write-Error -Message "Parameter `"$name`" is of type `"$type`" but should be secure." -ErrorId Password.Param.Not.Secure -TargetObject (Set-RuleID -RuleID $RULE_ID -TargetObject $parameter)
             }      
         }
     }
