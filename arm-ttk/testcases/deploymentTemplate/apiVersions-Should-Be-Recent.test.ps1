@@ -220,8 +220,8 @@ foreach ($av in $allApiVersions) {
             $nonPreviewVersionInUse = ($trimmedApiVersion -eq $av.apiVersion)
         }
         if (-not $nonPreviewVersionInUse) {            
-            if ($($av.ApiVersion) -eq $latestStableApiVersion) {
-                Write-Warning "Using latest stable API version $($av.ApiVersion) for the resource type: $FullResourceType but it is over $($NumberOfDays / 365) years old  "
+            if ($($av.ApiVersion) -eq $latestStableApiVersion) {     
+                #break from loop to avoid throwing error when using latest stable API version           
                 break
             }
 
