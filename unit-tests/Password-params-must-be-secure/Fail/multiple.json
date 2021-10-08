@@ -1,0 +1,17 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        // there are other test cases that hit each scenario below, also want to make multiple are ok (outside of unit tests)
+        "admin Password": {
+            "type": "string"
+        },
+        "adminPasswordObject": {
+            "type": "Object"
+        },
+        "password": {
+            "type": "bool"
+        }
+    },
+    "resources": []
+}

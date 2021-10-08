@@ -34,7 +34,7 @@ param(
 $RULE_ID = "000030"
 
 $foundReferences = $TemplateText | 
-    ?<ARM_Template_Function> -FunctionName 'reference|list\w{1,}'
+    ?<ARM_Template_Function> -FunctionName 'reference|list\w{0,}'
 
 foreach ($foundRef in $foundReferences) {
     
