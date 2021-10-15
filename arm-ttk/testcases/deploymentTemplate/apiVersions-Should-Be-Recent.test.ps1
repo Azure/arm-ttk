@@ -63,7 +63,7 @@ foreach ($av in $allApiVersions) {
         apiVersion
     #>
 
-    if($av.jsonPath -ne "apiVersion" -and $av.jsonpath -notmatch "\.apiVersion$"){
+    if ($av.jsonPath -ne "apiVersion" -and $av.jsonpath -notmatch "\.apiVersion$") {
         continue
     }
 
@@ -94,12 +94,13 @@ foreach ($av in $allApiVersions) {
     )
 
 
-    if ($FullResourceTypes -like '*/providers/*')  # If we have a provider resources
-    {
-        $FullResourceTypes    = @($FullResourceTypes -split '/')
+    if ($FullResourceTypes -like '*/providers/*') {
+        # If we have a provider resources
+        $FullResourceTypes = @($FullResourceTypes -split '/')
         if ($av.Name -match "'/{0,}(?<ResourceType>\w+\.\w+)/{0,}'") {
             $FullResourceTypes = @($matches.ResourceType)
-        } else {
+        }
+        else {
             Write-Warning "Could not identify provider resource for $($FullResourceTypes -join '/')"
             continue
         }
@@ -107,16 +108,17 @@ foreach ($av in $allApiVersions) {
 
     # To get the full type name, join them all with a slash
     $FullResourceType = @(for ($i = 0; $i -lt $FullResourceTypes.Length; $i++) {
-        # If it is not the last segment of a resource type
-        if ($i -lt ($FullResourceTypes.Length - 1)) {
-            # and it is is not included in a subsequent section
-            if (-not ($FullResourceTypes[($i+1)..$FullResourceTypes.Length] -match "^$($fullResourceTypes[$i])")) {
-                $fullResourceTypes[$i] # include it.
-            }            
-        } else {
-            $FullResourceTypes[$i] # Always include the last segment.
-        }       
-    }) -join '/'     
+            # If it is not the last segment of a resource type
+            if ($i -lt ($FullResourceTypes.Length - 1)) {
+                # and it is is not included in a subsequent section
+                if (-not ($FullResourceTypes[($i + 1)..$FullResourceTypes.Length] -match "^$($fullResourceTypes[$i])")) {
+                    $fullResourceTypes[$i] # include it.
+                }            
+            }
+            else {
+                $FullResourceTypes[$i] # Always include the last segment.
+            }       
+        }) -join '/'     
 
     # Now, get the API version as a string
     $apiString = $av.ApiVersion
@@ -151,6 +153,13 @@ foreach ($av in $allApiVersions) {
     # Create a string of recent or allowed apiVersions for display in the error message
     $recentApiVersions = ""
 
+    #add latest stable apiVersion to acceptable list by default
+    $stableApiVersions = $validApiVersions | where-object { $_ -notmatch 'preview' } 
+    $latestStableApiVersion = $stableApiVersions | Select-Object -First 1
+
+    $recentApiVersions += "        $latestStableApiVersion`n"
+
+
     foreach ($v in $validApiVersions) {
 
         $hasDate = $v -match "(?<Year>\d{4,4})-(?<Month>\d{2,2})-(?<Day>\d{2,2})"
@@ -164,6 +173,8 @@ foreach ($av in $allApiVersions) {
             $recentApiVersions += "        $v`n"
         }
     }
+    #if latest stable is already in list, deduplicate
+    $recentApiVersions = $recentApiVersions | Select-Object -Unique
 
     $howOutOfDate = $validApiVersions.IndexOf($av.ApiVersion) # Find out how out of date we are.
     # Is the apiVersion even in the list?
@@ -186,12 +197,12 @@ foreach ($av in $allApiVersions) {
 
         # the sorted array doesn't work perfectly so 2020-01-01-preview comes before 2020-01-01
         # in this case if the dates are the same, the non-preview version should be used
-        if ($howOutOfDate -eq 0 -and $validApiVersions.Count -gt 1){
+        if ($howOutOfDate -eq 0 -and $validApiVersions.Count -gt 1) {
             # check the second apiVersion and see if it matches the preview one
             $nextApiVersion = $validApiVersions[1]
             # strip the qualifier on the apiVersion and see if it matches the next one in the sorted array
             $truncatedApiVersion = $($av.apiVersion).Substring(0, $($av.ApiVersion).LastIndexOf("-"))
-            if ($nextApiVersion -eq $truncatedApiVersion){
+            if ($nextApiVersion -eq $truncatedApiVersion) {
                 Write-Error "$FullResourceType uses a preview version ( $($av.apiVersion) ) and there is a non-preview version for that apiVersion available." -TargetObject $av -ErrorId ApiVersion.Preview.Version.Has.NonPreview
                 Write-Output "Valid Api Versions:`n$recentApiVersions"
             }
@@ -208,14 +219,19 @@ foreach ($av in $allApiVersions) {
             $trimmedApiVersion = $validApiVersions[0].ToString().Substring(0, $validApiVersions[0].ToString().LastIndexOf("-"))
             $nonPreviewVersionInUse = ($trimmedApiVersion -eq $av.apiVersion)
         }
-        if (-not $nonPreviewVersionInUse) {
+        if (-not $nonPreviewVersionInUse) {            
+            if ($($av.ApiVersion) -eq $latestStableApiVersion) {     
+                #break from loop to avoid throwing error when using latest stable API version           
+                break
+            }
+
             # If it's older than two years, and there's nothing more recent
             Write-Error "Api versions must be the latest or under $($NumberOfDays / 365) years old ($NumberOfDays days) - API version $($av.ApiVersion) of $FullResourceType is $([Math]::Floor($timeSinceApi.TotalDays)) days old" -ErrorId ApiVersion.OutOfDate
             Write-Output "Valid Api Versions:`n$recentApiVersions"
         }
     }
 
-    if(! $validApiVersions.Contains($av.apiVersion)){
+    if (! $validApiVersions.Contains($av.apiVersion)) {
         Write-Warning "The apiVersion $($av.apiVersion) was not found for the resource type: $FullResourceType"
     }
 

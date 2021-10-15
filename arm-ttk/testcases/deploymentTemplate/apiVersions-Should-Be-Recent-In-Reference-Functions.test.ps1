@@ -32,7 +32,7 @@ param(
 )
 
 $foundReferences = $TemplateText | 
-    ?<ARM_Template_Function> -FunctionName 'reference|list\w{0,}'
+?<ARM_Template_Function> -FunctionName 'reference|list\w{0,}'
 
 foreach ($foundRef in $foundReferences) {
     
@@ -40,22 +40,23 @@ foreach ($foundRef in $foundReferences) {
     if (-not $hasApiVersion) { continue } # if we don't have one, continue.
     $apiVersion = $hasApiVersion.0 
     $hasResourceId = $foundRef.Value | ?<ARM_Template_Function> -FunctionName resourceId
-    $hasVariable   = $foundRef.value | ?<ARM_Variable> | Select-Object -First 1
+    $hasVariable = $foundRef.value | ?<ARM_Variable> | Select-Object -First 1
     $potentialResourceType = ''
 
     if ($hasResourceId) {       
-        $parameterSegments= @($hasResourceId.Groups["Parameters"].value -split '[(),]' -ne '' -replace "^\s{0,}'" -replace "'\s{0,}$")
+        $parameterSegments = @($hasResourceId.Groups["Parameters"].value -split '[(),]' -ne '' -replace "^\s{0,}'" -replace "'\s{0,}$")
         $potentialResourceType = ''
         $resourceTypeStarted = $false
         $potentialResourceType = @(foreach ($seg in $parameterSegments) {
-            if ($seg -like '*/*') {
-                $seg
-            }
-        }) -join '/'
-    } elseif ($hasVariable) {
+                if ($seg -like '*/*') {
+                    $seg
+                }
+            }) -join '/'
+    }
+    elseif ($hasVariable) {
         $foundResource = Find-JsonContent -Key name -Value "*$($hasVariable.Value)*" -InputObject $TemplateObject -Like |
-            Where-Object JSONPath -Like *Resources* | 
-            Select-Object -First 1
+        Where-Object JSONPath -Like *Resources* | 
+        Select-Object -First 1
 
         $typeList = @(@($foundResource) + @($foundResource.ParentObject) | Where-Object Type | Select-Object -ExpandProperty Type)
         [Array]::Reverse($typeList)
@@ -89,6 +90,12 @@ foreach ($foundRef in $foundReferences) {
     # Create a string of recent or allowed apiVersions for display in the error message
     $recentApiVersions = ""
 
+    #add latest stable apiVersion to acceptable list by default
+    $stableApiVersions = $validApiVersions | where-object { $_ -notmatch 'preview' } 
+    $latestStableApiVersion = $stableApiVersions | Select-Object -First 1
+
+    $recentApiVersions += "        $latestStableApiVersion`n"
+
     $howOutOfDate = -1
     $n = 0
     foreach ($v in $validApiVersions) {
@@ -103,11 +110,16 @@ foreach ($foundRef in $foundReferences) {
             # due to sorting, which is incorrect
             $recentApiVersions += "        $v`n"
         }
-        if ($v -like "$apiVersion") { # If this looks like the apiVersion,
+        if ($v -like "$apiVersion") {
+            # If this looks like the apiVersion,
             $howOutOfDate = $n         # keep track of how out-of-date it is.
         }
         $n++
     }
+
+    #if latest stable is already in list, deduplicate
+    $recentApiVersions = $recentApiVersions | Select-Object -Unique
+
     
     # Is the apiVersion even in the list?
     if ($howOutOfDate -eq -1 -and $validApiVersions) {
@@ -129,12 +141,12 @@ foreach ($foundRef in $foundReferences) {
 
         # the sorted array doesn't work perfectly so 2020-01-01-preview comes before 2020-01-01
         # in this case if the dates are the same, the non-preview version should be used
-        if ($howOutOfDate -eq 0 -and $validApiVersions.Count -gt 1){
+        if ($howOutOfDate -eq 0 -and $validApiVersions.Count -gt 1) {
             # check the second apiVersion and see if it matches the preview one
             $nextApiVersion = $validApiVersions[1]
             # strip the qualifier on the apiVersion and see if it matches the next one in the sorted array
             $truncatedApiVersion = $($apiVersion).Substring(0, $($ApiVersion).LastIndexOf("-"))
-            if ($nextApiVersion -eq $truncatedApiVersion){
+            if ($nextApiVersion -eq $truncatedApiVersion) {
                 Write-Error "$($foundRef.Value) uses a preview version ( $($apiVersion) ) and there is a non-preview version for that apiVersion available." -TargetObject $foundRef -ErrorId ApiReference.Version.Preview.Version.Has.NonPreview
                 Write-Output "Valid Api Versions for $potentialResourceType :`n$recentApiVersions"                
             } 
@@ -152,13 +164,17 @@ foreach ($foundRef in $foundReferences) {
             $nonPreviewVersionInUse = ($trimmedApiVersion -eq $apiVersion)
         }
         if (-not $nonPreviewVersionInUse) {
+            if ($($apiVersion) -eq $latestStableApiVersion) {     
+                #break from loop to avoid throwing error when using latest stable API version           
+                break
+            }
             # If it's older than two years, and there's nothing more recent
             Write-Error "Api versions must be the latest or under $($NumberOfDays / 365) years old ($NumberOfDays days) - API version used by:`n            $($foundRef.Value)`n        is $([Math]::Floor($timeSinceApi.TotalDays)) days old" -ErrorId ApiReference.Version.OutOfDate -TargetObject $foundRef
             Write-Output "Valid Api Versions for $potentialResourceType :`n$recentApiVersions"
         }
     }
 
-    if(! $validApiVersions.Contains($apiVersion)){
+    if (! $validApiVersions.Contains($apiVersion)) {
         Write-Warning "The apiVersion $($apiVersion) was not found for the resource type: $potentialResourceType"
     }
 
