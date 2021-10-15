@@ -20,7 +20,13 @@ Find-JsonContent -Key type -Value 'Microsoft.Resources/deployments'
 foreach ($dr in $deploymentResources) {
 
     $scope = $dr.properties.expressionEvaluationOptions.scope
-    $nestedTemplateText = $dr.properties.template | ConvertTo-Json -Depth 100
+    $nestedTemplateText = @($dr.properties.template | ConvertTo-Json -Depth 100) -replace '\\u0027', "'"
+
+    # If the template was scoped for inner evaluation, it will be extracted and converted into an empty template
+    # If this the case, NestedTemplateText will be blank string or an empty JSON object, and we can continue on our way.
+    if ((-not $nestedTemplateText) -or ($nestedTemplateText -replace '\s' -eq '{}')) { 
+        continue
+    }
 
     # if scope is not present or set to outer, flag it if it has secureParams
     if (!$scope -or $scope -eq 'outer') {
