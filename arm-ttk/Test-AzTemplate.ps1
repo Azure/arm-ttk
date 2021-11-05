@@ -33,7 +33,6 @@ Each test script has access to a set of well-known variables:
 * InnerTemplates (indicates if the template contained or was in inner templates)
 * ExpandedTemplateText (the text of a template, with variables expanded)
 * ExpandedTemplateOjbect (the object of a template, with variables expanded)
-* InnerTemplates (indicates if the template contained or was in inner templates
 
     .Example
         Test-AzTemplate -TemplatePath ./FolderWithATemplate
@@ -259,12 +258,18 @@ Each test script has access to a set of well-known variables:
                         if ($testCommandParameters.ContainsKey("TemplateText")) { 
                             $templateText   = $testInput['TemplateText']   = 
                                 $ParentTemplateText.Substring($foundInnerTemplate.Index, $foundInnerTemplate.Length) -replace 
-                                    '^[''"\w]+\s{0,}\:' # Clip the name of the property the template was embedded within, so $templateText is valid JSON
+                                    '^[''"\w]+\s{0,}\:' -replace # Clip the name of the property the template was embedded within, so $templateText is valid JSON
+                                    '\[\[', '[' # replace double brackets with a single bracket.
                             $usedParameters = $true
                         }
                         # And Map TemplateObject to the converted json (if the test command uses -TemplateObject)
                         if ($testCommandParameters.ContainsKey("TemplateObject")) { 
-                            $templateObject = $testInput['TemplateObject'] = $innerTemplate.template
+                            $templateObject = $testInput['TemplateObject'] = 
+                                try {
+                                    $templateText | ConvertFrom-Json
+                                } catch {
+                                    $innerTemplate.template
+                                }
                             $usedParameters = $true
                         }
 
