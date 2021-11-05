@@ -46,7 +46,8 @@ $PropertiesThatCanBeEmpty = 'resources',
                             'notEquals', # Microsoft.Authorization/policyDefinitions policyRule'
                             'clientId', # Microsoft.ContainerService/managedClusters.properties.servicePrincipalProfile
                             'allowedCallerIpAddresses', # Microsoft.Logic/workflows Access Control
-                            'workerPools' # Microsoft.Web/hostingEnvironments
+                            'workerPools', # Microsoft.Web/hostingEnvironments
+                            'AzureMonitor' # Microsoft.Insights/VMDiagnosticsSettings
 
 if ($emptyItems) {
     foreach ($emptyItem in $emptyItems) {

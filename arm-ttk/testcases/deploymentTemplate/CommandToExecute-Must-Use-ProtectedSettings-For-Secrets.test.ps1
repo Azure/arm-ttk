@@ -14,7 +14,7 @@ $TemplateObject
 # Find all references to an commandToExecute.
 $commandsToExecute = $TemplateObject | 
     Find-JsonContent -Key commandToExecute  -Value * -Like |
-    Where-Object { $_.ParentObject[0].type -imatch 'CustomScript$' } # on a customScript resource.
+    Where-Object { $_.ParentObject[0].type -imatch 'CustomScript|CustomScriptExtension|CustomScriptForLinux' } # on a customScript resource.
 
 
 foreach ($command in $commandsToExecute) {
