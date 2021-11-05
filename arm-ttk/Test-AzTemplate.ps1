@@ -1,4 +1,4 @@
-﻿function Test-AzTemplate
+function Test-AzTemplate
 {
     [Alias('Test-AzureRMTemplate')] # Added for backward compat with MP
     <#
@@ -33,7 +33,6 @@ Each test script has access to a set of well-known variables:
 * InnerTemplates (indicates if the template contained or was in inner templates)
 * ExpandedTemplateText (the text of a template, with variables expanded)
 * ExpandedTemplateOjbect (the object of a template, with variables expanded)
-* InnerTemplates (indicates if the template contained or was in inner templates
 
     .Example
         Test-AzTemplate -TemplatePath ./FolderWithATemplate
@@ -265,6 +264,7 @@ Each test script has access to a set of well-known variables:
                         # And Map TemplateObject to the converted json (if the test command uses -TemplateObject)
                         if ($testCommandParameters.ContainsKey("TemplateObject")) { 
                             $templateObject = $testInput['TemplateObject'] = $innerTemplate.template
+                            $templateObject | Add-Member NoteProperty IsInnerTemplate $true -Force -PassThru
                             $usedParameters = $true
                         }
 
