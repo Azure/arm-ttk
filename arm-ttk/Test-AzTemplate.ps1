@@ -264,7 +264,7 @@ Each test script has access to a set of well-known variables:
                         # And Map TemplateObject to the converted json (if the test command uses -TemplateObject)
                         if ($testCommandParameters.ContainsKey("TemplateObject")) { 
                             $templateObject = $testInput['TemplateObject'] = $innerTemplate.template
-                            $templateObject | Add-Member NoteProperty IsInnerTemplate $true -Force -PassThru
+                            $templateObject | Add-Member NoteProperty IsInnerTemplate $true -Force
                             $usedParameters = $true
                         }
 
