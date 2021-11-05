@@ -332,9 +332,12 @@ function Expand-AzTemplate
                         }
                         return "'$("$v".Replace("'","\'"))'"
                     } else {
-                        if ("$templateVariableValue".StartsWith('[')) {
-                            if ("$templateVariableValue".EndsWith(']')) {
-                                return "$templateVariableValue" -replace '^\[' -replace '\]$'
+                        if ($templateVariableValue -is [Object[]]) { # If the value is an array
+                            return "$match" # do not escape it.
+                        }
+                        if ("$templateVariableValue".StartsWith('[')) { # If the value is a subexpression
+                            if ("$templateVariableValue".EndsWith(']')) { 
+                                return "$templateVariableValue" -replace '^\[' -replace '\]$' -replace '"', '\"' # Escape the brackets and quotes
                             } else {
                                 return $templateVariableValue
                             }
