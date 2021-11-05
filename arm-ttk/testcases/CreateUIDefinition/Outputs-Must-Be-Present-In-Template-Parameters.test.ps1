@@ -1,4 +1,4 @@
-﻿<#
+<#
 .Synopsis
     Ensures that .outputs are present in the .parameters of CreateUIDefinition.json
 .Description
@@ -35,7 +35,13 @@ foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk th
         $outputName -eq 'managedresourcegroupid') { # If the output was one of the outputs used for Managed Apps and only found in the generated template, skip the test
             continue 
     }
-    # If the output name was not declared in the TemplateObject,      
+
+    # If the TemplateObject is inner template of MainTemplate, skip the test
+    if ($TemplateObject.IsInnerTemplate){
+        continue
+    }
+    
+    # If the output name was not declared in the TemplateObject
     if (-not $TemplateObject.parameters.$outputName) {
         # write an error
         Write-Error "output $outputName does not exist in template.parameters" -ErrorId CreateUIDefinition.Output.Missing.From.MainTemplate -TargetObject $parameterInfo.outputs
