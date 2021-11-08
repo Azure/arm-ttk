@@ -86,8 +86,19 @@ foreach ($av in $allApiVersions) {
             # by walking backwards over the parent resources
             # (since the topmost resource will be the last item in the list)
             for ($i = $av.ParentObject.Count - 1; $i -ge 0; $i--) {
-                if (-not $av.ParentObject[$i].type) { continue }
-                $av.ParentObject[$i].type
+                $parent=$av.ParentObject[$i]
+                if (-not $parent.type) { continue }
+
+                # if parent resource type is Microsoft.Resources/deployments, and this is an inner template, skip
+                $expEvaOptions= $parent.properties.expressionEvaluationOptions
+                if ($parent.type -eq "Microsoft.Resources/deployments" -and $expEvaOptions) {
+                    $scope=$expEvaOptions.scope
+                    if ($scope -eq "inner") {
+                        continue
+                    }
+                }
+
+                $parent.type
             }
         }
         $av.type # and adding this resource's type.
