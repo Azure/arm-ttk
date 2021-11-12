@@ -21,6 +21,18 @@ describe Expand-AzTemplate {
             $expanded.ExpandedTemplateText | ?<ARM_Variable> | Should -Be $null
             $expanded.ExpandedTemplateObject.someProperty | Should -Be '[resourceGroup().location]'
         }
+
+        it 'Can expand subexpressions with quotes' {
+            $expanded = Expand-AzTemplate -TemplatePath (Join-Path $pwd ExpandVariables.json)
+            $expanded.ExpandedTemplateText | ?<ARM_Variable> | Should -Be $null
+            $expanded.ExpandedTemplateObject.quoting | Should -BeLike '*"*"*' 
+        }
+
+        it 'Can embed nested objects' {
+            $expanded = Expand-AzTemplate -TemplatePath (Join-Path $pwd ExpandVariables.json)
+            $expanded.ExpandedTemplateText | ?<ARM_Variable> | Should -Be $null
+            $expanded.ExpandedTemplateObject.obj | Should -Be '[json(''{"key":"value"})'']' 
+        }
     }
 }
 

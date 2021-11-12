@@ -1,6 +1,12 @@
 ﻿{
   "variables": {
-    "rg": "[resourceGroup()]"
+    "rg": "[resourceGroup()]",
+    "doubleQuotes": "[concat('\"this string\" is quoted', 'this is not')]",
+    "embeddedObject": {
+        "key": "value"
+    }
   },
-  "someProperty": "[variables('rg').location]"
+  "someProperty": "[variables('rg').location]",
+  "quoting": "[variables('doubleQuotes')]",
+  "obj": "[variables('embeddedObject')]"
 }
