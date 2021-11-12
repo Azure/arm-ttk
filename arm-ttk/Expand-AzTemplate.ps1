@@ -332,8 +332,9 @@ function Expand-AzTemplate
                         }
                         return "'$("$v".Replace("'","\'"))'"
                     } else {
-                        if ($templateVariableValue -is [Object[]]) { # If the value is an array
-                            return "$match" # do not escape it.
+                        if ($templateVariableValue -isnot [string]) { # If the value is not a string                            
+                            return "json('$(($templateVariableValue | ConvertTo-Json -Depth 100 -Compress) -replace '\\u0027b', "'" -replace '"','\"'))'"
+                            # make it JSON
                         }
                         if ("$templateVariableValue".StartsWith('[')) { # If the value is a subexpression
                             if ("$templateVariableValue".EndsWith(']')) { 
