@@ -7,6 +7,6 @@ Files in this directory should match two patterns:
 
 For example, AllResources.cache.json is created with AllResources.init.cache.json.
 
-To use this cache within TTK /testcases, add a parameter $AllResources.  The test for [ApiVersions-Should-Be-Recent](../testcases/apiVersions-Should-Be-Recent.test.ps1) contains an example.
+To use this cache within TTK /testcases, add a parameter $AllResources.  The test for [ApiVersions-Should-Be-Recent](../testcases/deploymentTemplate/apiVersions-Should-Be-Recent.test.ps1) contains an example.
 
 You can use Update-TTKCache to run all *.init.cache.ps1 files within the directory.
