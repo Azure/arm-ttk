@@ -1,0 +1,25 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "secure": {
+            "type": "secureObject"
+        }
+    },
+    "resources": [
+        {
+            "name": "vm/CustomScriptExtension",
+            "type": "Microsoft.HybridCompute/machines/extensions",
+            "apiVersion": "2019-08-02-preview",
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": "https://foo.bar/script.ps1",
+                    "commandToExecute": "[concat('powershell -Arguments ', parameters('secure'))]"
+                }
+            }
+        }
+    ]
+}

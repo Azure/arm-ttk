@@ -40,8 +40,8 @@ if ($locationParameter -ne $null -and $locationParameter.type -ne "string") {
 }
 
 # In mainTemplate:
-# there must be a parameter named "location"
-# if that parameter has a defaultValue, it must be the expression [resourceGroup().location] 
+# If there is a parameter named "location" then
+#   if that parameter has a defaultValue, it must be the expression [resourceGroup().location] 
 if ($IsMainTemplate) { 
     if ($locationParameter.defaultValue -and 
         "$($locationParameter.defaultvalue)".Trim() -ne '[resourceGroup().location]' -and 

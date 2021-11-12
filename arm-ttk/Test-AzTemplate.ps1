@@ -1,4 +1,4 @@
-﻿function Test-AzTemplate
+function Test-AzTemplate
 {
     [Alias('Test-AzureRMTemplate')] # Added for backward compat with MP
     <#
@@ -269,7 +269,8 @@ Each test script has access to a set of well-known variables:
                                     $templateText | ConvertFrom-Json
                                 } catch {
                                     $innerTemplate.template
-                                }
+                                }                            
+                            $templateObject | Add-Member NoteProperty IsInnerTemplate $true -Force
                             $usedParameters = $true
                         }
 
