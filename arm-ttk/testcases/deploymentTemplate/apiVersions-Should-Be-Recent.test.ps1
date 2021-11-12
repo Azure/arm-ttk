@@ -86,8 +86,19 @@ foreach ($av in $allApiVersions) {
             # by walking backwards over the parent resources
             # (since the topmost resource will be the last item in the list)
             for ($i = $av.ParentObject.Count - 1; $i -ge 0; $i--) {
-                if (-not $av.ParentObject[$i].type) { continue }
-                $av.ParentObject[$i].type
+                $parent = $av.ParentObject[$i]
+                if (-not $parent.type) { continue }
+
+                # if parent resource type is Microsoft.Resources/deployments, and this is an inner template,
+                # do not add the prefix "Microsoft.Resources/deployments" to resource type.
+                $expEvalOptions = $parent.properties.expressionEvaluationOptions
+                if ($parent.type -eq "Microsoft.Resources/deployments" -and $expEvalOptions) {
+                    $scope = $expEvalOptions.scope
+                    if ($scope -eq "inner") {
+                        continue
+                    }
+                }
+                $parent.type
             }
         }
         $av.type # and adding this resource's type.
@@ -117,8 +128,8 @@ foreach ($av in $allApiVersions) {
             }
             else {
                 $FullResourceTypes[$i] # Always include the last segment.
-            }       
-        }) -join '/'     
+            }
+        }) -join '/'
 
     # Now, get the API version as a string
     $apiString = $av.ApiVersion
@@ -131,8 +142,6 @@ foreach ($av in $allApiVersions) {
         continue # and move onto the next resource
     }
     $apiDate = [DateTime]::new($matches.Year, $matches.Month, $matches.Day) # now coerce the apiVersion into a DateTime
-
-
 
     # Now find all of the valid versions from this API
     $validApiVersions = # This is made a little tricky by the fact that some resources don't directly have an API version
