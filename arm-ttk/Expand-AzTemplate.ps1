@@ -236,10 +236,11 @@ function Expand-AzTemplate
                                 FullPath = $fileInfo.Fullname#*FullPath (the full path to the file)
                             }
                             # If the file is JSON, two additional properties may be present:
-                            #*Object (the file's text, converted from JSON)
+                            #* Object (the file's text, converted from JSON)
                             $fileObject.Object = Import-Json $fileObject.FullPath
-                            #*Schema (the value of the $schema property of the JSON object, if present)
+                            #* Schema (the value of the $schema property of the JSON object, if present)
                             $fileObject.schema = $fileObject.Object.'$schema'
+                            #* InnerTemplates (any inner templates found within the object)
                             $fileObject.InnerTemplates = @(if ($fileObject.Text -and $fileObject.Text.Contains('"template"')) {
                                 Find-JsonContent -InputObject $fileObject.Object -Key template |
                                     Where-Object { $_.expressionEvaluationOptions.scope -eq 'inner' -or $_.jsonPath -like '*.policyRule.*' } |
