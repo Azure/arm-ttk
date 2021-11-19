@@ -31,6 +31,7 @@ Each test script has access to a set of well-known variables:
 * MainTemplateVariables (a hashtable containing the variables found in the main template)
 * MainTemplateOutputs (a hashtable containing the outputs found in the main template)
 * InnerTemplates (indicates if the template contained or was in inner templates)
+* IsInnerTemplate (indicates if currently testing an inner template)
 * ExpandedTemplateText (the text of a template, with variables expanded)
 * ExpandedTemplateOjbect (the object of a template, with variables expanded)
 
@@ -226,7 +227,9 @@ Each test script has access to a set of well-known variables:
                 } else {
                     return
                 }
-            $testInput = @{} + $TestParameters
+
+            $testInput = @{IsInnerTemplate=$false} + $TestParameters
+            $IsInnerTemplate = $false
 
             foreach ($k in @($testInput.Keys)) {
                 if (-not $testCommandParameters.ContainsKey($k)) {
@@ -251,6 +254,10 @@ Each test script has access to a set of well-known variables:
                 }
 
                 if ($TestParameters.InnerTemplates.Count) { # If an ARM template has inner templates
+                    $isInnerTemplate = $testInput['IsInnerTemplate'] = $true
+                    if (-not $testCommandParameters.ContainsKey('IsInnerTemplate')) {
+                        $testInput.Remove('IsInnerTemplate')
+                    }
                     foreach ($innerTemplate in $testParameters.InnerTemplates) {
                         $foundInnerTemplate = $innerTemplate | Resolve-JSONContent -JsonText $ParentTemplateText
                         $usedParameters = $false
@@ -263,8 +270,7 @@ Each test script has access to a set of well-known variables:
                         }
                         # And Map TemplateObject to the converted json (if the test command uses -TemplateObject)
                         if ($testCommandParameters.ContainsKey("TemplateObject")) { 
-                            $templateObject = $testInput['TemplateObject'] = $innerTemplate.template
-                            $templateObject | Add-Member NoteProperty IsInnerTemplate $true -Force
+                            $templateObject = $testInput['TemplateObject'] = $innerTemplate.template                            
                             $usedParameters = $true
                         }
 
@@ -284,7 +290,7 @@ Each test script has access to a set of well-known variables:
         }
 
         #*Test-Group (executes a group of tests)
-        function Test-Group {
+        function Test-Group {            
             $testQueue = [Collections.Queue]::new(@($GroupName))
             :nextTestInGroup while ($testQueue.Count) {
                 $dq = $testQueue.Dequeue()
