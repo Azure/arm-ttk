@@ -228,6 +228,7 @@ Each test script has access to a set of well-known variables:
                     return
                 }
 
+            $parentTemplateText = $testInput.TemplateText
             $testInput = @{IsInnerTemplate=$false} + $TestParameters
             $IsInnerTemplate = $false
 
@@ -253,7 +254,7 @@ Each test script has access to a set of well-known variables:
                     . $myModule $TheTest @testInput
                 }
 
-                if ($TestParameters.InnerTemplates.Count) { # If an ARM template has inner templates
+                if ($TestParameters.InnerTemplates.Count) { # If an ARM template has inner templates                    
                     $isInnerTemplate = $testInput['IsInnerTemplate'] = $true
                     if (-not $testCommandParameters.ContainsKey('IsInnerTemplate')) {
                         $testInput.Remove('IsInnerTemplate')
@@ -431,6 +432,7 @@ Each test script has access to a set of well-known variables:
         function Test-FileList {
             $lastFile = $FolderFiles[-1]
             $isFirstFile = $true                        
+            $mainInnerTemplates = $InnerTemplates
             foreach ($fileInfo in $FolderFiles) { # We loop over each file in the folder.
                 $isLastFile = $fileInfo -eq $lastFile
                 $matchingGroups =
@@ -505,6 +507,11 @@ Each test script has access to a set of well-known variables:
                     $templateFileName = $fileInfo.Name                    
                     $TemplateObject = $fileInfo.Object
                     $TemplateText = $fileInfo.Text
+                    if ($fileInfo.InnerTemplates) {
+                        $InnerTemplates = $fileInfo.InnerTemplates
+                    } else {
+                        $InnerTemplates = $mainInnerTemplates
+                    }
                     if ($InnerTemplates.Count) {
                         $anyProblems = $false
                             foreach ($it in $innerTemplates) {
