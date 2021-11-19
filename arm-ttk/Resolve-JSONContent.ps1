@@ -179,7 +179,7 @@
 
         $jsonPathParts = [Regex]::new(@'
 (?>
-(^|\.)(?<Property>\w+)
+(^|\.)(?<Property>\w+)(?:\[(?<Index>\d+)\])?
 |
 \[(?<Index>\d+)\]
 )
