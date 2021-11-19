@@ -240,6 +240,11 @@ function Expand-AzTemplate
                             $fileObject.Object = Import-Json $fileObject.FullPath
                             #*Schema (the value of the $schema property of the JSON object, if present)
                             $fileObject.schema = $fileObject.Object.'$schema'
+                            $fileObject.InnerTemplates = @(if ($fileObject.Text -and $fileObject.Text.Contains('"template"')) {
+                                Find-JsonContent -InputObject $fileObject.Object -Key template |
+                                    Where-Object { $_.expressionEvaluationOptions.scope -eq 'inner' -or $_.jsonPath -like '*.policyRule.*' } |
+                                    Sort-Object JSONPath -Descending
+                            })
                             $fileObject
                         }
 
