@@ -17,8 +17,17 @@ $CreateUIDefinitionObject,
 # The Template Object (the contents of azureDeploy.json, converted from JSON)
 [Parameter(Mandatory=$true,Position=1)]
 [PSObject]
-$TemplateObject
+$TemplateObject,
+
+# If set, the TemplateObject is an inner template.
+[switch]
+$IsInnerTemplate
 )
+
+# If the TemplateObject is inner template of MainTemplate, skip the test
+if ($IsInnerTemplate) {
+    return
+}
 
 # First, make sure CreateUIDefinition has outputs
 if (-not $CreateUIDefinitionObject.parameters.outputs) {
@@ -36,10 +45,7 @@ foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk th
             continue 
     }
 
-    # If the TemplateObject is inner template of MainTemplate, skip the test
-    if ($TemplateObject.IsInnerTemplate){
-        continue
-    }
+    
     
     # If the output name was not declared in the TemplateObject
     if (-not $TemplateObject.parameters.$outputName) {
