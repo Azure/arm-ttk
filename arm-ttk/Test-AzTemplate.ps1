@@ -259,14 +259,13 @@ Each test script has access to a set of well-known variables:
                     if (-not $testCommandParameters.ContainsKey('IsInnerTemplate')) {
                         $testInput.Remove('IsInnerTemplate')
                     }
+                    $innerTemplateNumber = 0
                     foreach ($innerTemplate in $testParameters.InnerTemplates) {
                         $foundInnerTemplate = $innerTemplate | Resolve-JSONContent -JsonText $ParentTemplateText
                         $usedParameters = $false
                         # Map TemplateText to the inner template text by converting to JSON (if the test command uses -TemplateText)
                         if ($testCommandParameters.ContainsKey("TemplateText")) { 
-                            $templateText   = $testInput['TemplateText']   = 
-                                $ParentTemplateText.Substring($foundInnerTemplate.Index, $foundInnerTemplate.Length) -replace 
-                                    '^[''"\w]+\s{0,}\:' # Clip the name of the property the template was embedded within, so $templateText is valid JSON
+                            $templateText   = $testInput['TemplateText']   = $TestParameters.InnerTemplatesText[$innerTemplateNumber]
                             $usedParameters = $true
                         }
                         # And Map TemplateObject to the converted json (if the test command uses -TemplateObject)
@@ -433,6 +432,7 @@ Each test script has access to a set of well-known variables:
             $lastFile = $FolderFiles[-1]
             $isFirstFile = $true                        
             $mainInnerTemplates = $InnerTemplates
+            $mainInnerTemplatesText = $InnerTemplatesText
             foreach ($fileInfo in $FolderFiles) { # We loop over each file in the folder.
                 $isLastFile = $fileInfo -eq $lastFile
                 $matchingGroups =
@@ -508,9 +508,11 @@ Each test script has access to a set of well-known variables:
                     $TemplateObject = $fileInfo.Object
                     $TemplateText = $fileInfo.Text
                     if ($fileInfo.InnerTemplates) {
-                        $InnerTemplates = $fileInfo.InnerTemplates
+                        $InnerTemplates     = $fileInfo.InnerTemplates
+                        $InnerTemplatesText = $fileInfo.InnerTemplatesText
                     } else {
                         $InnerTemplates = $mainInnerTemplates
+                        $InnerTemplatesText = $mainInnerTemplatesText
                     }
                     if ($InnerTemplates.Count) {
                         $anyProblems = $false

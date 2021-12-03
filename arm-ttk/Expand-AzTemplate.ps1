@@ -146,7 +146,7 @@ function Expand-AzTemplate
                 'MainTemplatePath', 'MainTemplateObject', 'MainTemplateText',
                 'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 'MainTemplateOutputs', 'TemplateMetadata',
                 'isParametersFile', 'ParameterFileName', 'ParameterObject', 'ParameterText',
-                'InnerTemplates', 'ParentTemplateText', 'ParentTemplateObject',
+                'InnerTemplates', 'InnerTemplatesText', 'ParentTemplateText', 'ParentTemplateObject',
                 'ExpandedTemplateText', 'ExpandedTemplateObject'
 
             foreach ($_ in $WellKnownVariables) {
@@ -246,6 +246,19 @@ function Expand-AzTemplate
                                     Where-Object { $_.expressionEvaluationOptions.scope -eq 'inner' -or $_.jsonPath -like '*.policyRule.*' } |
                                     Sort-Object JSONPath -Descending
                             })
+                            #* InnerTemplatesText (an array of the text of each inner template)
+                            $fileObject.InnerTemplatesText = @(if ($fileObject.innerTemplates) {
+                                $anyProblems = $false                                
+                                foreach ($it in $fileObject.innerTemplates) {
+                                    $foundInnerTemplate = $it | Resolve-JSONContent -JsonText $fileObject.Text
+                                    if (-not $foundInnerTemplate) { $anyProblems = $true; break }
+                                    $foundInnerTemplate.Content -replace '"template"\s{0,}\:\s{0,}'                                    
+                                }
+
+                                if ($anyProblems) {
+                                    Write-Error "Could not extract inner templates for '$TemplatePath'." -ErrorId InnerTemplate.Extraction.Error
+                                }
+                            })
                             $fileObject
                         }
 
@@ -302,12 +315,15 @@ function Expand-AzTemplate
                     Sort-Object JSONPath -Descending
             })
 
+            $innerTemplatesText =@()
+
             if ($innerTemplates) {
                 $anyProblems = $false
                 $originalTemplateText = "$TemplateText"
                 foreach ($it in $innerTemplates) {
                     $foundInnerTemplate = $it | Resolve-JSONContent -JsonText $TemplateText
                     if (-not $foundInnerTemplate) { $anyProblems = $true; break }
+                    $innerTemplatesText += $foundInnerTemplate.Content -replace '"template"\s{0,}\:\s{0,}'
                     $TemplateText = $TemplateText.Remove($foundInnerTemplate.Index, $foundInnerTemplate.Length)
                     $TemplateText = $TemplateText.Insert($foundInnerTemplate.Index, '"template": {}')
                 }
