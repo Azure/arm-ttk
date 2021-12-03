@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "_artifactsLocation": {
+      "type": "string",
+      "defaultValue": "[substring(deployment().properties.templateLink.uri, 0, lastIndexOf(deployment().properties.templateLink.uri, '/'))]"
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "defaultValue": ""
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[deployment().location]"
+    },
+    "diagnosticPolicies": {
+      "type": "array",
+      "defaultValue": [
+        "diagnostics-aa-deploy-policy"        
+      ]
+    }
+  },
+  "resources": [
+    {
+      "name": "getManagementGroupName",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-01-01",
+      "location": "[parameters('location')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "Inner"
+        },
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [ ]
+        }
+      }
+    }
+  ]
+}

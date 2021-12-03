@@ -179,7 +179,7 @@
 
         $jsonPathParts = [Regex]::new(@'
 (?>
-(^|\.)(?<Property>\w+)
+(^|\.)(?<Property>\w+)(?:\[(?<Index>\d+)\])?
 |
 \[(?<Index>\d+)\]
 )
@@ -196,18 +196,24 @@
             $propMatch = $null
             $listMatch = $null
             if ($part.Groups['Property'].Success) {
+                $foundProperty = $false
                 foreach ($propMatch in $jsonProperty.Matches($JSONText, $cursor)) {
                     if ($propMatch.Groups['Name'].Value -eq $part.Groups['Property'].Value) {
                         $cursor = $propMatch.Groups['Name'].Index + $propMatch.Groups['Name'].Length
                         $gotThisFar += $part
-                        continue nextPathPart
+                        $foundProperty = $true
+                        break
                     }
                 }
-                if ($VerbosePreference -ne 'silentlyContinue') {
-                    Write-Verbose "Unable to find $($gotThisFar -join '')$($part) around index $($cursor)"
+                if (-not $foundProperty) {
+                    if ($VerbosePreference -ne 'silentlyContinue') {
+                        Write-Verbose "Unable to find $($gotThisFar -join '')$($part) around index $($cursor)"
+                    }
+                    $cursor = $null
                 }
-                $cursor = $null
-            } elseif ($part.Groups['Index'].Success) {
+            }
+            
+            if ($part.Groups['Index'].Success) {
                 $targetIndex = $part.Groups['Index'].Value -as [int]
                 $listMatch = $jsonList.Match($JSONText, $cursor)
                 $values = $listMatch.Groups["JSON_Value"].Captures
@@ -238,7 +244,26 @@
 
         if (-not $cursor) { return }
         
-        if ($propMatch) { # If our last part of the path was a property        
+        if ($listMatch) {
+            
+            [PSCustomObject][Ordered]@{
+                PSTypeName = 'JSON.Content.Location'
+                JSONPath = $JSONPath
+                JSONText = $JSONText
+                Index    = $indexMatch.Index
+                Length   = $indexMatch.Length
+                Content  = $JSONText.Substring($indexMatch.Index, $indexMatch.Length)
+                Line     = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Matches(
+                                $JSONText, $indexMatch.Index
+                           ).Count
+                Column   = $listMatch.Groups["ListItem"].Index + $(
+                                $m = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Match(
+                                    $JSONText, $indexMatch.Index)
+                                $m.Index + $m.Length
+                            ) + 1
+            }
+            
+        } elseif ($propMatch) { # If our last part of the path was a property        
             $propMatchIndex  = $propMatch.Groups["Name"].Index - 1 # Subtract one for initial quote
             $propMatchLength = ($propMatch.Groups["JSON_Value"].Index + $propMatch.Groups["JSON_Value"].Length) - 
                                 $propMatch.Groups["Name"].Index + 1  # Add one for initial quote
@@ -258,25 +283,6 @@
                             ) + 1
                 PSTypeName = 'JSON.Content.Location'
             }
-        } elseif ($listMatch) {
-            
-            [PSCustomObject][Ordered]@{
-                PSTypeName = 'JSON.Content.Location'
-                JSONPath = $JSONPath
-                JSONText = $JSONText
-                Index    = $indexMatch.Index
-                Length   = $indexMatch.Length
-                Content  = $JSONText.Substring($indexMatch.Index, $indexMatch.Length)
-                Line     = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Matches(
-                                $JSONText, $indexMatch.Index
-                           ).Count
-                Column   = $listMatch.Groups["ListItem"].Index + $(
-                                $m = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Match(
-                                    $JSONText, $indexMatch.Index)
-                                $m.Index + $m.Length
-                            ) + 1
-            }
-            
         }
 
         
