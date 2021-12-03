@@ -49,14 +49,23 @@ $PropertiesThatCanBeEmpty = 'resources',
                             'workerPools', # Microsoft.Web/hostingEnvironments
                             'AzureMonitor' # Microsoft.Insights/VMDiagnosticsSettings
 
+# Find any instances of these properties within the document.
+$foundPropertiesThatCanBeEmpty = @(Find-JsonContent -Key "(?>$($PropertiesThatCanBeEmpty -join '|'))" -Match  -InputObject $TemplateObject)
+
 if ($emptyItems) {
-    foreach ($emptyItem in $emptyItems) {
+    :nextBlank foreach ($emptyItem in $emptyItems) {
         $nearbyContext = [Regex]::new('"(?<PropertyName>[^"]{1,})"\s{0,}:', "RightToLeft").Match($TemplateText, $emptyItem.Index)
         if ($nearbyContext -and $nearbyContext.Success) {
             $emptyPropertyName = $nearbyContext.Groups["PropertyName"].Value
             # exceptions
-            if ($PropertiesThatCanBeEmpty -contains $emptyPropertyName) {
-                continue
+            if ($PropertiesThatCanBeEmpty -contains $emptyPropertyName) { # If the property was one we said could be empty, 
+                continue # continue to the next blank.
+            }
+            foreach ($potentialException in $foundPropertiesThatCanBeEmpty) { # Otherwise, walk over each potential exception found
+                if ($potentialException.psobject.properties -and # and see if it has this property.
+                    $potentialException.psobject.properties[$emptyPropertyName]) {
+                    continue nextBlank # If so we will continue to the next blank.
+                }
             }
             # userAssigned Identity can have an expression for the property name
             # it could also be a literal resourceId
