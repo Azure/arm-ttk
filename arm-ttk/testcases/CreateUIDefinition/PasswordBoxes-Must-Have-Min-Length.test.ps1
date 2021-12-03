@@ -36,7 +36,7 @@ foreach ($pwb in $passwordBoxes) { # Loop over each password box
     }
 
     try { # If it did,
-        $constraintWasRegex = [Regex]::new($textbox.constraints.regex) # try to cast to a regex
+        $constraintWasRegex = [Regex]::new($pwb.constraints.regex) # try to cast to a regex
         $hasLengthConstraint = $lengthConstraintRegex.Matches($pwb.constraints.regex)
 
         if (-not $hasLengthConstraint) {
