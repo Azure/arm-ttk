@@ -32,7 +32,7 @@ foreach ($parameterProp in $templateObject.parameters.psobject.properties) {
     if ($parameter.Type -eq 'securestring' -and $parameter.defaultValue) {
         # the defaultValue must be an empty string "" or must be an expression that contains use the newGuid() function
         if ($parameter.defaultValue -and
-            $parameter.defaultValue -notmatch $usedNewGuid) {
+            -not ($parameter.defaultValue | ?<ARM_Template_Function> -FunctionName 'newguid')) {
             # Will return true when defaultvalue is not null or blank (blank values are OK).
             Write-Error -Message "Parameter $name is a SecureString and must not have a default value unless it is an expression that contains the newGuid() function." `
                 -ErrorId SecureString.Must.Not.Have.Default -TargetObject $parameter
