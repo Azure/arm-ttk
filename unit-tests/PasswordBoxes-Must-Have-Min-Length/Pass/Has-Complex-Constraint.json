@@ -1,0 +1,26 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Compute.MultiVm",
+  "version": "0.1.2-preview",
+  "parameters": {
+    "basics": [
+      {
+        "name": "adminPassword",
+        "type": "Microsoft.Common.PasswordBox",
+        "label": {
+          "password": "password",
+          "confirmPassword": "Confirm password"
+        },
+        "constraints": {
+          "required": true,
+          "regex": "(?=.{12,})((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])|(?=.*\\d)(?=.*[a-zA-Z])(?=.*[\\W_])|(?=.*[a-z])(?=.*[A-Z])(?=.*[\\W_])).*",
+          "validationMessage": "Password must be at least 12 characters long"
+        },
+        "options": {
+          "hideConfirmation": false
+        }
+      }
+    ],
+    "steps": []
+  }
+}
