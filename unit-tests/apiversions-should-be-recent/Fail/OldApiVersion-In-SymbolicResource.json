@@ -30,7 +30,7 @@
     "resources": {
         "NestedDeployment": {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2016-04-01",
+            "apiVersion": "2015-01-01",
             "name": "[variables('nestedTemplateName_ImportVHD-FromZipArchive')]",
             "properties": {
                 "mode": "Incremental",
