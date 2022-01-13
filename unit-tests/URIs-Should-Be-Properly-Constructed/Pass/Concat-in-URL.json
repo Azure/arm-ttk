@@ -1,0 +1,9 @@
+﻿{
+"$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "outputs": {
+        "ServerUrl": {
+          "type": "string",
+          "value": "[uri(concat('http://', reference(variables('publicIPAddressName')).dnsSettings.fqdn), 'somepath')]"
+        }
+    }
+}
