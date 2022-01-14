@@ -51,6 +51,9 @@ $preceededBySchema = # The exception to the rule is a schema reference,
 
 # Exception Regexs (end)
 
+$parametersSection = Resolve-JSONContent -JSONPath "parameters" -JSONText $TemplateText
+
+
 # Walk thru each host reference found 
 foreach ($match in $HardcodedHostFinder.Matches($TemplateText)) { 
     
@@ -61,6 +64,16 @@ foreach ($match in $HardcodedHostFinder.Matches($TemplateText)) {
     # The Azure Automation library packages are in a devopsgallerystorage blob container
     $devOpsGalleryMatch = $IsDevOpsGalleryStorage.Match($templateText, $match.Index)
     $notTheDevOpsGallery = (-not $devOpsGalleryMatch.Success -or $devOpsGalleryMatch.Index + $devOpsGalleryMatch.Length -ne $match.Index)
+
+    
+    if ($parametersSection -and # If there was a parameters section, 
+        (                       # and the url occured within it                  
+            $match.Index -ge $parametersSection.Index -and 
+            $match.Index -lt ( $parametersSection.Index  + $parametersSection.Length)
+        )
+    ) {
+        continue                # this is not a problem.  Move onto the next match.
+    }
 
     if ($notTheDevOpsGallery -and 
         $notTheSchema 
