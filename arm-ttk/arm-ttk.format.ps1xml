@@ -129,6 +129,12 @@ $($ParentNode.CustomControl.CustomEntries.CustomEntry.CustomItem.ExpressionBindi
                 if ($line.Location) {
                     $msg += " Line: $($line.Location.Line), Column: $($line.Location.Column)"
                 }
+                elseif ($line.TargetObject.JsonPath) {
+                    $resolved = Resolve-JSONContent -JSONPath $line.TargetObject.JsonPath -JSONText $testOut.File.Text
+                    if ($resolved) {
+                        $msg += " Line: $($resolved.Line), Column: $($resolved.Column)"
+                    }
+                }
 
                 if ($CanUseColor) {
                     . ${arm-ttk_SetOutputStyle} -ForegroundColor Error
