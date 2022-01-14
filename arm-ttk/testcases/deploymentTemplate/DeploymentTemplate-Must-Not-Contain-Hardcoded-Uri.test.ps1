@@ -68,8 +68,8 @@ foreach ($match in $HardcodedHostFinder.Matches($TemplateText)) {
     
     if ($parametersSection -and # If there was a parameters section, 
         (                       # and the url occured within it                  
-            $match.StartIndex -ge $parametersSection.Index -and 
-            $match.StartIndex -lt ( $parametersSection.Index  + $parametersSection.Length)
+            $match.Index -ge $parametersSection.Index -and 
+            $match.Index -lt ( $parametersSection.Index  + $parametersSection.Length)
         )
     ) {
         continue                # this is not a problem.  Move onto the next match.
