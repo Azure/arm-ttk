@@ -36,6 +36,9 @@ param(
     ),
 
     # Some properties can be empty within a given resource.
+    # The key is the full resource type name, and the value is a list of JSON paths to acceptable blanks.
+    # For instance, a value of "properties" would allow blanks in any subproperty named properties
+    # A value of "properties.settings" would allow blanks in any subproperty of settings.
     [Collections.IDictionary]
     $ResourcePropertiesThatCanBeEmpty = @{
         "Microsoft.Web/sites/config" = "properties"
