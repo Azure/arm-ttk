@@ -22,15 +22,14 @@ foreach ($found in $foundObjects) { # Walk over each found object
     foreach ($prop in $found.psobject.properties) { # then walk thru each property
         if ($prop.Name -notmatch 'ur[il]$') { continue } # skipping ones that are not uri/url
         if (-not $prop.value | ?<ARM_Template_Expression>) { continue } # and ones that do not contain an expression.
-        
-
 
         # If the value contained expressions, but not the function uri
         $foundBadFunction = $prop.Value | ?<ARM_Template_Function> -FunctionName ($FunctionNotAllowedInUri -join '|')
         $foundUriFunction = $prop.Value | ?<ARM_Template_Function> -FunctionName uri
+
         if (
             ($foundBadFunction -and -not $foundUriFunction) -or 
-            $foundBadFunction.Index -lt $foundUriFunction.Index
+            ($foundBadFunction.Index -lt $foundUriFunction.Index -and $foundBadFunction)
         ) {
             Write-Error "Function'$($foundBadFunction.Groups['FunctionName'].Value)' found within '$($prop.Name)" -TargetObject $found -ErrorId "URI.Improperly.Constructed"
         }
