@@ -8,7 +8,38 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]
-    $TemplateText
+    $TemplateText,
+
+    [Parameter(Mandatory = $true)]
+    [PSObject]
+    $TemplateObject,
+
+    # Some properties can be empty for readability
+    [string[]]    
+    $PropertiesThatCanBeEmpty = @('resources',
+                            'outputs',
+                            'variables',
+                            'parameters',
+                            'functions',
+                            'properties',
+                            'template',
+                            'defaultValue', # enables optional parameters
+                            'accessPolicies',  # keyVault requires this
+                            'value', # Microsoft.Resources/deployments - passing empty strings to a nested deployment
+                            'promotionCode', # Microsoft.OperationsManagement/soltuions/plan object
+                            'inputs', # Microsoft.Portal/dashboard
+                            'notEquals', # Microsoft.Authorization/policyDefinitions policyRule'
+                            'clientId', # Microsoft.ContainerService/managedClusters.properties.servicePrincipalProfile
+                            'allowedCallerIpAddresses', # Microsoft.Logic/workflows Access Control
+                            'workerPools', # Microsoft.Web/hostingEnvironments
+                            'AzureMonitor' # Microsoft.Insights/VMDiagnosticsSettings
+    ),
+
+    # Some properties can be empty within a given resource.
+    [Collections.IDictionary]
+    $ResourcePropertiesThatCanBeEmpty = @{
+        "Microsoft.Web/sites/config" = "properties"
+    }
 )
 
 # Check for any text to remove empty property values - PowerShell handles empty differently in objects so check the JSON source (i.e. text)
@@ -30,30 +61,58 @@ $emptyItems = @([Regex]::Matches($TemplateText, "${colon}\{\s{0,}\}")) + # Empty
 
 $lineBreaks = [Regex]::Matches($TemplateText, "`n|$([Environment]::NewLine)")
 
-# Some properties can be empty for readability
-$PropertiesThatCanBeEmpty = 'resources',
-                            'outputs',
-                            'variables',
-                            'parameters',
-                            'functions',
-                            'properties',
-                            'template',
-                            'defaultValue', # enables optional parameters
-                            'accessPolicies',  # keyVault requires this
-                            'value', # Microsoft.Resources/deployments - passing empty strings to a nested deployment
-                            'promotionCode', # Microsoft.OperationsManagement/soltuions/plan object
-                            'inputs', # Microsoft.Portal/dashboard
-                            'notEquals', # Microsoft.Authorization/policyDefinitions policyRule'
-                            'clientId', # Microsoft.ContainerService/managedClusters.properties.servicePrincipalProfile
-                            'allowedCallerIpAddresses', # Microsoft.Logic/workflows Access Control
-                            'workerPools', # Microsoft.Web/hostingEnvironments
-                            'AzureMonitor' # Microsoft.Insights/VMDiagnosticsSettings
 
-# Find any instances of these properties within the document.
-$foundPropertiesThatCanBeEmpty = @(Find-JsonContent -Key "(?>$($PropertiesThatCanBeEmpty -join '|'))" -Match  -InputObject $TemplateObject)
+if ($emptyItems) {  # If we found empty items
+    # Do what we need to in order to determine if they are "really" empty
 
-if ($emptyItems) {
+    # Find any instances of these properties within the document.
+    $foundPropertiesThatCanBeEmpty = @(Find-JsonContent -Key "(?>$($PropertiesThatCanBeEmpty -join '|'))" -Match  -InputObject $TemplateObject)
+
+    # Find the short or long name for each resource type
+    $resourceTypesThatCanBeEmpty = @($ResourcePropertiesThatCanBeEmpty.Keys) + @(
+        foreach ($k in $ResourcePropertiesThatCanBeEmpty.Keys) {
+            @($k -split '/')[-1]
+        }
+    )
+
+
+    # Find all resources of interest
+    $foundResourcesThatCanContainBlanks = 
+        @(Find-JsonContent -Key "type" -Value "(?>$($resourceTypesThatCanBeEmpty -join '|'))" -Match -InputObject $TemplateObject | 
+        Foreach-Object { 
+            $jsonMatch = $_
+        
+            $resourceTypeBlankPaths = # Find the properties within this resource that can be blank
+                @(if (-not $ResourcePropertiesThatCanBeEmpty[$jsonMatch.type]) { # If the type is not a full name
+                    # Walk the hierarchy to find the full name
+                    $fullTypeList = @($jsonMatch.type) + @($jsonMatch.Parent | Where-Object Type | Select-Object -ExpandProperty Type)
+                    [Array]::Reverse($fullTypeList) 
+                    if (-not $ResourcePropertiesThatCanBeEmpty[$fullTypeList -join '/']) { # If this was a resource we did not care about
+                        return # return
+                    } else {
+                        $ResourcePropertiesThatCanBeEmpty[$fullTypeList -join '/']
+                    }
+                } else {
+                    $ResourcePropertiesThatCanBeEmpty[$jsonMatch.type]
+                })
+
+            foreach ($blankPath in $resourceTypeBlankPaths) { # Each acceptable blank path is appended to the JSON path of the return object
+                Resolve-JSONContent -JSONText $TemplateText -JSONPath "$($jsonMatch.JSONPath).$blankPath" # and resolved.
+            }
+        })
+
+    $resourceBlankRange = # All resolved blank ranges are turned into a list of indexes
+        @(
+            foreach ($_ in $foundResourcesThatCanContainBlanks) {
+                for ($i = $_.Index; $i -lt $_.Index + $_.Length; $i++) {
+                    $i
+                }
+            }
+        )
+
+
     :nextBlank foreach ($emptyItem in $emptyItems) {
+        if ($emptyItem.Index -in $resourceBlankRange) { continue } # If the blank is within a range of acceptable indexes, continue.
         $nearbyContext = [Regex]::new('"(?<PropertyName>[^"]{1,})"\s{0,}:', "RightToLeft").Match($TemplateText, $emptyItem.Index)
         if ($nearbyContext -and $nearbyContext.Success) {
             $emptyPropertyName = $nearbyContext.Groups["PropertyName"].Value
