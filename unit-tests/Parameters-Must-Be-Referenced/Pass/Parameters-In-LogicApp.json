@@ -1,0 +1,88 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "logicAppName": {
+      "type": "String",
+      "defaultValue": "AllTabs",
+      "metadata": {
+        "description": "Name of the Logic App to be created."
+      }
+    },
+    "location": {
+      "type": "String",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure region in which the Logic App should be created."
+      }
+    },
+    "workspacesToQuery": {
+      "type": "Array",
+      "metadata": {
+        "description": "List of workspaces that the Logic App should query data from. Should be a comma-separated array of values of the format ['/subscriptions/{subscriptionId1}/resourceGroups/{resourceGroupName1}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName1}','/subscriptions/{subscriptionId2}/resourceGroups/{resourceGroupName2}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName2}']"
+      }
+    }
+  },
+  "variables": {
+    "office365ConnectionName": "[concat(parameters('location'),'-','office365')]",
+    "azureMonitorLogsConnectionName": "[concat(parameters('location'),'-','azuremonitorlogs')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('logicAppName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "workspacesToQuery": {
+              "defaultValue": "[parameters('workspacesToQuery')]",
+              "type": "Array"
+            }
+          },
+          "actions": {
+            "For_each": {
+              "foreach": "@parameters('workspacesToQuery')",
+              "actions": {
+                "Append_to_string_variable": {
+                  "type": "AppendToStringVariable",
+                  "inputs": {
+                    "name": "AzureDiagnostics_Incomplete",
+                    "value": " workspace('@{items('For_each')}').AzureDiagnostics,"
+                  }
+                }
+              },
+              "runAfter": {
+                "Initialize_variable-AddonAzureBackupStorage": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Foreach"
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azuremonitorlogs": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('azureMonitorLogsConnectionName'))]",
+                "connectionName": "[variables('azureMonitorLogsConnectionName')]",
+                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', parameters('location'), 'azuremonitorlogs')]"
+              },
+              "office365": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', variables('office365ConnectionName'))]",
+                "connectionName": "[variables('office365ConnectionName')]",
+                "id": "[subscriptionResourceId('Microsoft.Web/locations/managedApis', parameters('location'), 'office365')]"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
