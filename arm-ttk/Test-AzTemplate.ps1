@@ -334,18 +334,18 @@ Each test script has access to a set of well-known variables:
                     $InnerTemplateEndLine   = 0
                     $innerGroup = 
                         if ($testCaseOutput.InnerTemplateStart) {
-                            $innerTemplateStartIndex = ($($testCaseOutput | Select-Object -First 1).InnerTemplateStart) -as [int]
-                            $innerTemplateLength     = ($($testCaseOutput | Select-Object -First 1).InnerTemplateLength) -as [int]
+                            $innerTemplateStartIndex = ($($testCaseOutput | Where-Object InnerTemplateStart | Select-Object -First 1).InnerTemplateStart) -as [int]
+                            $innerTemplateLength     = ($($testCaseOutput | Where-Object InnerTemplateEnd | Select-Object -First 1).InnerTemplateLength) -as [int]
                             $InnerTemplateStartLine = 
                                     [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Matches(
                                         $parentTemplateText, $innerTemplateStartIndex
                                     ).Count
                             $InnerTemplateEndLine = 
-                                    [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Matches(
-                                        $parentTemplateText, $innerTemplateStartIndex + $innerTemplateLength
+                                    $InnerTemplateStartLine - 1 + [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Matches(
+                                        $testInput.TemplateText, $testInput.TemplateText.Length - 1
                                     ).Count
 
-                            "NestedTemplate $($testCaseOutput.InnerTemplateName) [ Lines $InnerTemplateStartLine - $InnerTemplateEndLine ]"
+                            "NestedTemplate $($testCaseOutput.InnerTemplateName | Select-Object -Unique) [ Lines $InnerTemplateStartLine - $InnerTemplateEndLine ]"
                         } else {''}
 
                     $displayGroup = if ($innerGroup) { $innerGroup } else { $GroupName } 

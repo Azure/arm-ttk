@@ -1,0 +1,45 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Azure.CreateUIDef",
+  "version": "0.1.2-preview",
+  "parameters": {
+    "basics": [
+      {
+        "name": "skuCode",
+        "type": "Microsoft.Common.DropDown",
+        "label": "App Service Server Type",
+        "placeholder": "Select Your Server Infrastructure",
+        "defaultValue": "Basic Server B3",
+        "toolTip": "This option allows you to choose the underlying infrastructure for the applications. Please review Azure documentation for details of the options.",
+        "multiselect": false,
+        "selectAll": false,
+        "filter": false,
+        "filterPlaceholder": "Filter items ...",
+        "multiLine": true,
+        "defaultDescription": "A value for selection",
+        "constraints": {
+          "allowedValues": [
+            {
+              "label": "Basic Server B2",
+              "description": "200 ACU, 2 cores, 3.5 GB RAM, manual scale up to 3 instances",
+              "value": "B2"
+            },
+            {
+              "label": "Basic Server B3",
+              "description": "(Recommended) 400 ACU, 4 cores, 7 GB RAM, manual scale up to 3 instances",
+              "value": "B3"
+            }
+          ],
+          "required": true
+        },
+        "visible": true
+      }
+    ],
+    "steps": [],
+    "outputs": {
+      "location": "[location()]",
+      "skuCode": "[basics('skuCode')]"
+    }
+  }
+}
+

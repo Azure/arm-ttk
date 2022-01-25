@@ -1,0 +1,8 @@
+﻿{
+    "parameters": {
+        "skuCode": {
+            "type": "string",
+            "defaultValue": "B3"
+        }
+    }
+}

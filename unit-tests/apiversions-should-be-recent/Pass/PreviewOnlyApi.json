@@ -1,0 +1,14 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "resources": [
+        {
+            "apiVersion": "2018-09-15", // is the latest non-preview version - "2018-10-15-preview" is the latest preview version
+            "name": "namespace",
+            "type": "Microsoft.DevTestLab/schedules",
+            "location": "global",
+            "properties": {
+            }
+        }
+    ]
+}

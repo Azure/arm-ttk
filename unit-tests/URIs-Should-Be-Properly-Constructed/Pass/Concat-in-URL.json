@@ -1,0 +1,15 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "resources": [],
+  "outputs": {
+    "ServerUrl": {
+      "type": "string",
+      "value": "[uri(concat('http://', reference(variables('publicIPAddressName')).dnsSettings.fqdn), 'somepath')]"
+    },
+    "otherUri": {
+      "type": "string",
+      "value": "[uri(reference(resourceId('Microsoft.KeyVault/vaults/keys', 'keyVaultName', 'keyName'), '2021-06-01-preview').keyUri, 'blah')]"
+    }
+  }
+}

@@ -1,0 +1,130 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "resources": [
+        {
+            "type": "Microsoft.Authorization/policyDefinitions",
+            "name": "diagnostics-aa-deploy-policy",
+            "apiVersion": "2021-06-01",
+            "properties": {
+                "parameters": {
+                    "profileName": {
+                        "type": "string",
+                        "metadata": {
+                            "displayName": "Profile name",
+                            "description": " "
+                        },
+                        "defaultValue": "setbypolicy_logAnalytics"
+                    },
+                    "logAnalytics": {
+                        "type": "string",
+                        "metadata": {
+                            "displayName": " ",
+                            "description": " ",
+                            "strongType": "",
+                            "assignPermissions": true
+                        }
+                    }
+                },
+                "policyType": "Custom",
+                "policyRule": {
+                    "if": {
+                        "field": "type",
+                        "equals": "Microsoft.Automation/automationAccounts"
+                    },
+                    "then": {
+                        "effect": "deployIfNotExists",
+                        "details": {
+                            "type": "Microsoft.Insights/diagnosticSettings",
+                            "roleDefinitionIds": [
+                                "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+                            ],
+                            "existenceCondition": {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                                        "equals": "True"
+                                    },
+                                    {
+                                        "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
+                                        "equals": "True"
+                                    },
+                                    {
+                                        "field": "Microsoft.Insights/diagnosticSettings/workspaceId",
+                                        "matchInsensitively": "[[parameters('logAnalytics')]"
+                                    }
+                                ]
+                            },
+                            "deployment": {
+                                "properties": {
+                                    "mode": "incremental",
+                                    "template": {
+                                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                        "contentVersion": "1.0.0.0",
+                                        "parameters": {
+                                            "profileName": {
+                                                "type": "string"
+                                            },
+                                            "logAnalytics": {
+                                                "type": "string"
+                                            },
+                                            "resourceName": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "resources": [
+                                            {
+                                                "name": "[[parameters('profileName')]",
+                                                "type": "Microsoft.Insights/diagnosticSettings",
+                                                "apiVersion": "2021-05-01-preview",
+                                                "scope": "[[resourceId('Microsoft.Automation/automationAccounts', parameters('resourceName'))]",
+                                                "properties": {
+                                                    "workspaceId": "[[parameters('logAnalytics')]",
+                                                    "metrics": [
+                                                        {
+                                                            "category": "AllMetrics",
+                                                            "enabled": true,
+                                                            "retentionPolicy": {
+                                                                "enabled": false,
+                                                                "days": 0
+                                                            }
+                                                        }
+                                                    ],
+                                                    "logs": [
+                                                        {
+                                                            "category": "JobLogs",
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "category": "JobStreams",
+                                                            "enabled": true
+                                                        },
+                                                        {
+                                                            "category": "DscNodeStatus",
+                                                            "enabled": true
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    "parameters": {
+                                        "profileName": {
+                                            "value": "[[parameters('profileName')]"
+                                        },
+                                        "logAnalytics": {
+                                            "value": "[[parameters('logAnalytics')]"
+                                        },
+                                        "resourceName": {
+                                            "value": "[[field('name')]"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

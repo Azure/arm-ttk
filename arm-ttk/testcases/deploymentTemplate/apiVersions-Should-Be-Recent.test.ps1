@@ -47,8 +47,8 @@ if (-not $TemplateObject.resources) {
 }
 
 # First, find all of the API versions in the main template resources.
-$allApiVersions = $TemplateObject.resources | 
-Find-JsonContent -Key apiVersion -Value * -Like
+$allApiVersions = Find-JsonContent -Key apiVersion -Value * -Like -InputObject $TemplateObject
+    
 
 
 
@@ -236,7 +236,7 @@ foreach ($av in $allApiVersions) {
             }
 
             # If it's older than two years, and there's nothing more recent
-            Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Api versions must be the latest or under $($NumberOfDays / 365) years old ($NumberOfDays days) - API version $($av.ApiVersion) of $FullResourceType is $([Math]::Floor($timeSinceApi.TotalDays)) days old" -ErrorId ApiVersion.OutOfDate
+            Write-TtkMessage "Api versions must be the latest or under $($NumberOfDays / 365) years old ($NumberOfDays days) - API version $($av.ApiVersion) of $FullResourceType is $([Math]::Floor($timeSinceApi.TotalDays)) days old" -ErrorId ApiVersion.OutOfDate -TargetObject $av
             Write-Output "Valid Api Versions:`n$recentApiVersions"
         }
     }
