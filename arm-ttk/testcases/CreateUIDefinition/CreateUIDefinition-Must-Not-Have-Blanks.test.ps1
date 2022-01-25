@@ -14,6 +14,8 @@ param(
 $CreateUIDefinitionText
 )
 
+$MarketplaceWarning = $true
+
 $colon = "(?<=:)\s{0,}" # this a back reference for a colon followed by 0 to more whitespace
 
 $emptyItems = 
@@ -38,7 +40,7 @@ if ($emptyItems) {
                 continue
             }            
             $lineNumber = @($lineBreaks | ? { $_.Index -lt $emptyItem.Index }).Count + 1
-            Write-Error "Empty property: $emptyPropertyName found on line: $lineNumber" -TargetObject $emptyItem
+            Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Empty property: $emptyPropertyName found on line: $lineNumber" -TargetObject $emptyItem
         } 
     }
 }

@@ -11,6 +11,8 @@ param(
 $TemplateText
 )
 
+$MarketplaceWarning = $true
+
 if ($TemplateText -like '*providers(*).apiVersions*') { # If the template text contains providers(*).apiVersions, fail
-    Write-Error "providers().apiVersions is not permitted, use a literal apiVersion" -ErrorId ApiVersion.Using.Providers -TargetObject $TemplateText
+    Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "providers().apiVersions is not permitted, use a literal apiVersion" -ErrorId ApiVersion.Using.Providers -TargetObject $TemplateText
 }

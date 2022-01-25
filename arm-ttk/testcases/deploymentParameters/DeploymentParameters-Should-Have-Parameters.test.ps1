@@ -12,10 +12,12 @@ param(
     $ParameterObject
 )
 
+$MarketplaceWarning = $false
+
 if (-not $ParameterObject.'$schema' -and -not $ParameterObject.contentVersion) {
     return
 }
 
 if (-not $ParameterObject.parameters) {
-    Write-Error -ErrorId Parameters.Missing.Parameters -Message "No parameters exists" 
+    Write-TtkMessage -MarketplaceWarning $MarketplaceWarning -ErrorId Parameters.Missing.Parameters -Message "No parameters exists" 
 } 

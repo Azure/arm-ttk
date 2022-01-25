@@ -18,6 +18,8 @@ $CreateUIDefinitionText,
 $MainTemplateParameters
 )
 
+$MarketplaceWarning = $false
+
 $progressId = [Random]::new().Next()
 $count = 0 
 
@@ -57,7 +59,7 @@ foreach ($av in $allowedValues) { # Walk thru each thing we find.
     if (-not $theOutput) {
         if ($CreateUIDefinitionText -notmatch "\.$($parent.Name)") { # and the control is not referred to elsewhere
             # write an error.
-            Write-Error "Could not find $($parent.Name) in outputs" -TargetObject $parent
+            Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Could not find $($parent.Name) in outputs" -TargetObject $parent
         }
         # Regardless, if we couldn't find the step in outputs, we move onto the next control with allowed values.
         continue 
@@ -69,7 +71,7 @@ foreach ($av in $allowedValues) { # Walk thru each thing we find.
     # If it didn't exist in the mainTemplate
     if (-not $MainTemplateParam) {
         # write an error and move onto the next item
-        Write-Error "CreateUIDefinition has parameter $($parent.Name), but it is missing from main template parameters "-TargetObject $parent
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "CreateUIDefinition has parameter $($parent.Name), but it is missing from main template parameters "-TargetObject $parent
         continue
     }
 
@@ -91,7 +93,7 @@ foreach ($av in $allowedValues) { # Walk thru each thing we find.
                 foreach ($v in $MainTemplateParam.allowedValues) {
                     if ($v -like "*$rv*") { continue CheckNextValue }
                 }
-                Write-Error "CreateUIDefinition parameter '$paramName' with value $rv is not allowed in the main template parameter $($theOutput.Name)" -ErrorId Allowed.Value.Mismatch
+                Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "CreateUIDefinition parameter '$paramName' with value $rv is not allowed in the main template parameter $($theOutput.Name)" -ErrorId Allowed.Value.Mismatch
             }
     } 
 
@@ -111,7 +113,7 @@ foreach ($av in $allowedValues) { # Walk thru each thing we find.
                 
             }
         if (-not $foundDefaultValue) {
-            Write-Error "CreateUIDefinition parameter $($parent.Name) is not allowed in the main template parameter $($theOutput.Name)" -ErrorId Allowed.Value.Default.Mismatch
+            Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "CreateUIDefinition parameter $($parent.Name) is not allowed in the main template parameter $($theOutput.Name)" -ErrorId Allowed.Value.Default.Mismatch
         }
     }
 }

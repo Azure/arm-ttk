@@ -16,6 +16,8 @@ param(
     $TemplateText
 )
 
+$MarketplaceWarning = $true
+
 $lineBreaks = [Regex]::Matches($TemplateText, "`n|$([Environment]::NewLine)")
 
 $exprStrOrQuote = [Regex]::new('(?<!\\)[\[\"]', 'RightToLeft')
@@ -28,7 +30,7 @@ foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
 
     $foundRefs = $TemplateText | ?<ARM_Parameter> -Parameter $escapedName
     if (-not $foundRefs) { # If we didn't, error
-        Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject $parameter
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject $parameter
     } else {
         foreach ($fr in $foundRefs) { # Walk thru each reference
             $foundQuote =$exprStrOrQuote.Match($TemplateText, $fr.Index + 1) # make sure we hit a [ before a quote
@@ -36,7 +38,7 @@ foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
                 $lineNumber = @($lineBreaks | ? { $_.Index -lt $fr.Index }).Count + 1    
                 $targetObject = $parameter.PsObject.Copy()
                 $targetObject | Add-Member -MemberType NoteProperty -Name lineNumber -Value $lineNumber
-                Write-Error -Message "Parameter reference is not contained within an expression: $($Parameter.Name) on line: $lineNumber" -ErrorId Parameters.Must.Be.Referenced.In.Expression -TargetObject $targetObject
+                Write-TtkMessage -MarketplaceWarning $MarketplaceWarning -Message "Parameter reference is not contained within an expression: $($Parameter.Name) on line: $lineNumber" -ErrorId Parameters.Must.Be.Referenced.In.Expression -TargetObject $targetObject
             }
         }
     }

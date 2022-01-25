@@ -10,6 +10,8 @@ param(
     $TemplateObject
 )
 
+$MarketplaceWarning = $false
+
 $storageProfiles = Find-JsonContent -Key storageProfile -InputObject $TemplateObject | 
 Where-Object {
     $_.ParentObject.type -eq "Microsoft.Compute/virtualMachines" -or 
@@ -27,6 +29,6 @@ foreach ($sp in $storageProfiles) {
         $storageProfile.imageReference.version -like '*preview' -or `
         $storageProfile.imageReference.sku -like '*preview' -or `
         $storageProfile.imageReference.offer -like '*preview*') {
-        Write-Error "StorageProfile for resource '$($sp.ParentObject.Name)' must not use a preview version" -TargetObject $sp -ErrorId VM.Using.Preview.Image
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "StorageProfile for resource '$($sp.ParentObject.Name)' must not use a preview version" -TargetObject $sp -ErrorId VM.Using.Preview.Image
     }
 }

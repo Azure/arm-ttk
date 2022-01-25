@@ -17,27 +17,29 @@ param(
     [switch]$IsMainTemplate
 )
 
+$MarketplaceWarning = $false
+
 $artifactslocationParameter = $templateObject.parameters._artifactsLocation
 $artifactslocationSasTokenParameter = $templateObject.parameters._artifactsLocationSasToken
 
 #if there is no _artifactsLocationParameter skip the tests
 if ($artifactslocationParameter -ne $null) {
     if ($artifactslocationParameter.type -ne "string" -and $artifactslocationParameter.type -ne "secureString" ) {
-        Write-Error "The _artifactsLocation in `"$TemplateFileName`" parameter must be a 'string' type in the parameter declaration `"$($artifactslocationParameter.type)`"" -ErrorId ArtifactsLocation.Parameter.TypeMisMatch -TargetObject $artifactslocationParameter
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "The _artifactsLocation in `"$TemplateFileName`" parameter must be a 'string' type in the parameter declaration `"$($artifactslocationParameter.type)`"" -ErrorId ArtifactsLocation.Parameter.TypeMisMatch -TargetObject $artifactslocationParameter
     }
     # is the sasToken present
     if ($artifactslocationSasTokenParameter -eq $null) {
-        Write-Error "Template `"$TemplateFileName`" is missing _artifactsLocationSasToken parameter" -ErrorId ArtifactsLocation.Parameter.sasToken.Missing -TargetObject $artifactslocationParameter
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Template `"$TemplateFileName`" is missing _artifactsLocationSasToken parameter" -ErrorId ArtifactsLocation.Parameter.sasToken.Missing -TargetObject $artifactslocationParameter
     }
     elseif ($artifactslocationSasTokenParameter.type -ne "secureString") {
-        Write-Error "The _artifactsLocationSasToken in `"$TemplateFileName`" parameter must be of type 'secureString'." -ErrorId ArtifactsLocation.Parameter.sasToken.TypeMisMatch -TargetObject $artifactslocationParameter        
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "The _artifactsLocationSasToken in `"$TemplateFileName`" parameter must be of type 'secureString'." -ErrorId ArtifactsLocation.Parameter.sasToken.TypeMisMatch -TargetObject $artifactslocationParameter        
     }
     # is the defaultValue correct
     if ($IsMainTemplate) {
         #in the main template defaultValue must exist and be correct
         if (-not $artifactslocationParameter.defaultValue) {
             # empty string is not ok
-            Write-Error "The _artifactsLocation parameter in `"$TemplateFileName`" must have a defaultValue in the main template" -ErrorId ArtifactsLocation.Parameter.DefaultValue.Missing -TargetObject $artifactslocationParameter
+            Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "The _artifactsLocation parameter in `"$TemplateFileName`" must have a defaultValue in the main template" -ErrorId ArtifactsLocation.Parameter.DefaultValue.Missing -TargetObject $artifactslocationParameter
         }
         else {
             # it must be take one of two approaches:
@@ -53,19 +55,19 @@ if ($artifactslocationParameter -ne $null) {
             # deploym
             if (!($artifactslocationParameter.defaultValue -eq $QuickStartPath -or 
                   $artifactsLocationParameter.defaultValue -like "*deployment().properties.templateLink*")) {
-                    Write-Error "The _artifactsLocation in `"$TemplateFileName`" has an incorrect defaultValue, found: $($artifactsLocationParameter.defaultValue)" -ErrorId ArtifactsLocation.Parameter.DefaultValue.Incorrect -TargetObject $artifactslocationParameter
-                    Write-Error "Must be one of: $QuickStartPath or deployment().properties.templateLink.uri"
+                    Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "The _artifactsLocation in `"$TemplateFileName`" has an incorrect defaultValue, found: $($artifactsLocationParameter.defaultValue)" -ErrorId ArtifactsLocation.Parameter.DefaultValue.Incorrect -TargetObject $artifactslocationParameter
+                    Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Must be one of: $QuickStartPath or deployment().properties.templateLink.uri"
             }
         }
         if ( !($artifactslocationSasTokenParameter.defaultValue) -and $artifactslocationSasTokenParameter.defaultValue -ne "") {
-            Write-Error "The _artifactsLocationSasToken in `"$TemplateFileName`" has an incorrect defaultValue, must be an empty string" -ErrorId ArtifactsLocation.Parameter.sasToken.DefaultValue.Incorrect -TargetObject $artifactslocationSasTokenParameter
+            Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "The _artifactsLocationSasToken in `"$TemplateFileName`" has an incorrect defaultValue, must be an empty string" -ErrorId ArtifactsLocation.Parameter.sasToken.DefaultValue.Incorrect -TargetObject $artifactslocationSasTokenParameter
         }
     }
     else {
         #if it's not main template, there must not be a defaultValue to ensure the value is passed through
         if ($artifactslocationParameter.defaultValue -or 
             $artifactslocationSasTokenParameter.defaultValue) {
-            Write-Error "The _artifactsLocation and _artifactsLocationsSasToke parameters in `"$TemplateFileName`" must not have a defaulValue in a nested template." -ErrorId ArtifactsLocation.Parameter.DefaultValue.NotEmpty  
+            Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "The _artifactsLocation and _artifactsLocationsSasToke parameters in `"$TemplateFileName`" must not have a defaulValue in a nested template." -ErrorId ArtifactsLocation.Parameter.DefaultValue.NotEmpty  
         }    
     } 
 } # there is a parameter named _artifactsLocation

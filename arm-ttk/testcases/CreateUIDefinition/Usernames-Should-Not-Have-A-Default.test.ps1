@@ -11,6 +11,8 @@ param(
 $CreateUIDefinitionObject
 )
 
+$MarketplaceWarning = $false
+
 # First, find al user name text boxes.
 $userNameTextBoxes =
     $CreateUIDefinitionObject | 
@@ -19,6 +21,6 @@ $userNameTextBoxes =
 foreach ($tb in $userNameTextBoxes) { # Then walk thru each text box, 
     if ($tb.defaultValue) { # if it contained a default value,
         # write an error.
-        Write-Error "Username textbox $($tb.Name) should not have a default value" -TargetObject $tb
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Username textbox $($tb.Name) should not have a default value" -TargetObject $tb
     }
 }

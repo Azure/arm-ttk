@@ -11,6 +11,8 @@ param(
     $TemplateObject
 )
 
+$MarketplaceWarning = $false
+
 $usedNewGuid = [Regex]::new(@'
 \[             # Starting bracket
 \s{0,}         # ... optional whitespace
@@ -34,7 +36,7 @@ foreach ($parameterProp in $templateObject.parameters.psobject.properties) {
         if ($parameter.defaultValue -and
             -not ($parameter.defaultValue | ?<ARM_Template_Function> -FunctionName 'newguid')) {
             # Will return true when defaultvalue is not null or blank (blank values are OK).
-            Write-Error -Message "Parameter $name is a SecureString and must not have a default value unless it is an expression that contains the newGuid() function." `
+            Write-TtkMessage -MarketplaceWarning $MarketplaceWarning -Message "Parameter $name is a SecureString and must not have a default value unless it is an expression that contains the newGuid() function." `
                 -ErrorId SecureString.Must.Not.Have.Default -TargetObject $parameter
         }
     }

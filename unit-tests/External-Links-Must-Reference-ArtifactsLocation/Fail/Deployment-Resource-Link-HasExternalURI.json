@@ -1,0 +1,36 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "artifactsLocation": {
+        "type": "String",
+        "defaultValue": "[deployment().properties.templateLink.uri]",
+        "metadata": {
+          "description": "The base URI where artifacts required by this template are located including a trailing '/'."
+        }
+      },
+      "artifactsLocationSasToken": {
+        "type": "securestring",
+        "metadata": {
+          "description": "The sasToken required to access artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+        },
+        "defaultValue": ""
+      }
+    },
+    "variables": {
+    },
+    "resources": [
+      {
+        "name": "pid-3b48387b-eed3-4d58-96db-114301895cdc-partnercenter",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2020-10-01",      
+        "properties": {
+          "mode": "Incremental",
+          "TemplateLink": {
+            "uri": "http://somebadlocation.something.net"
+          }
+        }
+      }
+    ]
+  }
+  

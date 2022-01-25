@@ -14,6 +14,8 @@ param(
 $TemplateObject
 )
 
+$MarketplaceWarning = $false
+
 <#
 This test should flag using runtime functions that list secrets or secure parameters in the outputs
 
@@ -52,12 +54,12 @@ foreach ($output in $TemplateObject.outputs.psobject.properties) {
             # Go back and find if it starts with a [ or a "
             $preceededBy = $exprStrOrQuote.Match($outputText, $m.Index + 1) # add 1 to index since the match has to include "list" plus at least one other char
             if ($preceededBy.Value -eq '[') {  # If it starts with a [, it's a real ref
-                Write-Error -Message "Output contains secret: $($output.Name)" -ErrorId Output.Contains.Secret -TargetObject $output   
+                Write-TtkMessage -MarketplaceWarning $MarketplaceWarning -Message "Output contains secret: $($output.Name)" -ErrorId Output.Contains.Secret -TargetObject $output   
             }
         }
     }
     if ($output.Name -like "*password*"){
-        Write-Error -Message "Output name suggests secret: $($output.Name)" -ErrorId Output.Contains.Secret.Name -TargetObject $output
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning -Message "Output name suggests secret: $($output.Name)" -ErrorId Output.Contains.Secret.Name -TargetObject $output
     }
 }
 
@@ -96,7 +98,7 @@ $name                # the parameter name
                 $matchIndex = $findParam.Match($outputText).Index
                 $preceededBy = $exprStrOrQuote.Match($outputText, $matchIndex).Value
                 if ($preceededBy -eq '[') {
-                    Write-Error -Message "Output contains $($parameterProp.Value.Type) parameter: $($output.Name)" -ErrorId Output.Contains.SecureParameter -TargetObject $output
+                    Write-TtkMessage -MarketplaceWarning $MarketplaceWarning -Message "Output contains $($parameterProp.Value.Type) parameter: $($output.Name)" -ErrorId Output.Contains.SecureParameter -TargetObject $output
                 }
             }
         }        

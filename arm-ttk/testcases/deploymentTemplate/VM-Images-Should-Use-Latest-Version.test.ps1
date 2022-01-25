@@ -11,6 +11,8 @@ param(
 $TemplateObject
 )
 
+$MarketplaceWarning = $true
+
 <#
 Skipping this test for now... there are a few issues:
 - this only applies to Stock Images, or images that do not use a "plan" object, but there are some images (e.g. MSDN) that don't have a "plan" object and do not allow for "latest"
@@ -28,7 +30,7 @@ foreach ($vm in $vms) {
     }
 
     if (-not $storageProfile) { # If the storageProfile didn't resolve
-        Write-Error "Could not resolve storage profile" -TargetObject $vm # write an error
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Could not resolve storage profile" -TargetObject $vm # write an error
         continue # and move onto the next
     }
 
@@ -40,7 +42,7 @@ foreach ($vm in $vms) {
     }
 
     if (-not $imageReference) { # If no image reference was found
-        Write-Error "Could not resolve image reference" -TargetObject $storageProfile # write an error
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Could not resolve image reference" -TargetObject $storageProfile # write an error
         continue # and move onto the next
     }
 
@@ -50,7 +52,7 @@ foreach ($vm in $vms) {
         # try resolving it
         $resolvedImageVersion = Expand-AzTemplate -Expression $imageVersion -InputObject $TemplateObject
         if ($resolvedImageVersion -ne 'latest') { # If it still wasn't latest
-            Write-Error "VM Image versions should be Latest, not $($resolvedImageVersion)" -TargetObject $vm # write an error.
+            Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "VM Image versions should be Latest, not $($resolvedImageVersion)" -TargetObject $vm # write an error.
         }
     }
 }

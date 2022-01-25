@@ -15,6 +15,8 @@ $CreateUIDefinitionObject,
 $PasswordMinLength = 12
 )
 
+$MarketplaceWarning = $false
+
 # First, find all password boxes.
 $passwordBoxes = $CreateUIDefinitionObject | 
     Find-JsonContent -Key type -Value Microsoft.Common.PasswordBox
@@ -23,7 +25,7 @@ $lengthConstraintRegex = [Regex]::new('\{(?<Min>\d+)')
 
 foreach ($pwb in $passwordBoxes) { # Loop over each password box
     if (-not $pwb.constraints) {
-        Write-Error "PasswordBox '$($pwb.name)' is missing constraints" -TargetObject $pwb
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "PasswordBox '$($pwb.name)' is missing constraints" -TargetObject $pwb
         continue
     }
     if (-not $pwb.constraints.regex) { # If there is no regex, the default will meet the complexity requirements.
@@ -40,18 +42,18 @@ foreach ($pwb in $passwordBoxes) { # Loop over each password box
         $hasLengthConstraint = $lengthConstraintRegex.Matches($pwb.constraints.regex)
 
         if (-not $hasLengthConstraint) {
-            Write-Error "PasswordBox '$($pwb.Name)' regex does not have a length constraint." -TargetObject $pwb 
+            Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "PasswordBox '$($pwb.Name)' regex does not have a length constraint." -TargetObject $pwb 
         } else {
             $totalMins = 0
             foreach ($match in $hasLengthConstraint) {
                 $totalMins += $match.Groups['Min'].Value -as [int]
             }
             if ($passWordMinLength -gt $totalMins) {
-                Write-Error "PasswordBox '$($pwb.Name)' regex does not have a minimum length of $PasswordMinLength" -TargetObject $pwb
+                Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "PasswordBox '$($pwb.Name)' regex does not have a minimum length of $PasswordMinLength" -TargetObject $pwb
             }
         }
     } catch {
         $err = $_ # if that fails, 
-        Write-Error "PasswordBox '$($pwb.Name)' regex is invalid: $($err)" -TargetObject $pwb #error.
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "PasswordBox '$($pwb.Name)' regex is invalid: $($err)" -TargetObject $pwb #error.
     }
 }

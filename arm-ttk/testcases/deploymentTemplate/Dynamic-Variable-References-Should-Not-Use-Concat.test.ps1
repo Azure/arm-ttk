@@ -10,6 +10,7 @@ param(
 $TemplateText
 )
 
+$MarketplaceWarning = $true
 
 # Because so many parts of an Azure Resource Manager expression allow whitespace, 
 # it's easier to create a Regex by listing all of the segments 
@@ -34,5 +35,5 @@ $DynamicCompatReference = [Regex]::new(
 foreach ($match in $DynamicCompatReference.Matches($TemplateText)) {
     $rewriteMsg = "variables('$($match.Groups['VariableName'])')[parameters('$($match.Groups['ParameterName'])']"
     
-    Write-Error "Dynamic Variable References should not use concat.  Suggested: $rewriteMsg" -ErrorId 'DynamicVariable.Reference.Using.Concat' -TargetObject $match
+    Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Dynamic Variable References should not use concat.  Suggested: $rewriteMsg" -ErrorId 'DynamicVariable.Reference.Using.Concat' -TargetObject $match
 }

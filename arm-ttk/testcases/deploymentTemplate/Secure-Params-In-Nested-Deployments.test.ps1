@@ -14,6 +14,8 @@ param(
     $TemplateObject
 )
 
+$MarketplaceWarning = $false
+
 $deploymentResources = $TemplateObject.resources | 
 Find-JsonContent -Key type -Value 'Microsoft.Resources/deployments'
 

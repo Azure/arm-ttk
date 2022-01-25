@@ -25,6 +25,8 @@ param(
     $TemplateFullPath
 )
 
+$MarketplaceWarning = $false
+
 # See #478 a number of scenarios not accounted for in the test.  Going to pull the test and the test cases for now.
 continue    
 
@@ -56,7 +58,7 @@ $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName re
                         $foundResource = # see if we can find a resource with that type.
                         @(Find-JsonContent -InputObject $TemplateObject.resources -Key Type -Value $foundResourceType)
                         if ((-not $foundResource) -or ($foundResource | Where-Object Condition)) { 
-                            Write-Error "At least one parameter must preceed the resource type in: $rid" -TargetObject $rid -ErrorId 'ResourceID.Missing.Name'
+                            Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "At least one parameter must preceed the resource type in: $rid" -TargetObject $rid -ErrorId 'ResourceID.Missing.Name'
                             continue nextResourceId
                         }
                     }
@@ -75,7 +77,7 @@ $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName re
         $resourceTypeName = $foundResourceType -replace "^\s{0,}'" -replace "\s{0,}'$"        
 
         if ($foundResourceType.EndsWith('/')) {    
-            Write-Error "ResourceType has a trailing slash '$foundResourceType'" -TargetObject $rid -ErrorId 'ResourceID.Trailing.Slash'
+            Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "ResourceType has a trailing slash '$foundResourceType'" -TargetObject $rid -ErrorId 'ResourceID.Trailing.Slash'
         }        
 
         # Find all resources of this type within the template
@@ -96,7 +98,7 @@ $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName re
                 # See if we have enough
                 if ($foundParametersInResource.Count -lt $additionalParameters.Count) {
                     # If we didn't have enough, we may want to write an error.
-                    Write-Error "Resource referencing $rid does not contain all segments of it's resource name" -TargetObject $rid -ErrorId 'ResourceID.Missing.Name'
+                    Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Resource referencing $rid does not contain all segments of it's resource name" -TargetObject $rid -ErrorId 'ResourceID.Missing.Name'
                 }
                 else {
                     # but if we did, we can finally feel ok about this resourceID.
@@ -126,7 +128,7 @@ $resourceIdFunctions = $TemplateText | ?<ARM_Template_Function> -FunctionName re
                 # See if we have enough
                 if ($foundParametersInResource.Count -lt $additionalParameters.Count) {
                     # If we didn't have enough, we may want to write an error.
-                    Write-Error "Resource referencing $rid does not contain all segments of it's resource name" -TargetObject $rid -ErrorId 'ResourceID.Missing.Name'
+                    Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Resource referencing $rid does not contain all segments of it's resource name" -TargetObject $rid -ErrorId 'ResourceID.Missing.Name'
                 }
                 else {
                     # but if we did, we can finally feel ok about this resourceID.

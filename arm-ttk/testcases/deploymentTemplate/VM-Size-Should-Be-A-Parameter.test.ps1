@@ -10,6 +10,8 @@ param(
 $TemplateObject
 )
 
+$MarketplaceWarning = $false
+
 $vms = $TemplateObject.resources | Find-JsonContent -Key type -Value Microsoft.Compute/virtualMachines
 
 
@@ -26,7 +28,7 @@ foreach ($vm in $vms) {
     }
 
     if (-not $hardwareProfile) { # If the hardwareProfile didn't resolve
-        Write-Error "Could not resolve hardware profile" -TargetObject $vm # write an error
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Could not resolve hardware profile" -TargetObject $vm # write an error
         continue # and move onto the next
     }
 
@@ -37,10 +39,10 @@ foreach ($vm in $vms) {
         if ($vmSize -match "\s{0,}\[.*?variables\s{0,}\(\s{0,}'") {
             $resolvedVmSize = Expand-AzTemplate -Expression $vmSize -InputObject $TemplateObject
             if ($resolvedVmSize -notmatch "\s{0,}\[.*?parameters\s{0,}\(\s{0,}'") {
-                Write-Error "VM Size must be a parameter" -TargetObject $vm
+                Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "VM Size must be a parameter" -TargetObject $vm
             }
         } else {
-            Write-Error "VM Size must be a parameter" -TargetObject $vm
+            Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "VM Size must be a parameter" -TargetObject $vm
         }
     }
 }

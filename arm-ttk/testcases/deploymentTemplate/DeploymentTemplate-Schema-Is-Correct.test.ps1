@@ -8,10 +8,12 @@ param(
 [PSObject]$TemplateObject
 )
 
+$MarketplaceWarning = $true
+
 $templateSchema = $TemplateObject.'$schema'
 
 if (-not $templateSchema) {
-    Write-Error 'DeploymentTemplate Missing .$schema property' -ErrorId Template.Missing.Schema
+    Write-TtkMessage -MarketplaceWarning $MarketplaceWarning 'DeploymentTemplate Missing .$schema property' -ErrorId Template.Missing.Schema
     return
 }
 
@@ -24,7 +26,7 @@ $validSchemas =
 
 
 if ($validSchemas -notcontains $templateSchema) {
-    Write-Error "DeploymentTemplate has an unexpected Schema.
+    Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "DeploymentTemplate has an unexpected Schema.
 It should be one of the following:
 $($validSchemas -join ([Environment]::NewLine))
 " -ErrorId Template.Bad.Schema

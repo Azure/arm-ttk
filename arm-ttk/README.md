@@ -24,7 +24,12 @@ This will run the full suite of applicable tests on your template.  To run a spe
 You can also skip tests any tests:
 
     Test-AzTemplate -TemplatePath $thePathToYourTemplate -Skip apiVersions-Should-Be-Recent 
-    # This will exclude the tests indicated by the -Skip parameter from the test run and results     
+    # This will exclude the tests indicated by the -Skip parameter from the test run and results
+
+To run the tests in marketplace mode include the -MarketplaceMode $true parameter. This runs in a mode where only the tests that are "must fix" for marketplace will throw errors
+
+    Test-AzTemplate -TemplatePath $thePathToYourTemplate -MarketplaceMode $true
+    # This will run the tests in marketplace mode. 
 
 ## Running Tests on Linux
 

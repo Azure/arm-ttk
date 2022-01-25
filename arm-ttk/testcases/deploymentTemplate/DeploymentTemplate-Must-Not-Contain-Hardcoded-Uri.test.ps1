@@ -40,6 +40,8 @@ $DisallowedHosts =
     )
 )
 
+$MarketplaceWarning = $false
+
 $HardcodedHostFinder = # Create a regex to find any reference
     [Regex]::new(($DisallowedHosts -join '|' -replace '\.', '\.'), 'IgnoreCase')
 
@@ -65,6 +67,6 @@ foreach ($match in $HardcodedHostFinder.Matches($TemplateText)) {
     if ($notTheDevOpsGallery -and 
         $notTheSchema 
         ) { 
-        Write-Error "Found hardcoded reference to $($match)" -ErrorId 'Hardcoded.Url.Reference' -TargetObject $match 
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Found hardcoded reference to $($match)" -ErrorId 'Hardcoded.Url.Reference' -TargetObject $match 
     }
 }

@@ -12,16 +12,18 @@ param(
   $ParameterObject
 )
 
+$MarketplaceWarning = $false
+
 if (-not $ParameterObject.contentVersion) {
     # Skippig error is schema is missing, i.e. '$schemaless'
     if ($ParameterObject.'$schema') { 
-        Write-Error -ErrorId Parameters.Missing.ContentVersion -Message "contentVersion property must exist in the template"
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning -ErrorId Parameters.Missing.ContentVersion -Message "contentVersion property must exist in the template"
     }
     return
 } 
 
 if ($ParameterObject.contentVersion -isnot [string]) {
-    Write-Error -ErrorId ContentVersion.Not.String -Message "contentVersion must be string" -TargetObject $TemplateObject.contentVersion 
+    Write-TtkMessage -MarketplaceWarning $MarketplaceWarning -ErrorId ContentVersion.Not.String -Message "contentVersion must be string" -TargetObject $TemplateObject.contentVersion 
     return
 } 
 

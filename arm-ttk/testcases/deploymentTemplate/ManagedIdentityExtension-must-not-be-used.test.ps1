@@ -10,8 +10,10 @@ param(
 $TemplateObject
 )
 
+$MarketplaceWarning = $true
+
 $resourcesJson = $TemplateObject.resources  | ConvertTo-Json -Depth 100  
 
 if ($resourcesJson -match 'ManagedIdentityExtension') {
-    Write-Error "Managed Identity Extension must not be used" -ErrorId ManagedIdentityExtension.Was.Used
+    Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Managed Identity Extension must not be used" -ErrorId ManagedIdentityExtension.Was.Used
 }

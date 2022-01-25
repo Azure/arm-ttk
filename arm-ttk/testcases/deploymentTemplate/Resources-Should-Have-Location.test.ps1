@@ -10,12 +10,14 @@ param(
     [PSObject]$TemplateObject
 )
 
+$MarketplaceWarning = $false
+
 foreach ($r in $TemplateObject.Resources) {
     foreach ($resource in @(@($r) + $r.ParentResources)) { 
         if ($resource.Location) {
             $location = "$($resource.location)".Trim()
             if ($location -notmatch '^\[.*\]$' -and $location -ne 'global') {
-                Write-Error "Resource $($resource.Name) Location must be an expression or 'global'" -TargetObject $resource
+                Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Resource $($resource.Name) Location must be an expression or 'global'" -TargetObject $resource
             }
         }
     }

@@ -24,6 +24,8 @@ $TemplateObject,
 $IsInnerTemplate
 )
 
+$MarketplaceWarning = $false
+
 # If the TemplateObject is inner template of MainTemplate, skip the test
 if ($IsInnerTemplate) {
     return
@@ -31,7 +33,7 @@ if ($IsInnerTemplate) {
 
 # First, make sure CreateUIDefinition has outputs
 if (-not $CreateUIDefinitionObject.parameters.outputs) {
-    Write-Error "CreateUIDefinition is missing the .parameters.outputs property" -ErrorId CreateUIDefinition.Missing.Outputs     # ( write an error if it doesn't)
+    Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "CreateUIDefinition is missing the .parameters.outputs property" -ErrorId CreateUIDefinition.Missing.Outputs     # ( write an error if it doesn't)
 }
 
 $parameterInfo = $CreateUIDefinitionObject.parameters
@@ -50,6 +52,6 @@ foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk th
     # If the output name was not declared in the TemplateObject
     if (-not $TemplateObject.parameters.$outputName) {
         # write an error
-        Write-Error "output $outputName does not exist in template.parameters" -ErrorId CreateUIDefinition.Output.Missing.From.MainTemplate -TargetObject $parameterInfo.outputs
+        Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "output $outputName does not exist in template.parameters" -ErrorId CreateUIDefinition.Output.Missing.From.MainTemplate -TargetObject $parameterInfo.outputs
     }
 }

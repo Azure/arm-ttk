@@ -31,6 +31,8 @@ param(
     $TestDate = [DateTime]::Now
 )
 
+$MarketplaceWarning = $true
+
 $foundReferences = $TemplateText | 
 ?<ARM_Template_Function> -FunctionName 'reference|list\w{0,}'
 
@@ -125,7 +127,7 @@ foreach ($foundRef in $foundReferences) {
     if ($howOutOfDate -eq -1 -and $validApiVersions) {
         # Removing the error for this now - this is happening with the latest versions and outdated manifests
         # We can assume that if the version is indeed invalid, deployment will fail
-        #Write-Error "$potentialResourceType is using an invalid apiVersion." -ErrorId ApiReference.Version.Not.Valid -TargetObject $foundRef
+        #Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "$potentialResourceType is using an invalid apiVersion." -ErrorId ApiReference.Version.Not.Valid -TargetObject $foundRef
         #Write-Output "ApiVersion not found for: $($foundRef.Value) and version $($av.apiVersion)" 
         #Write-Output "Valid Api Versions found $potentialResourceType :`n$recentApiVersions"
     }
@@ -135,7 +137,7 @@ foreach ($foundRef in $foundReferences) {
 
         $moreRecent = $validApiVersions[0..$howOutOfDate] # see if there's a more recent non-preview version. 
         if ($howOutOfDate -gt 0 -and $moreRecent -notlike '*-*-*-*') {
-            Write-Error "$($foundRef.Value)  uses a preview version ( $($apiVersion) ) and there are more recent versions available." -TargetObject $foundRef -ErrorId ApiReference.Version.Preview.Not.Recent
+            Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "$($foundRef.Value)  uses a preview version ( $($apiVersion) ) and there are more recent versions available." -TargetObject $foundRef -ErrorId ApiReference.Version.Preview.Not.Recent
             Write-Output "Valid Api Versions $potentialResourceType :`n$recentApiVersions"
         }
 
@@ -147,7 +149,7 @@ foreach ($foundRef in $foundReferences) {
             # strip the qualifier on the apiVersion and see if it matches the next one in the sorted array
             $truncatedApiVersion = $($apiVersion).Substring(0, $($ApiVersion).LastIndexOf("-"))
             if ($nextApiVersion -eq $truncatedApiVersion) {
-                Write-Error "$($foundRef.Value) uses a preview version ( $($apiVersion) ) and there is a non-preview version for that apiVersion available." -TargetObject $foundRef -ErrorId ApiReference.Version.Preview.Version.Has.NonPreview
+                Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "$($foundRef.Value) uses a preview version ( $($apiVersion) ) and there is a non-preview version for that apiVersion available." -TargetObject $foundRef -ErrorId ApiReference.Version.Preview.Version.Has.NonPreview
                 Write-Output "Valid Api Versions for $potentialResourceType :`n$recentApiVersions"                
             } 
         }     
@@ -169,7 +171,7 @@ foreach ($foundRef in $foundReferences) {
                 break
             }
             # If it's older than two years, and there's nothing more recent
-            Write-Error "Api versions must be the latest or under $($NumberOfDays / 365) years old ($NumberOfDays days) - API version used by:`n            $($foundRef.Value)`n        is $([Math]::Floor($timeSinceApi.TotalDays)) days old" -ErrorId ApiReference.Version.OutOfDate -TargetObject $foundRef
+            Write-TtkMessage -MarketplaceWarning $MarketplaceWarning "Api versions must be the latest or under $($NumberOfDays / 365) years old ($NumberOfDays days) - API version used by:`n            $($foundRef.Value)`n        is $([Math]::Floor($timeSinceApi.TotalDays)) days old" -ErrorId ApiReference.Version.OutOfDate -TargetObject $foundRef
             Write-Output "Valid Api Versions for $potentialResourceType :`n$recentApiVersions"
         }
     }
