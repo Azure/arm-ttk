@@ -37,7 +37,7 @@ if ("resources" -in $TemplateObject.PSobject.Properties.Name) {
         }
         if ($trimmedUserName -notmatch '\[[^\]]+\]') {
             # If they aren't expressions
-            Write-Ttk -TargetObject $ref -Message "AdminUsername `"$trimmedUserName`" is not an expression" -ErrorId AdminUsername.Is.Literal # write an error
+            Write-TtkMessage -TargetObject $ref -Message "AdminUsername `"$trimmedUserName`" is not an expression" -ErrorId AdminUsername.Is.Literal # write an error
             continue # and move onto the next
         }
     }
