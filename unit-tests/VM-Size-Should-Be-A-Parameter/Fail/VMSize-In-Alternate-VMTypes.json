@@ -1,0 +1,28 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "resources": [
+        {
+            "name": "workspaceName/computeName",
+            "type": "Microsoft.MachineLearningServices/workspaces/computes",
+            "apiVersion": "2019-11-01",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "location": "[parameters('location')]",
+            "tags": {},
+            "properties": {
+                "computeType": "ComputeInstance",
+                "computeLocation": "[parameters('location')]",
+                "description": "Where your notebook is run from.",
+                "properties": {
+                    "applicationSharingPolicy": "Personal",
+                    "remoteLoginPortPublicAccess": "Enabled",
+                    "vmSize": "Standard_D3_v2",
+                    "subnet": {
+                        "id": "[variables('subnet')]"
+                    }
+                }
+            }
+        }
+    ]
+}
