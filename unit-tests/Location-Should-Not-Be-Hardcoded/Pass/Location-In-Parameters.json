@@ -1,0 +1,23 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "parameters": {
+        "storagelocation": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Azure region to deploy the storage account to. Defaults to resource group location."
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "apiVersion": "2019-06-01",
+            "location": "[parameters('storageLocation')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "identity": {
+                "type": "SystemAssigned"
+            }
+        }
+    ]
+}
