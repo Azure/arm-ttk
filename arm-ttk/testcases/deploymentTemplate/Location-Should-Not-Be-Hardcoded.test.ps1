@@ -78,13 +78,13 @@ if ($TemplateWithoutLocationParameter -like '*resourceGroup().location*' -or
 ) {
     # If it did, write an error
     
-    $foundResourceGroupLocations = [Regex]::Matches($TemplateText, 'resourceGroup\(\).location', 'IgnoreCase')
+    $foundResourceGroupLocations = [Regex]::Matches($TemplateText, '(?>resourceGroup|deployment)\(\).location', 'IgnoreCase')
     
     foreach ($spotFound in $foundResourceGroupLocations) {
         if ($spotFound.Index -ge $paramsSection.Index -and $spotFound.Index -le ($paramsSection.Index + $paramsSection.Length)) {
             continue
         }
         Write-Error "$TemplateFileName must use the location parameter, not resourceGroup().location or deployment().location (except when used as a default value in the main template)" -ErrorId Location.Parameter.Should.Be.Used -TargetObject $parameter
-    }    
+    }
 }
 
