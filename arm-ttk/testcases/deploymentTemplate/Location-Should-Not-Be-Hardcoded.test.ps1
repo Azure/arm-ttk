@@ -37,6 +37,11 @@ if ($TemplateObjectCopy.parameters.psobject -ne $null) {
     # Now get the location parameter 
     $locationParameter = $templateObject.parameters.location
 }
+
+# Determine where the parameters section is within the JSON
+$paramsSection = Resolve-JSONContent -JSONPath 'parameters' -JSONText $TemplateText
+
+
 # All location parameters must be of type "string" in the parameter declaration
 if ($locationParameter -ne $null -and $locationParameter.type -ne "string") {
     Write-Error "The location parameter must be a 'string' type in the parameter declaration `"$($locationParameter.type)`"" -ErrorId Location.Parameter.TypeMisMatch -TargetObject $parameter
@@ -58,7 +63,8 @@ if ($IsMainTemplate) {
     # Note that Powershell will count an empty string (which should fail the test) as null if not explictly tested, so we check for it
 }
 else {
-    if ($locationParameter.defaultValue -ne $null) { 
+    if ($locationParameter.defaultValue -ne $null -and 
+        $locationParameter.defaultValue -notin '[resourceGroup().location]', '[deployment().location]') {
         Write-Error "The location parameter of nested templates must not have a defaultValue property. It is `"$($locationParameter.defaultValue)`"" -ErrorId Location.Parameter.DefaultValuePresent -TargetObject $parameter
     }   
 }
@@ -67,11 +73,10 @@ else {
 # we'll need to modify the test to allow it on deployment resources (and catch it in other places (which is not common))
 # see: https://github.com/Azure/arm-ttk/issues/346
 # Now check that the rest of the template doesn't use [resourceGroup().location] or deployment().location
-if ($TemplateWithoutLocationParameter -like '*resourceGroup().location*' # -or
-    # $TemplateWithoutLocationParameter -like '*deployment().location*'
+if ($TemplateWithoutLocationParameter -like '*resourceGroup().location*' -or
+    $TemplateWithoutLocationParameter -like '*deployment().location*'
 ) {
     # If it did, write an error
-    $paramsSection = Resolve-JSONContent -JSONPath 'parameters' -JSONText $TemplateText
     
     $foundResourceGroupLocations = [Regex]::Matches($TemplateText, 'resourceGroup\(\).location', 'IgnoreCase')
     
