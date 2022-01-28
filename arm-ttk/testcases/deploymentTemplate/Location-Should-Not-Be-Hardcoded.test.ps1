@@ -1,8 +1,11 @@
 ﻿<#
 .Synopsis
-    TODO: summary of test
+    Ensures that the location is not hardcoded.
 .Description
-    TODO: describe this test
+    Attempts to ensures that location is not hardcoded, by:
+
+    * Ensure the location parameter is not a literal
+    * Ensuring that references to resourceGroup().location are contained within parameters
 #>
 
 param(
@@ -34,6 +37,12 @@ if ($TemplateObjectCopy.parameters.psobject -ne $null) {
     # Now get the location parameter 
     $locationParameter = $templateObject.parameters.location
 }
+
+# Determine where the parameters section is within the JSON
+$paramsSection  = Resolve-JSONContent -JSONPath 'parameters' -JSONText $TemplateText
+$LocationRegex = '(?>resourceGroup|deployment)\(\).location'
+
+
 # All location parameters must be of type "string" in the parameter declaration
 if ($locationParameter -ne $null -and $locationParameter.type -ne "string") {
     Write-Error "The location parameter must be a 'string' type in the parameter declaration `"$($locationParameter.type)`"" -ErrorId Location.Parameter.TypeMisMatch -TargetObject $parameter
@@ -55,19 +64,18 @@ if ($IsMainTemplate) {
     # Note that Powershell will count an empty string (which should fail the test) as null if not explictly tested, so we check for it
 }
 else {
-    if ($locationParameter.defaultValue -ne $null) { 
+    if ($locationParameter.defaultValue -ne $null -and 
+        $locationParameter.defaultValue -notmatch $LocationRegex) {
         Write-Error "The location parameter of nested templates must not have a defaultValue property. It is `"$($locationParameter.defaultValue)`"" -ErrorId Location.Parameter.DefaultValuePresent -TargetObject $parameter
     }   
 }
 
-# TODO: removing the check for deployment().location as bicep codegens this for modules at subscription scope.
-# we'll need to modify the test to allow it on deployment resources (and catch it in other places (which is not common))
-# see: https://github.com/Azure/arm-ttk/issues/346
-# Now check that the rest of the template doesn't use [resourceGroup().location] or deployment().location
-if ($TemplateWithoutLocationParameter -like '*resourceGroup().location*' # -or
-    # $TemplateWithoutLocationParameter -like '*deployment().location*'
-) {
-    # If it did, write an error
+# Now check that the rest of the template doesn't use [resourceGroup().location] or [deployment().location] except in the params section
+$foundResourceGroupLocations = [Regex]::Matches($TemplateText, $LocationRegex, 'IgnoreCase')
+    
+foreach ($spotFound in $foundResourceGroupLocations) {
+    if ($spotFound.Index -ge $paramsSection.Index -and $spotFound.Index -le ($paramsSection.Index + $paramsSection.Length)) {
+        continue
+    }
     Write-Error "$TemplateFileName must use the location parameter, not resourceGroup().location or deployment().location (except when used as a default value in the main template)" -ErrorId Location.Parameter.Should.Be.Used -TargetObject $parameter
 }
-
