@@ -1,8 +1,11 @@
 ﻿<#
 .Synopsis
-    TODO: summary of test
+    Ensures that the location is not hardcoded.
 .Description
-    TODO: describe this test
+    Attempts to ensures that location is not hardcoded, by:
+
+    * Ensure the location parameter is not a literal
+    * Ensuring that references to resourceGroup().location are contained within parameters
 #>
 
 param(
@@ -68,6 +71,15 @@ if ($TemplateWithoutLocationParameter -like '*resourceGroup().location*' # -or
     # $TemplateWithoutLocationParameter -like '*deployment().location*'
 ) {
     # If it did, write an error
-    Write-Error "$TemplateFileName must use the location parameter, not resourceGroup().location or deployment().location (except when used as a default value in the main template)" -ErrorId Location.Parameter.Should.Be.Used -TargetObject $parameter
+    $paramsSection = Resolve-JSONContent -JSONPath 'parameters' -JSONText $TemplateText
+    
+    $foundResourceGroupLocations = [Regex]::Matches($TemplateText, 'resourceGroup\(\).location', 'IgnoreCase')
+    
+    foreach ($spotFound in $foundResourceGroupLocations) {
+        if ($spotFound.Index -ge $paramsSection.Index -and $spotFound.Index -le ($paramsSection.Index + $paramsSection.Length)) {
+            continue
+        }
+        Write-Error "$TemplateFileName must use the location parameter, not resourceGroup().location or deployment().location (except when used as a default value in the main template)" -ErrorId Location.Parameter.Should.Be.Used -TargetObject $parameter
+    }    
 }
 
