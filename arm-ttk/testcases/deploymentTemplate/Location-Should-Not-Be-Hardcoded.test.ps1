@@ -39,7 +39,8 @@ if ($TemplateObjectCopy.parameters.psobject -ne $null) {
 }
 
 # Determine where the parameters section is within the JSON
-$paramsSection = Resolve-JSONContent -JSONPath 'parameters' -JSONText $TemplateText
+$paramsSection  = Resolve-JSONContent -JSONPath 'parameters' -JSONText $TemplateText
+$LocationRegex = '(?>resourceGroup|deployment)\(\).location'
 
 
 # All location parameters must be of type "string" in the parameter declaration
@@ -64,7 +65,7 @@ if ($IsMainTemplate) {
 }
 else {
     if ($locationParameter.defaultValue -ne $null -and 
-        $locationParameter.defaultValue -notin '[resourceGroup().location]', '[deployment().location]') {
+        $locationParameter.defaultValue -notmatch $LocationRegex) {
         Write-Error "The location parameter of nested templates must not have a defaultValue property. It is `"$($locationParameter.defaultValue)`"" -ErrorId Location.Parameter.DefaultValuePresent -TargetObject $parameter
     }   
 }
@@ -73,12 +74,10 @@ else {
 # we'll need to modify the test to allow it on deployment resources (and catch it in other places (which is not common))
 # see: https://github.com/Azure/arm-ttk/issues/346
 # Now check that the rest of the template doesn't use [resourceGroup().location] or deployment().location
-if ($TemplateWithoutLocationParameter -like '*resourceGroup().location*' -or
-    $TemplateWithoutLocationParameter -like '*deployment().location*'
-) {
+if ($TemplateWithoutLocationParameter -match $LocationRegex) {
     # If it did, write an error
     
-    $foundResourceGroupLocations = [Regex]::Matches($TemplateText, '(?>resourceGroup|deployment)\(\).location', 'IgnoreCase')
+    $foundResourceGroupLocations = [Regex]::Matches($TemplateText, $LocationRegex, 'IgnoreCase')
     
     foreach ($spotFound in $foundResourceGroupLocations) {
         if ($spotFound.Index -ge $paramsSection.Index -and $spotFound.Index -le ($paramsSection.Index + $paramsSection.Length)) {
