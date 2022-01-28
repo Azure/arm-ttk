@@ -70,20 +70,12 @@ else {
     }   
 }
 
-# TODO: removing the check for deployment().location as bicep codegens this for modules at subscription scope.
-# we'll need to modify the test to allow it on deployment resources (and catch it in other places (which is not common))
-# see: https://github.com/Azure/arm-ttk/issues/346
-# Now check that the rest of the template doesn't use [resourceGroup().location] or deployment().location
-if ($TemplateWithoutLocationParameter -match $LocationRegex) {
-    # If it did, write an error
+# Now check that the rest of the template doesn't use [resourceGroup().location] or [deployment().location] except in the params section
+$foundResourceGroupLocations = [Regex]::Matches($TemplateText, $LocationRegex, 'IgnoreCase')
     
-    $foundResourceGroupLocations = [Regex]::Matches($TemplateText, $LocationRegex, 'IgnoreCase')
-    
-    foreach ($spotFound in $foundResourceGroupLocations) {
-        if ($spotFound.Index -ge $paramsSection.Index -and $spotFound.Index -le ($paramsSection.Index + $paramsSection.Length)) {
-            continue
-        }
-        Write-Error "$TemplateFileName must use the location parameter, not resourceGroup().location or deployment().location (except when used as a default value in the main template)" -ErrorId Location.Parameter.Should.Be.Used -TargetObject $parameter
+foreach ($spotFound in $foundResourceGroupLocations) {
+    if ($spotFound.Index -ge $paramsSection.Index -and $spotFound.Index -le ($paramsSection.Index + $paramsSection.Length)) {
+        continue
     }
+    Write-Error "$TemplateFileName must use the location parameter, not resourceGroup().location or deployment().location (except when used as a default value in the main template)" -ErrorId Location.Parameter.Should.Be.Used -TargetObject $parameter
 }
-
