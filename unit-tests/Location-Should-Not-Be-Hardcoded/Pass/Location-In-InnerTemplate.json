@@ -1,13 +1,6 @@
 ﻿{
   "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "metadata": {
-    "_generator": {
-      "name": "bicep",
-      "version": "0.4.1124.51302",
-      "templateHash": "1282479610345940392"
-    }
-  },
   "parameters": {
     "location": {
       "type": "string",
@@ -33,13 +26,6 @@
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
           "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.4.1124.51302",
-              "templateHash": "13055239406992524583"
-            }
-          },
           "parameters": {
             "location": {
               "type": "string"
