@@ -52,4 +52,15 @@ foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk th
         # write an error
         Write-Error "output $outputName does not exist in template.parameters" -ErrorId CreateUIDefinition.Output.Missing.From.MainTemplate -TargetObject $parameterInfo.outputs
     }
+    
+    $outputParameterType = $TemplateObject.parameters.$outputName.type    
+    if ($outputParameterType -and $outputParameterType -ne 'string') {
+        $firstOutputFunction = $output.Value | ?<ARM_Template_Function> -Extract | Select-Object -ExpandProperty FunctionName
+        if ($outputParameterType -eq 'int' -and $firstOutputFunction -notin 'int', 'min', 'max') {
+            Write-Error "output $outputName does not return the expected type '$outputParameterType'" -ErrorId CreateUIDefinition.Output.Incorrect -TargetObject $parameterInfo.outputs
+        }
+        if ($outputParameterType -eq 'bool' -and $firstOutputFunction -notin 'equals', 'less', 'lessOrEquals', 'greater', 'greaterOrEquals') {
+            Write-Error "output $outputName does not return the expected type '$outputParameterType'" -ErrorId CreateUIDefinition.Output.Incorrect -TargetObject $parameterInfo.outputs
+        }
+    }
 }
