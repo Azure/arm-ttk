@@ -61,7 +61,8 @@ foreach ($id in $ids) {
         "requestedServiceObjectiveId", # Microsoft.Sql/servers/databases
         "groupId",                     # Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints
         "sid",                         # Microsoft.Sql/servers/administrators/activeDirectory
-        "ruleId"                          # Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies
+        "ruleId",                      # Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies
+        "deploymentSpecId"             # Microsoft.NetApp/netAppAccounts/volumeGroups
     )
 
     if ($exceptions -contains $myIdFieldName) {
