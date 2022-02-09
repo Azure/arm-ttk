@@ -327,7 +327,28 @@ Each test script has access to a set of well-known variables:
                     
                     $outputByInnerTemplate = $testCaseOutput | 
                         Group-Object InnerTemplateName
-
+                    if (-not $outputByInnerTemplate) {
+                        # If there's no output, the test has passed.
+                        $script:PassFailTotalPerRun.Total++ # update the totals
+                        $script:PassFailTotalPerRun.Pass++
+                        [PSCustomObject][Ordered]@{         # And output the object
+                            pstypename = 'Template.Validation.Test.Result'
+                            Errors = @()
+                            Warnings = @()
+                            Output = @()
+                            AllOutput = $testCaseOutput
+                            Passed = $true
+                            Group = $dq                        
+                            Name = $dq
+                            Timespan = $testTook
+                            File = $fileInfo
+                            TestInput = @{} + $TestInput
+                            Summary = if ($isLastFile -and -not $testQueue.Count) {
+                                [PSCustomObject]$script:PassFailTotalPerRun    
+                            }
+                        }
+                        continue nextTestInGroup
+                    }
                     foreach ($testOutputGroup in $outputByInnerTemplate) {
                         $testErrors = [Collections.ArrayList]::new()
                         $testWarnings = [Collections.ArrayList]::new()
