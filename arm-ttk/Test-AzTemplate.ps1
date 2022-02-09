@@ -371,7 +371,7 @@ Each test script has access to a set of well-known variables:
                                         $ex = $_
                                         Write-Error "Error Isolating Nested Template Lines in $templateFileName " -TargetObject $ex
                                     }
-                                "NestedTemplate $($testOutputGroup.Name) [ Lines $InnerTemplateStartLine - $InnerTemplateEndLine ]"
+                                " NestedTemplate $($testOutputGroup.Name) [ Lines $InnerTemplateStartLine - $InnerTemplateEndLine ]"
                             } else {''}
                         $displayGroup = if ($innerGroup) { $innerGroup } else { $GroupName }
                         $null= foreach ($testOut in $testOutputGroup.Group) {
@@ -394,17 +394,18 @@ Each test script has access to a set of well-known variables:
                                     $testOut | Add-Member NoteProperty Location ([PSCustomObject]@{Line=$lineNumber;Column=$columnNumber;Index=$testOut.TargetObject.Index;Length=$testOut.TargetObject.Length}) -Force
                                 }
                                 elseif ($testOut.TargetObject.PSTypeName -eq 'JSON.Content' -or $testOut.TargetObject.JSONPath) {
+                                    $jsonPath = "$($testOut.TargetObject.JSONPath)".Trim()
                                     $location = 
-                                        if ($GroupName -eq 'CreateUIDefinition') {                                        
-                                            Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $createUIDefinitionText                                       
+                                        if ($GroupName -eq 'CreateUIDefinition') {                                                         
+                                            Resolve-JSONContent -JSONPath $jsonPath -JSONText $createUIDefinitionText
                                         } elseif ($GroupName -eq 'DeploymentParameters') {
-                                            Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $parameterText
+                                            Resolve-JSONContent -JSONPath $jsonPath -JSONText $parameterText
                                         } elseif ($testOut.InnerTemplateText) {
-                                            Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $testOut.InnerTemplateText
+                                            Resolve-JSONContent -JSONPath $jsonPath -JSONText $testOut.InnerTemplateText
                                         } else {
-                                            $resolvedLocation = Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $TemplateText
+                                            $resolvedLocation = Resolve-JSONContent -JSONPath $jsonPath -JSONText $TemplateText
                                             if (-not $resolvedLocation) {
-                                                Write-Verbose "Unable to Resolve location in $($testOut.TargetObject.JSONPath) in $($fileInfo.Name)"
+                                                Write-Verbose "Unable to Resolve location in $($jsonPath) in $($fileInfo.Name)"
                                             } else {
                                                 $resolvedLocation.Line += $(if ($InnerTemplateStartLine) { $InnerTemplateStartLine - 1 })
                                                 $resolvedLocation
