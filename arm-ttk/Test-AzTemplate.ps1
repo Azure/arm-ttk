@@ -403,8 +403,12 @@ Each test script has access to a set of well-known variables:
                                             Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $testOut.InnerTemplateText
                                         } else {
                                             $resolvedLocation = Resolve-JSONContent -JSONPath $testOut.TargetObject.JSONPath -JSONText $TemplateText
-                                            $resolvedLocation.Line += $(if ($InnerTemplateStartLine) { $InnerTemplateStartLine - 1 })
-                                            $resolvedLocation
+                                            if (-not $resolvedLocation) {
+                                                Write-Verbose "Unable to Resolve location in $($testOut.TargetObject.JSONPath) in $($fileInfo.Name)"
+                                            } else {
+                                                $resolvedLocation.Line += $(if ($InnerTemplateStartLine) { $InnerTemplateStartLine - 1 })
+                                                $resolvedLocation
+                                            }
                                         }
 
                                     $testOut | Add-Member NoteProperty Location $location -Force
