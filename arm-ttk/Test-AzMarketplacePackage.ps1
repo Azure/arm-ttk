@@ -1,5 +1,5 @@
-function Test-AzMarketplacePackage
-    <#
+function Test-AzMarketplaceTemplatelse {
+    <#    
     .Synopsis
 Runs the tests for a marketplace package.
     .Description
@@ -10,12 +10,12 @@ Test-AzMarketplacePackage validates a package to verify if it passes all the min
     .Example
         Test-AzMarketplacePackage -TemplatePath ./FolderWithPackage
         # Tests Marketplace package in /FolderWithPackage
-    
-    #>
+  
+#>
 
     param (
         [string]
-        $PackagePath
+        $templatePath
     )
 
     # these are the tests that should only show a warning, we don't block Marketplace submissions on these tests
@@ -36,13 +36,11 @@ Test-AzMarketplacePackage validates a package to verify if it passes all the min
         "VM-Images-Should-Use-Latest-Version"
     )
 
-    # $WarningtestList = $MarketplaceWarningTests -join  ","
-
     # these tests should only trigger a warning, not a "failure"
-    $ttkWarnings = Test-AzTemplate  $PackagePath -Tests $MarketplaceWarningTests
+    $ttkWarnings = Test-AzTemplate  $templatePath -Tests $MarketplaceWarningTests
 
     # All other tests should trigger a true test "failure"
-    $ttkErrors = Test-AzTemplate $PackagePath -Skip $MarketplaceWarningTests
+    $ttkErrors = Test-AzTemplate $templatePath -Skip $MarketplaceWarningTests
     
 
     # we need to be able to combine these 2 objects $errors and $ttkWarnings so as to show the errors and warnings as separate
@@ -50,12 +48,23 @@ Test-AzMarketplacePackage validates a package to verify if it passes all the min
     #     1) the errors in the warnings variable show up as warnings i.e not in red but yellow 
     #     2) And the groups are merged for both variables , eg : CreateUidefinition group results for both should get combined together.
 
-    #if($ttkErrors.Passed -ne $true)
-    #{
-        $ttkErrors
-    #}
-    #if($ttkWarnings.Passed -ne $true)
-    #{
-        $ttkWarnings
-    #}
+    $ttkErrors
+
+    $ttkWarnings  | Where-Object Errors | ForEach-Object {
+        $_.Warnings = @(foreach ($err in $_.Errors) {
+                Write-Warning -Message "$err" *>&1
+            })
+        $_.Errors = @()
+        $_.AllOutput = @(
+            foreach ($eachOutput in $_.AllOutput) {
+                if ($eachOutput -is [Management.Automation.ErrorRecord]) {
+                    Write-Warning -Message "$eachOutput" *>&1
+                }
+                else {
+                    $eachOutput
+                }
+            }
+        )
+        $_
+    }
 }
