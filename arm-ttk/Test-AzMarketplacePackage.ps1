@@ -1,5 +1,4 @@
 function Test-AzMarketplacePackage
-{
     <#
     .Synopsis
 Runs the tests for a marketplace package.
@@ -19,9 +18,10 @@ Test-AzMarketplacePackage validates a package to verify if it passes all the min
         $PackagePath
     )
 
+    # these are the tests that should only show a warning, we don't block Marketplace submissions on these tests
+    # below we will run the TTK twice, once with the set of tests that are warnings and then once exclude these warning test
     $MarketplaceWarningTests = @(
-        "CreateUIDefinition-Must-Not-Have-Blanks" ,
-
+        "CreateUIDefinition-Must-Not-Have-Blanks",
         "apiVersions-Should-Be-Recent-In-Reference-Functions",
         "apiVersions-Should-Be-Recent",
         "DependsOn-Best-Practices",
@@ -36,31 +36,26 @@ Test-AzMarketplacePackage validates a package to verify if it passes all the min
         "VM-Images-Should-Use-Latest-Version"
     )
 
-    $WarningtestList = $MarketplaceWarningTests -join  ","
+    # $WarningtestList = $MarketplaceWarningTests -join  ","
 
-    $errors = Invoke-Command {
-    ## Include all error tests here
-    Test-AzTemplate $PackagePath -Skip $WarningtestList
-    } -ArgumentList $PackagePath
+    # these tests should only trigger a warning, not a "failure"
+    $ttkWarnings = Test-AzTemplate  $PackagePath -Tests $MarketplaceWarningTests
+
+    # All other tests should trigger a true test "failure"
+    $ttkErrors = Test-AzTemplate $PackagePath -Skip $MarketplaceWarningTests
     
 
-    $warnings = Invoke-Command {
-    ## Include all warning tests here
-    Test-AzTemplate  $PackagePath -Tests $MarketplaceWarningTests
-    } -ArgumentList $PackagePath
-
-
-    # we need to be able to combine these 2 objects $errors and $warnings so as to show the errors and warnings as separate
+    # we need to be able to combine these 2 objects $errors and $ttkWarnings so as to show the errors and warnings as separate
     # i.e the sections need to be combined so that 
     #     1) the errors in the warnings variable show up as warnings i.e not in red but yellow 
     #     2) And the groups are merged for both variables , eg : CreateUidefinition group results for both should get combined together.
 
-    if($errors.Passed -ne $true)
-    {
-        $errors
-    }
-    if($warnings.Passed -ne $true)
-    {
-        $warnings
-    }
+    #if($ttkErrors.Passed -ne $true)
+    #{
+        $ttkErrors
+    #}
+    #if($ttkWarnings.Passed -ne $true)
+    #{
+        $ttkWarnings
+    #}
 }
