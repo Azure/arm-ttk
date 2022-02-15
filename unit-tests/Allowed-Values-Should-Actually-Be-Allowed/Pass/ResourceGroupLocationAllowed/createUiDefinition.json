@@ -1,0 +1,111 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "config": {
+            "isWizard": false,
+            "basics": {
+                "description": "sample description",
+                "location": {
+                    "allowedValues": [
+                        "eastus",
+                        "eastus2"
+                    ]
+                }
+            }
+        },
+        "basics": [
+            {
+                "name": "actionSection",
+                "type": "Microsoft.Common.Section",
+                "label": "sample label",
+                "elements": [
+                    {
+                        "name": "createOrUpdate",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Select one:",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Create",
+                                    "value": "Create"
+                                },
+                                {
+                                    "label": "Update",
+                                    "value": "Update"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        ],
+        "steps": [
+            {
+                "name": "configureStep",
+                "label": "Configure Step",
+                "elements": [
+                    {
+                        "name": "nodeSection",
+                        "type": "Microsoft.Common.Section",
+                        "label": " Size of your Node",
+                        "elements": [
+                            {
+                                "name": "nodeSize",
+                                "type": "Microsoft.Compute.SizeSelector",
+                                "label": "Node size:",
+                                "recommendedSizes": [
+                                    "Standard_F16s_v2"
+                                ],
+                                "constraints": {
+                                    "allowedSizes": [
+                                        "Standard_F8s_v2",
+                                        "Standard_F16s_v2"
+                                    ]
+                                },
+                                "osPlatform": "Linux",
+                                "count": 1
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "updateStep",
+                "label": "Update Configuration",
+                "elements": [
+                    {
+                        "name": "updateSection",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Update",
+                        "elements": [
+                            {
+                                "name": "userAssignedIdentitiesApi",
+                                "type": "Microsoft.Solutions.ArmApiControl",
+                                "request": {
+                                    "method": "GET",
+                                    "path": "[concat(subscription().id,'/resourceGroups/',resourceGroup().name,  '/providers/Microsoft.ManagedIdentity/userAssignedIdentities?api-version=2018-11-30')]"
+                                }
+                            },
+                            {
+                                "name": "userAssignedIdentitiesDropDown",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Select deployment user identity:",
+                                "constraints": {
+                                    "allowedValues": "[map(steps('updateStep').updateSection.userAssignedIdentitiesApi.value, (item) => parse(concat('{\"label\":\"', item.name, '\",\"value\":\"', item.id, '\"}')))]"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "outputs": {
+            "location": "[location()]",
+            "createOrUpdate": "[basics('actionSection').createOrUpdate]",
+            "nodeSize": "[steps('configureStep').nodeSection.nodeSize]",
+            "updateIdentityId": "[steps('updateStep').updateSection.userAssignedIdentitiesDropDown]"
+        }
+    }
+}
