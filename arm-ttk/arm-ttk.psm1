@@ -12,6 +12,7 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
 #region Template Functions
 . $PSScriptRoot\Expand-AzTemplate.ps1
 . $PSScriptRoot\Test-AzTemplate.ps1
+. $PSScriptRoot\Test-AzMarketplacePackage.ps1
 
 . $PSScriptRoot\Format-AzTemplate.ps1
 #endregion Template Functions
