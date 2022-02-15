@@ -84,8 +84,10 @@ foreach ($av in $allowedValues) { # Walk thru each thing we find.
 
     
 
+    $paramName = if ($parent.name) { $parent.name } elseif ($configName) { $configName }
+
     if ($MainTemplateParam.allowedValues) { # If the main template parameter has allowed values
-        $paramName = if ($parent.name) { $parent.name } elseif ($configName) { $configName }
+        
         :CheckNextValue # then we want to check each value in order to see if it's permitted.
             foreach ($rv in $reallyAllowedValues) {
                 foreach ($v in $MainTemplateParam.allowedValues) {
@@ -96,6 +98,7 @@ foreach ($av in $allowedValues) { # Walk thru each thing we find.
     } 
 
     if ($MainTemplateParam.defaultValue -and # If the main template has a default value
+        $MainTemplateParam.defaultValue -replace '\s' -ne '[resourceGroup().location]' -and # and it's not [resourceGroup().location]
         $reallyAllowedValues -notcontains $MainTemplateParam.defaultValue) { # and the allowedValues list doesn't contain it.
         
         
@@ -111,7 +114,7 @@ foreach ($av in $allowedValues) { # Walk thru each thing we find.
                 
             }
         if (-not $foundDefaultValue) {
-            Write-Error "CreateUIDefinition parameter $($parent.Name) is not allowed in the main template parameter $($theOutput.Name)" -ErrorId Allowed.Value.Default.Mismatch
+            Write-Error "CreateUIDefinition parameter '$paramName' default value is not allowed in the main template parameter '$($theOutput.Name)'" -ErrorId Allowed.Value.Default.Mismatch
         }
     }
 }
