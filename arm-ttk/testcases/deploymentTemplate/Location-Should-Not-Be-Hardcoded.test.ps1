@@ -40,6 +40,20 @@ if ($TemplateObjectCopy.parameters.psobject -ne $null) {
 
 # Determine where the parameters section is within the JSON
 $paramsSection  = Resolve-JSONContent -JSONPath 'parameters' -JSONText $TemplateText
+$deployments    = Find-JsonContent -InputObject $TemplateObject -Key type -Value Microsoft.Resources/deployments |  # Find any deployments
+    Resolve-JSONContent -JSONText $TemplateText -JSONPath { $_.JsonPath -replace '\.type$' }      # and then resolve the resource they are in.
+
+$ignoredRanges = 
+    @() + @(
+        if ($paramsSection.Index -and $paramSection.Length) {
+            $paramsSection.Index..($paramsSection.Index + $paramsSection.Length)
+        }
+    ) + @(
+        foreach ($deployment in $deployments) {
+            $deployment.Index..($deployment.Index + $deployment.Length)
+        }
+    )
+
 $LocationRegex = '(?>resourceGroup|deployment)\(\).location'
 
 
@@ -74,7 +88,7 @@ else {
 $foundResourceGroupLocations = [Regex]::Matches($TemplateText, $LocationRegex, 'IgnoreCase')
     
 foreach ($spotFound in $foundResourceGroupLocations) {
-    if ($spotFound.Index -ge $paramsSection.Index -and $spotFound.Index -le ($paramsSection.Index + $paramsSection.Length)) {
+    if ($spotFound.Index -in $ignoredRanges) {
         continue
     }
     Write-Error "$TemplateFileName must use the location parameter, not resourceGroup().location or deployment().location (except when used as a default value in the main template)" -ErrorId Location.Parameter.Should.Be.Used -TargetObject $parameter
