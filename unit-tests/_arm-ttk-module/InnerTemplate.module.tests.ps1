@@ -48,4 +48,43 @@ describe InnerTemplates {
             Select-Object -ExpandProperty Count | 
             Should -BeGreaterThan 2
     }
+
+    it 'Will complain (but not error) about a single blank file in an empty directory' {
+        $templatePathRoot = $here | Join-Path -ChildPath "BlankFile$(Get-Random)"
+        $null = New-Item -Path $templatePathRoot -ItemType Directory
+        '' | Set-Content (Join-Path $templatePathRoot -ChildPath 'azureDeploy.json')
+        $testHadErrorsOrExceptions = 
+            try {
+                $testOutput = Test-AzTemplate -TemplatePath $templatePathRoot *>&1
+                $testOutput | Where-Object { $_ -is [Management.Automation.ErrorRecord] }
+            } catch {
+                $_
+            }
+        $testHadErrorsOrExceptions | Should -Be $null
+        $templatePathRoot | Remove-Item
+    }
+
+    it 'Will not complain (and not error) given a blank template in a directory' {
+        $templatePathRoot = $here | Join-Path -ChildPath "BlankFile$(Get-Random)"
+        $null = New-Item -Path $templatePathRoot -ItemType Directory
+        @'
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": { },
+  "variables": { },
+  "resources": [ ],
+  "outputs": { }
+}
+'@ | Set-Content (Join-Path $templatePathRoot -ChildPath 'azureDeploy.json')
+        $testHadErrorsOrExceptions = 
+            try {
+                $testOutput = Test-AzTemplate -TemplatePath $templatePathRoot *>&1
+                $testOutput | Where-Object { $_ -is [Management.Automation.ErrorRecord] }
+            } catch {
+                $_
+            }
+        $testHadErrorsOrExceptions | Should -Be $null
+        $templatePathRoot | Remove-Item
+    }
 }
