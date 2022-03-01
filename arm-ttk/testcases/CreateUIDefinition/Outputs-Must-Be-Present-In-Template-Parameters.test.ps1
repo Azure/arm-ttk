@@ -32,8 +32,11 @@ $AllowedFunctionInOutput = $(@{
 
 # If the TemplateObject is inner template of MainTemplate, skip the test
 if ($IsInnerTemplate) {
+    "a. Skipping Due To Inner Template" | Out-Host 
     return
 }
+
+
 
 # First, make sure CreateUIDefinition has outputs
 if (-not $CreateUIDefinitionObject.parameters.outputs) {
@@ -42,6 +45,7 @@ if (-not $CreateUIDefinitionObject.parameters.outputs) {
 
 $parameterInfo = $CreateUIDefinitionObject.parameters
 
+"b. $(@($parameterInfo.outputs.psobject.properties).Count) Outputs Found" | Out-Host 
 foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk thru each output
     $outputName = $output.Name
     if ($outputName -eq 'applicationresourcename' -or `
@@ -59,11 +63,14 @@ foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk th
         Write-Error "output $outputName does not exist in template.parameters" -ErrorId CreateUIDefinition.Output.Missing.From.MainTemplate -TargetObject $parameterInfo.outputs
     }
     
-    $outputParameterType = $TemplateObject.parameters.$outputName.type    
+    $outputParameterType = $TemplateObject.parameters.$outputName.type
+    "b.a. Output '$outputName' found with '$outputParameterType'" | Out-Host     
     if ($outputParameterType -and $outputParameterType -ne 'string') {
         $firstOutputFunction = $output.Value | ?<ARM_Template_Function> -Extract | Select-Object -ExpandProperty FunctionName
+        "b.b. Output '$outputName' first function found '$firstOutputFunction'" | Out-Host     
         if ($AllowedFunctionInOutput) {
             foreach ($af in $AllowedFunctionInOutput.GetEnumerator()) {
+                "b.c. Output '$outputName' checking $($af.Key)" | Out-Host     
                 if ($outputParameterType -eq $af.Key -and $firstOutputFunction -notin $af.Value) {
                     Write-Error "output $outputName does not return the expected type '$outputParameterType'" -ErrorId CreateUIDefinition.Output.Incorrect -TargetObject $parameterInfo.outputs
                 }
