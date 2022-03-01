@@ -21,7 +21,13 @@ $TemplateObject,
 
 # If set, the TemplateObject is an inner template.
 [switch]
-$IsInnerTemplate
+$IsInnerTemplate,
+
+[Collections.IDictionary]
+$AllowedFunctionInOutput = $(@{
+    int = 'int', 'min', 'max', 'div', 'add', 'mod', 'mul', 'sub', 'copyIndex'
+    bool = 'equals', 'less', 'lessOrEquals', 'greater', 'greaterOrEquals', 'and', 'or','not', 'true', 'false', 'contains','empty'
+})
 )
 
 # If the TemplateObject is inner template of MainTemplate, skip the test
@@ -56,11 +62,12 @@ foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk th
     $outputParameterType = $TemplateObject.parameters.$outputName.type    
     if ($outputParameterType -and $outputParameterType -ne 'string') {
         $firstOutputFunction = $output.Value | ?<ARM_Template_Function> -Extract | Select-Object -ExpandProperty FunctionName
-        if ($outputParameterType -eq 'int' -and $firstOutputFunction -notin 'int', 'min', 'max') {
-            Write-Error "output $outputName does not return the expected type '$outputParameterType'" -ErrorId CreateUIDefinition.Output.Incorrect -TargetObject $parameterInfo.outputs
-        }
-        if ($outputParameterType -eq 'bool' -and $firstOutputFunction -notin 'equals', 'less', 'lessOrEquals', 'greater', 'greaterOrEquals') {
-            Write-Error "output $outputName does not return the expected type '$outputParameterType'" -ErrorId CreateUIDefinition.Output.Incorrect -TargetObject $parameterInfo.outputs
-        }
+        if ($AllowedFunctionInOutput) {
+            foreach ($af in $AllowedFunctionInOutput.GetEnumerator()) {
+                if ($outputParameterType -eq $af.Key -and $firstOutputFunction -notin $af.Value) {
+                    Write-Error "output $outputName does not return the expected type '$outputParameterType'" -ErrorId CreateUIDefinition.Output.Incorrect -TargetObject $parameterInfo.outputs
+                }    
+            }
+        }       
     }
 }
