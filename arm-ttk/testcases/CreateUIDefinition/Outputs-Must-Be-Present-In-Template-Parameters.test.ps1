@@ -7,6 +7,15 @@
     Test-AzTemplate .\100-marketplace-sample -Test Outputs-Must-Be-Present-In-Template-Parameters
 .Example
     .\Outputs-Must-Be-Present-In-Template-Parameters.test.ps1 -CreateUIDefinitionObject @([PSCustomObject]@{badinput=$true}) -TemplateObject ([PSCustomObject]@{})
+.Notes
+    This also attempts to validate the return type of an output, provided that the return type is not a string.
+
+    It currently _does not_ attempt to validate the data type of the control, 
+    and thus may give a false positive in the case of Checkboxes and other non-string CreateUiDefinition controls.
+
+    The list of acceptable output functions by datatype is accessible in the parameter -AllowedFunctionInOutput.
+    
+    It currently only checks integer and boolean types.  If you believe an additional exception is needed, please file an issue on GitHub.
 #>
 param(
 # The CreateUIDefinition Object (the contents of CreateUIDefinition.json, converted from JSON)
@@ -23,10 +32,12 @@ $TemplateObject,
 [switch]
 $IsInnerTemplate,
 
+# The allowed functions for a given data type.
+# This is not accounting for the type or control.
 [Collections.IDictionary]
 $AllowedFunctionInOutput = $(@{
-    int = 'int', 'min', 'max', 'div', 'add', 'mod', 'mul', 'sub', 'copyIndex','length'
-    bool = 'equals', 'less', 'lessOrEquals', 'greater', 'greaterOrEquals', 'and', 'or','not', 'true', 'false', 'contains','empty'
+    int = 'int', 'min', 'max', 'div', 'add', 'mod', 'mul', 'sub', 'copyIndex','length', 'coalesce'
+    bool = 'equals', 'less', 'lessOrEquals', 'greater', 'greaterOrEquals', 'and', 'or','not', 'true', 'false', 'contains','empty','coalesce','if'
 })
 )
 
@@ -67,7 +78,7 @@ foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk th
         if ($AllowedFunctionInOutput) {
             foreach ($af in $AllowedFunctionInOutput.GetEnumerator()) {
                 if ($outputParameterType -eq $af.Key -and $firstOutputFunction -notin $af.Value) {
-                    Write-Error "output $outputName does not return the expected type '$outputParameterType'" -ErrorId CreateUIDefinition.Output.Incorrect -TargetObject $parameterInfo.outputs
+                    Write-Warning "output $outputName does not return the expected type '$outputParameterType'" -ErrorId CreateUIDefinition.Output.Incorrect -TargetObject $parameterInfo.outputs
                 }
             }
         }       
