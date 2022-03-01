@@ -25,7 +25,7 @@ $IsInnerTemplate,
 
 [Collections.IDictionary]
 $AllowedFunctionInOutput = $(@{
-    int = 'int', 'min', 'max', 'div', 'add', 'mod', 'mul', 'sub', 'copyIndex'
+    int = 'int', 'min', 'max', 'div', 'add', 'mod', 'mul', 'sub', 'copyIndex','length'
     bool = 'equals', 'less', 'lessOrEquals', 'greater', 'greaterOrEquals', 'and', 'or','not', 'true', 'false', 'contains','empty'
 })
 )
@@ -66,7 +66,7 @@ foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk th
             foreach ($af in $AllowedFunctionInOutput.GetEnumerator()) {
                 if ($outputParameterType -eq $af.Key -and $firstOutputFunction -notin $af.Value) {
                     Write-Error "output $outputName does not return the expected type '$outputParameterType'" -ErrorId CreateUIDefinition.Output.Incorrect -TargetObject $parameterInfo.outputs
-                }    
+                }
             }
         }       
     }
