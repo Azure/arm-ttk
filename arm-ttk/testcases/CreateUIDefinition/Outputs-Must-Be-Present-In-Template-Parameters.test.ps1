@@ -34,6 +34,8 @@ $AllowedFunctionInOutput = $(@{
 if ($IsInnerTemplate) {
     "a. Skipping Due To Inner Template" | Out-Host 
     return
+} else {
+    "a. Not Inner Template.  CreateUIDefinition: $CreateUIDefinitionFullPath" | Out-Host
 }
 
 
@@ -45,7 +47,7 @@ if (-not $CreateUIDefinitionObject.parameters.outputs) {
 
 $parameterInfo = $CreateUIDefinitionObject.parameters
 
-"b. $(@($parameterInfo.outputs.psobject.properties).Count) Outputs Found" | Out-Host 
+"b. $(@($parameterInfo.outputs.psobject.properties).Count) Outputs Found" | Out-Host
 foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk thru each output
     $outputName = $output.Name
     if ($outputName -eq 'applicationresourcename' -or `
