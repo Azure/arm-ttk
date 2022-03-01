@@ -6,6 +6,8 @@
         "basics": [],
         "steps": [
             {
+                "name": "swarmConfig",
+                "label": "swarmConfig",
                 "bladeTitle": "app Configuration",
                 "elements": [
                     {
@@ -41,8 +43,7 @@
                         },
                         "visible": true
                     }
-                ],
-                "visible": "[equals(steps('SwarmConfig').deployApp, 'yes')]"
+                ]
             }
         ],
         "outputs": {
