@@ -37,4 +37,15 @@ describe InnerTemplates {
         $expanded = Expand-AzTemplate -TemplatePath $templatePath
         $expanded.innerTemplates.Count | Should -be 1
     }
+
+    it 'Will report results from multiple inner templates' {
+        $templatePath = $here | Join-Path -ChildPath MultipleInnerTemplates.json
+        $expanded = Expand-AzTemplate -TemplatePath $templatePath
+        $testOutput = Test-AzTemplate -TemplatePath $templatePath -Test "Parameters Must Be Referenced"
+        $testOutput | 
+            Select-Object -ExpandProperty Group -Unique | 
+            Measure-Object | 
+            Select-Object -ExpandProperty Count | 
+            Should -BeGreaterThan 2
+    }
 }
