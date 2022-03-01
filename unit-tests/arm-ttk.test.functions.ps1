@@ -88,6 +88,9 @@ function Test-TTKPass {
             
             $ttkResults = Get-Item -Path $testFile.Fullname | 
                 Test-AzTemplate @ttkParams
+            if ($DebugPreference -in 'inquire', 'continue') {
+                $ttkResults | Out-Host
+            }
             if (-not $ttkResults) { throw "No Test Results" }
             if ($ttkResults | Where-Object { -not $_.Passed}) {
                 throw "$($ttkResults.Errors | Out-String)"
@@ -121,6 +124,9 @@ function Test-TTKFail {
             $ttkResults = Get-Item -Path $testFile.Fullname | 
                 Test-AzTemplate @ttkParams 
             if (-not $ttkResults) { throw "No Test Results" }
+            if ($DebugPreference -in 'inquire', 'continue') {
+                $ttkResults | Out-Host
+            }
             if (-not ($ttkResults | Where-Object {$_.Errors })) {
                 throw 'Errors were expected'
             }
