@@ -11,6 +11,13 @@
                 "description": "Please select the size of the data disk you wish to deploy (value is integer GB)."
             }
         },
+        "testBoolean": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata":{
+                "description": "A Boolean Parameter"
+            }
+        },
         "location": {
             "type": "string",
             "defaultValue": "[resourceGroup().location]",

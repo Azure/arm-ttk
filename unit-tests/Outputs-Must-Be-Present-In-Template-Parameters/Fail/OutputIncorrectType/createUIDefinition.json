@@ -47,7 +47,8 @@
         ],
         "outputs": {
             "location": "[location()]",
-            "swarmRootDiskSize": "[steps('SwarmConfig').vmSettings.rootDiskSize]"
+            "swarmRootDiskSize": "[steps('SwarmConfig').vmSettings.rootDiskSize]", 
+            "testBoolean": "[int('1')]"
         }
     }
 }
