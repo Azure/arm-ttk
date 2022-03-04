@@ -85,7 +85,7 @@ describe Resolve-JSONContent {
                 }
             }
         }'
-        $resolved.Column | Should -be 10
+        $resolved.Column | Should -be 18
         $resolved.Line | Should -Be 3
     }
 
