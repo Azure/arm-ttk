@@ -33,6 +33,19 @@ describe Find-JSONContent {
         $foundIt.JSONPath | Should -Be 'a.b.c[0].d'
     }
 
+    it 'Will return the index of the second item within a list' {
+        $jsonText = '{
+            a: {
+                b: {
+                    c: [{d:1},{e:2}]
+                }
+            }
+        }'
+        $jsonObject = $jsonText | ConvertFrom-Json
+        $foundIt = Find-JsonContent -InputObject $jsonObject -Key e -Value 2
+        $foundIt.JSONPath | Should -Be 'a.b.c[1].e'
+    }
+
     it 'Will return the index within a list when provided a -Value' {
         $jsonText = '{
             a: {
@@ -72,6 +85,7 @@ describe Resolve-JSONContent {
                 }
             }
         }'
+        $resolved.Column | Should -be 18
         $resolved.Line | Should -Be 3
     }
 
@@ -85,7 +99,7 @@ describe Resolve-JSONContent {
     }
 }
 '@
-        $resolved.Line | Should -Be 4
+        $resolved.Line    | Should -Be 4
         $resolved.Content | Should -Be "1"
     }
 

@@ -90,7 +90,8 @@
         if (-not $InputObject) { return }
 
 
-        $index = -1       
+        $index = -1
+        $originalProperty = @() + $Property       
         foreach ($in in $InputObject) {
             if (-not $in) { continue }
             $index++
@@ -106,12 +107,16 @@
                         ($NotLike -and $in.$key -notlike $Value) -or
                         ($NotMatch -and $in.$key -notmatch $Value) -or
                         ($in.$key -eq $Value -and -not ($NotLike -or $NotMatch))) {
-                        if ($InputObject -is [Collections.IList] -and $Property) {
-                            $property += "[$index].$($key)"
-                        } else {
-                            $property += $key
-                        }                        
+
+
+                        if ($InputObject -is [Collections.IList] -and $Property) {                             
+                            $property += "[$index]"
+                        }
+                        $property += $key
+                        
                         . $outputMatch $in
+
+                        $property = $originalProperty
                     }
                 }
             } elseif ($PSCmdlet.ParameterSetName -eq 'Key') {
@@ -178,6 +183,8 @@
 
                     Find-JsonContent @mySplat -InputObject $prop.Value
                 }
+
+                
             }
         }
     }

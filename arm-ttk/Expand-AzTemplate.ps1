@@ -146,7 +146,7 @@ function Expand-AzTemplate
                 'MainTemplatePath', 'MainTemplateObject', 'MainTemplateText',
                 'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 'MainTemplateOutputs', 'TemplateMetadata',
                 'isParametersFile', 'ParameterFileName', 'ParameterObject', 'ParameterText',
-                'InnerTemplates', 'InnerTemplatesText', 'ParentTemplateText', 'ParentTemplateObject',
+                'InnerTemplates', 'InnerTemplatesText', 'InnerTemplatesNames','InnerTemplatesLocations','ParentTemplateText', 'ParentTemplateObject',
                 'ExpandedTemplateText', 'ExpandedTemplateObject'
 
             foreach ($_ in $WellKnownVariables) {
@@ -245,20 +245,27 @@ function Expand-AzTemplate
                                 Find-JsonContent -InputObject $fileObject.Object -Key template |
                                     Where-Object { $_.expressionEvaluationOptions.scope -eq 'inner' -or $_.jsonPath -like '*.policyRule.*' } |
                                     Sort-Object JSONPath -Descending
-                            })
-                            #* InnerTemplatesText (an array of the text of each inner template)
-                            $fileObject.InnerTemplatesText = @(if ($fileObject.innerTemplates) {
+                            })                            
+                            #* InnerTemplatesText     (an array of the text of each inner template)
+                            $fileObject.InnerTemplatesText = @()
+                            #* InnerTemplateNames     (an array of the name of each inner template)
+                            $fileObject.InnerTemplatesNames = @()
+                            #* InnerTemplateLocations (an array of the resolved locations of each inner template)
+                            $fileObject.InnerTemplatesLocations = @()
+                            if ($fileObject.innerTemplates) {
                                 $anyProblems = $false                                
                                 foreach ($it in $fileObject.innerTemplates) {
                                     $foundInnerTemplate = $it | Resolve-JSONContent -JsonText $fileObject.Text
-                                    if (-not $foundInnerTemplate) { $anyProblems = $true; break }
-                                    $foundInnerTemplate.Content -replace '"template"\s{0,}\:\s{0,}'                                    
+                                    if (-not $foundInnerTemplate) { $anyProblems = $true; continue }
+                                    $fileObject.InnerTemplatesText += $foundInnerTemplate.Content -replace '^\s{0,}"template"\s{0,}\:\s{0,}'
+                                    $fileObject.InnerTemplatesNames += $it.ParentObject[0].Name
+                                    $fileObject.InnerTemplatesLocations += $foundInnerTemplate
                                 }
-
+                                
                                 if ($anyProblems) {
                                     Write-Error "Could not extract inner templates for '$TemplatePath'." -ErrorId InnerTemplate.Extraction.Error
                                 }
-                            })
+                            }
                             $fileObject
                         }
 

@@ -256,7 +256,7 @@
                 Line     = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Matches(
                                 $JSONText, $indexMatch.Index
                            ).Count
-                Column   = $listMatch.Groups["ListItem"].Index + $(
+                Column   = $listMatch.Groups["ListItem"].Index - $(
                                 $m = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Match(
                                     $JSONText, $indexMatch.Index)
                                 $m.Index + $m.Length
@@ -276,9 +276,9 @@
                                 $JSONText, $propMatchIndex
                            ).Count
                 Content  = $JSONText.Substring($propMatchIndex, $propMatchLength)
-                Column   = $propMatch.Groups["Name"].Index - 1 + $(
+                Column   = $propMatch.Groups["Name"].Index - $(
                                 $m = [Regex]::new('(?>\r\n|\n|\A)', 'RightToLeft').Match(
-                                    $JSONText, $propMatch.Groups["Name"].Index - 1)
+                                    $JSONText, $propMatch.Groups["Name"].Index)
                                 $m.Index + $m.Length
                             ) + 1
                 PSTypeName = 'JSON.Content.Location'

@@ -28,15 +28,18 @@ foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
     # Create a Regex to find the parameter
 
     $foundRefs = $TemplateText | ?<ARM_Parameter> -Parameter $escapedName
-    if (-not $foundRefs) { # If we didn't, error
-        Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject $parameter
+    if (-not $foundRefs) { # If we didn't, error        
+        Write-Error -Message "Unreferenced parameter: $($Parameter.Name)" -ErrorId Parameters.Must.Be.Referenced -TargetObject (
+            $parameter | Add-Member NoteProperty JSONPath "parameters.$($Parameter.Name)" -Force -PassThru
+        )
     } else {
         foreach ($fr in $foundRefs) { # Walk thru each reference
             $foundQuote =$exprStrOrQuote.Match($TemplateText, $fr.Index + 1) # make sure we hit a [ before a quote
             if ($foundQuote.Value -eq '"') { # if we don't, error
                 $lineNumber = @($lineBreaks | ? { $_.Index -lt $fr.Index }).Count + 1    
-                $targetObject = $parameter.PsObject.Copy()
-                $targetObject | Add-Member -MemberType NoteProperty -Name lineNumber -Value $lineNumber
+                $targetObject = $fr | 
+                    Add-Member -MemberType NoteProperty -Name lineNumber -Value $lineNumber -PassThru -Force |
+                    Add-Member -MemberType NoteProperty -Name name -Value $parameter.Name -Force -PassThru
                 Write-Error -Message "Parameter reference is not contained within an expression: $($Parameter.Name) on line: $lineNumber" -ErrorId Parameters.Must.Be.Referenced.In.Expression -TargetObject $targetObject
             }
         }
