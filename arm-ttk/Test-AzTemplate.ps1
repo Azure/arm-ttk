@@ -261,7 +261,7 @@ Each test script has access to a set of well-known variables:
                     }
                     $innerTemplateNumber = 0
                     foreach ($innerTemplate in $testParameters.InnerTemplates) {
-                        $foundInnerTemplate = $innerTemplate | Resolve-JSONContent -JsonText $ParentTemplateText
+                        
                         $usedParameters = $false
                         # Map TemplateText to the inner template text by converting to JSON (if the test command uses -TemplateText)
                         if ($testCommandParameters.ContainsKey("TemplateText")) { 
@@ -277,15 +277,16 @@ Each test script has access to a set of well-known variables:
                         if ($usedParameters) {
                             if (-not $Pester) {
                                 . $myModule $TheTest @testInput 2>&1 3>&1 | # Run the test, and add data about the inner template context it was in.
-                                    Add-Member NoteProperty InnerTemplateName $innerTemplate.ParentObject[0].Name -Force -PassThru |
-                                    Add-Member NoteProperty InnerTemplateStart $foundInnerTemplate.Index -Force -PassThru |
-                                    Add-Member NoteProperty InnerTemplateLength $foundInnerTemplate.Length -Force -PassThru |
+                                    Add-Member NoteProperty InnerTemplateName $testParameters.InnerTemplatesNames[$innerTemplateNumber] -Force -PassThru |
+                                    Add-Member NoteProperty InnerTemplateStart $testParameters.InnerTemplatesLocations[$innerTemplateNumber].Index -Force -PassThru |
+                                    Add-Member NoteProperty InnerTemplateLocation $testParameters.InnerTemplatesLocations[$innerTemplateNumber]  -Force -PassThru |
                                     Add-Member NoteProperty InnerTemplateInput (@{} + $testInput) -Force -PassThru |
                                     Add-Member NoteProperty InnerTemplateText $templateText -Force -PassThru
                             } else {
                                 . $myModule $TheTest @testInput
                             }           
                         }
+                        $innerTemplateNumber++
                     }
                 }
             } while ($false)
@@ -326,7 +327,8 @@ Each test script has access to a set of well-known variables:
                     $InnerTemplateEndLine   = 0
                     
                     $outputByInnerTemplate = $testCaseOutput | 
-                        Group-Object InnerTemplateName
+                        Group-Object InnerTemplateName | 
+                        Sort-Object { $($_.Group.InnerTemplateStart) }
                     if (-not $outputByInnerTemplate) {
                         # If there's no output, the test has passed.
                         $script:PassFailTotalPerRun.Total++ # update the totals
@@ -400,8 +402,8 @@ Each test script has access to a set of well-known variables:
                                             Resolve-JSONContent -JSONPath $jsonPath -JSONText $createUIDefinitionText
                                         } elseif ($GroupName -eq 'DeploymentParameters') {
                                             Resolve-JSONContent -JSONPath $jsonPath -JSONText $parameterText
-                                        } elseif ($testOut.InnerTemplateText) {
-                                            Resolve-JSONContent -JSONPath $jsonPath -JSONText $testOut.InnerTemplateText
+                                        } elseif ($testOut.InnerTemplateLocation) {                                            
+                                            Resolve-JSONContent -JSONPath $jsonPath -JSONText $testOut.InnerTemplateText                                            
                                         } else {
                                             $resolvedLocation = Resolve-JSONContent -JSONPath $jsonPath -JSONText $TemplateText
                                             if (-not $resolvedLocation) {
@@ -411,6 +413,10 @@ Each test script has access to a set of well-known variables:
                                                 $resolvedLocation
                                             }
                                         }
+
+                                    if ($testOut.InnerTemplateLocation) {
+                                        $location.Line += $testOut.InnerTemplateLocation.Line - 1
+                                    }
 
                                     $testOut | Add-Member NoteProperty Location $location -Force
                                 }
@@ -548,8 +554,10 @@ Each test script has access to a set of well-known variables:
                     $TemplateObject = $fileInfo.Object
                     $TemplateText = $fileInfo.Text
                     if ($fileInfo.InnerTemplates) {
-                        $InnerTemplates     = $fileInfo.InnerTemplates
-                        $InnerTemplatesText = $fileInfo.InnerTemplatesText
+                        $InnerTemplates          = $fileInfo.InnerTemplates
+                        $InnerTemplatesText      = $fileInfo.InnerTemplatesText
+                        $InnerTemplatesNames     = $fileInfo.InnerTemplatesNames
+                        $innerTemplatesLocations = $fileInfo.InnerTemplatesLocations
                     } else {
                         $InnerTemplates = $mainInnerTemplates
                         $InnerTemplatesText = $mainInnerTemplatesText
