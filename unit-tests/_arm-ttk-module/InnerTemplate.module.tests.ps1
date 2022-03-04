@@ -37,8 +37,8 @@ describe InnerTemplates {
         $templatePath = $here | Join-Path -ChildPath InnerTemplateWithEscapeSequence.json
         $expanded = Expand-AzTemplate -TemplatePath $templatePath
         $expanded.innerTemplates.Count | Should -be 1
-    }   $testOutput   = 
-    $testOutput   = 
+    }
+    
     it 'Will expand inner templates and their grandchildren correctly' {
         $templatePath = $here | Join-Path -ChildPath MultipleInnerTemplatesWithUnreferencedParameters.json
         $testOutput   = Test-AzTemplate -TemplatePath $templatePath -Test "Parameters Must Be Referenced"
