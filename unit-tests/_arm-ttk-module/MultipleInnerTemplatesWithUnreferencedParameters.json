@@ -1,0 +1,112 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "NotUsedAtRoot": {
+            "type": "string",
+            "metadata": {
+                "description": "A parameter that is not referenced (at the root of the template)"
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "name": "InnerTemplate1",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "NotUsedInInnerTemplate1": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "A parameter that is not referenced (in the first inner template)"
+                            }
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Resources/deployments",
+                            "apiVersion": "2015-01-01",
+                            "name": "InnerInnerTemplate1",
+                            "properties": {
+                                "expressionEvaluationOptions": {
+                                    "scope": "inner"
+                                },
+                                "mode": "Incremental",
+                                "template": {
+                                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                    "contentVersion": "1.0.0.0",
+                                    "parameters": {
+                                        "NotUsedInInnerInnerTemplate1": {
+                                            "type": "string",
+                                            "metadata": {
+                                                "description": "A parameter that is not referenced (in the first grandchild template)"
+                                            }
+                                        }
+                                    },
+                                    "resources": []
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "name": "InnerTemplate2",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "NotUsedInInnerTemplate2": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "A parameter that is not referenced (in the first inner template)"
+                            }
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Resources/deployments",
+                            "apiVersion": "2015-01-01",
+                            "name": "InnerInnerTemplate2",
+                            "properties": {
+                                "expressionEvaluationOptions": {
+                                    "scope": "inner"
+                                },
+                                "mode": "Incremental",
+                                "template": {
+                                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                    "contentVersion": "1.0.0.0",
+                                    "parameters": {
+                                        "NotUsedInInnerInnerTemplate2": {
+                                            "type": "string",
+                                            "metadata": {
+                                                "description": "A parameter that is not referenced (in the first grandchild template)"
+                                            }
+                                        }
+                                    },
+                                    "resources": []
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
