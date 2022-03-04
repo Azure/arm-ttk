@@ -65,18 +65,7 @@ describe InnerTemplates {
         # The next template should be "NotUsedInInnerInnerTemplate2" (the second grandchild)
         $testOutput[4].AllOutput[0].TargetObject.JSONPath | Should -Be parameters.NotUsedInInnerInnerTemplate2
         $testOutput[4].AllOutput[0].Location.Line | Should -BeGreaterThan $testOutput[3].AllOutput[0].Location.Line
-    }
-
-    it 'Will report results from multiple inner templates' {
-        $templatePath = $here | Join-Path -ChildPath MultipleInnerTemplates.json
-        $expanded = Expand-AzTemplate -TemplatePath $templatePath
-        $testOutput = Test-AzTemplate -TemplatePath $templatePath -Test "Parameters Must Be Referenced"
-        $testOutput | 
-            Select-Object -ExpandProperty Group -Unique | 
-            Measure-Object | 
-            Select-Object -ExpandProperty Count | 
-            Should -BeGreaterThan 2
-    }
+    }    
 
     it 'Will complain (but not error) about a single blank file in an empty directory' {
         $templatePathRoot = $here | Join-Path -ChildPath "BlankFile$(Get-Random)"
@@ -90,7 +79,7 @@ describe InnerTemplates {
                 $_
             }
         $testHadErrorsOrExceptions | Should -Be $null
-        $templatePathRoot | Remove-Item
+        $templatePathRoot | Remove-Item -Recurse -Force
     }
 
     it 'Will not complain (and not error) given a blank template in a directory' {
@@ -114,6 +103,6 @@ describe InnerTemplates {
                 $_
             }
         $testHadErrorsOrExceptions | Should -Be $null
-        $templatePathRoot | Remove-Item
+        $templatePathRoot | Remove-Item -Recurse -Force
     }
 }
