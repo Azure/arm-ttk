@@ -85,6 +85,7 @@ describe Resolve-JSONContent {
                 }
             }
         }'
+        $resolved.Column | Should -be 10
         $resolved.Line | Should -Be 3
     }
 
@@ -98,7 +99,7 @@ describe Resolve-JSONContent {
     }
 }
 '@
-        $resolved.Line | Should -Be 4
+        $resolved.Line    | Should -Be 4
         $resolved.Content | Should -Be "1"
     }
 
