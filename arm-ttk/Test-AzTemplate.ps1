@@ -276,10 +276,19 @@ Each test script has access to a set of well-known variables:
 
                         if ($usedParameters) {
                             if (-not $Pester) {
+                                $itn = 
+                                    if ($TestParameters.InnerTemplatesNames) {
+                                        $TestParameters.InnerTemplatesNames[$innerTemplateNumber]
+                                    } else { ''}
+                                
+                                $itl =
+                                    if ($TestParameters.InnerTemplatesLocations){
+                                        $testParameters.InnerTemplatesLocations[$innerTemplateNumber]
+                                    } else { '' }
                                 . $myModule $TheTest @testInput 2>&1 3>&1 | # Run the test, and add data about the inner template context it was in.
-                                    Add-Member NoteProperty InnerTemplateName $testParameters.InnerTemplatesNames[$innerTemplateNumber] -Force -PassThru |
-                                    Add-Member NoteProperty InnerTemplateStart $testParameters.InnerTemplatesLocations[$innerTemplateNumber].Index -Force -PassThru |
-                                    Add-Member NoteProperty InnerTemplateLocation $testParameters.InnerTemplatesLocations[$innerTemplateNumber]  -Force -PassThru |
+                                    Add-Member NoteProperty InnerTemplateName $itn -Force -PassThru |
+                                    Add-Member NoteProperty InnerTemplateStart $itl.index -Force -PassThru |
+                                    Add-Member NoteProperty InnerTemplateLocation $itl  -Force -PassThru |
                                     Add-Member NoteProperty InnerTemplateInput (@{} + $testInput) -Force -PassThru |
                                     Add-Member NoteProperty InnerTemplateText $templateText -Force -PassThru
                             } else {
@@ -479,6 +488,8 @@ Each test script has access to a set of well-known variables:
             $isFirstFile = $true                        
             $mainInnerTemplates = $InnerTemplates
             $mainInnerTemplatesText = $InnerTemplatesText
+            $MainInnerTemplatesNames = $InnerTemplatesNames
+            $MainInnerTemplatesLocations = $innerTemplatesLocations
             foreach ($fileInfo in $FolderFiles) { # We loop over each file in the folder.
                 $isLastFile = $fileInfo -eq $lastFile
                 $matchingGroups =
@@ -561,6 +572,8 @@ Each test script has access to a set of well-known variables:
                     } else {
                         $InnerTemplates = $mainInnerTemplates
                         $InnerTemplatesText = $mainInnerTemplatesText
+                        $InnerTemplatesNames = $MainInnerTemplatesNames
+                        $innerTemplatesLocations = $MainInnerTemplatesLocations
                     }
                     if ($InnerTemplates.Count) {
                         $anyProblems = $false
