@@ -1,0 +1,127 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.1272.37030",
+      "templateHash": "10564275694562029269"
+    }
+  },
+  "parameters": {
+    "budgetAmount": {
+      "type": "int"
+    },
+    "budgetActualThreshold": {
+      "type": "int"
+    },
+    "budgetForecastThreshold": {
+      "type": "int"
+    },
+    "budgetStartDate": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "budgetDeploy",
+      "location": "[deployment().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "amount": {
+            "value": "[parameters('budgetAmount')]"
+          },
+          "actualThreshold": {
+            "value": "[parameters('budgetActualThreshold')]"
+          },
+          "forecastThreshold": {
+            "value": "[parameters('budgetForecastThreshold')]"
+          },
+          "startDate": {
+            "value": "[parameters('budgetStartDate')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.1272.37030",
+              "templateHash": "9897258113487664291"
+            }
+          },
+          "parameters": {
+            "startDate": {
+              "type": "string"
+            },
+            "amount": {
+              "type": "int"
+            },
+            "forecastThreshold": {
+              "type": "int"
+            },
+            "actualThreshold": {
+              "type": "int"
+            },
+            "contactEmails": {
+              "type": "array",
+              "defaultValue": []
+            },
+            "contactRoles": {
+              "type": "array",
+              "defaultValue": [
+                "Owner",
+                "Contributor"
+              ]
+            },
+            "contactGroups": {
+              "type": "array",
+              "defaultValue": []
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Consumption/budgets",
+              "apiVersion": "2021-10-01",
+              "name": "[format('budget-{0}', subscription().displayName)]",
+              "properties": {
+                "timePeriod": {
+                  "startDate": "[parameters('startDate')]"
+                },
+                "timeGrain": "Monthly",
+                "amount": "[parameters('amount')]",
+                "category": "Cost",
+                "notifications": {
+                  "NotificationForExceededBudget1": {
+                    "enabled": true,
+                    "operator": "GreaterThan",
+                    "threshold": "[parameters('forecastThreshold')]",
+                    "thresholdType": "Forecasted",
+                    "contactEmails": "[parameters('contactEmails')]",
+                    "contactRoles": "[parameters('contactRoles')]",
+                    "contactGroups": "[parameters('contactGroups')]"
+                  },
+                  "NotificationForExceededBudget2": {
+                    "enabled": true,
+                    "operator": "GreaterThan",
+                    "threshold": "[parameters('actualThreshold')]",
+                    "contactEmails": "[parameters('contactEmails')]",
+                    "contactRoles": "[parameters('contactRoles')]",
+                    "contactGroups": "[parameters('contactGroups')]"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
