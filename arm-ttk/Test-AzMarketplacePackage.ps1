@@ -1,4 +1,4 @@
-function Test-AzMarketplaceTemplatelse {
+function Test-AzMarketplaceTemplate {
     <#    
     .Synopsis
 Runs the tests for a marketplace package.
