@@ -45,7 +45,7 @@ $deployments    = Find-JsonContent -InputObject $TemplateObject -Key type -Value
 
 $ignoredRanges = 
     @() + @(
-        if ($paramsSection.Index -and $paramSection.Length) {
+        if ($paramsSection.Index -and $paramsSection.Length) {
             $paramsSection.Index..($paramsSection.Index + $paramsSection.Length)
         }
     ) + @(
