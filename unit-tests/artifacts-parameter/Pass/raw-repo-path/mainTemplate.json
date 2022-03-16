@@ -4,7 +4,9 @@
     "parameters": {
         "_artifactsLocation": {
             "type": "securestring", //this type is ok, so is the defaultValue (if you pass in the params)
-            "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/sample-path-for-unit-tests-do-not-change/"
+            // unit tests can't do this yet
+            //"defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/sample-path-for-unit-tests-do-not-change/"
+            "defaultValue": "[deployment().properties.templateLink.uri]"
         },
         "_artifactsLocationSasToken": {
             "type": "securestring",
