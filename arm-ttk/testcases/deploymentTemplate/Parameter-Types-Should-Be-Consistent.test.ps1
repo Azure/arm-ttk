@@ -19,17 +19,38 @@ $IsInnerTemplate
 )
 
 
-if ($IsInnerTemplate) { return } # If we are in an inner template, return.
+if ($IsInnerTemplate) { return }   # If we are evaluating an inner template, return (this test should run once per file)
 
-foreach ($prop in $TemplateObject.parameters.PSObject.properties) {  # Walk over all parameters in the parameterName
-    $parameterName = $prop.Name
-    $parameterType = $prop.Value.Type
-    foreach ($inner in $innerTemplates) { # then walk over each template
-        if ($inner.template.parameters.($prop.Name).type -ne $parameterType) {  # If the parameter type differs
-            # write an error.
-            Write-Error -ErrorId Inconsistent.Parameter -Message "Parameter '$parameterName' is inconsistently used in inner template '$($inner.ParentObject[0].name)'" -TargetObject ([PSCustomObject]@{
-                JSONPath = "parameters.$parameterName"
-            })
+# Find the list of original inner templates (using $OriginalTemplateObject)
+$originalInnerTemplates = @(Find-JsonContent -InputObject $OriginalTemplateObject -Key template |
+    Where-Object { $_.expressionEvaluationOptions.scope -eq 'inner' } |
+    Sort-Object JSONPath -Descending)
+    
+
+# Walk over each inner template
+foreach ($inner in $originalInnerTemplates) {
+    # Then walk over each parameter passed to that template
+    foreach ($innerTemplateParam in $inner.ParentObject[0].properties.parameters.psobject.properties) {
+        $parameterName = $innerTemplateParam.Name
+        
+        $mappedParameterName = # Determine what external parameter this template parameter is mapped to.
+            $innerTemplateParam.Value | 
+            ?<ARM_Parameter> -Extract | 
+            Select-Object -ExpandProperty ParameterName
+
+        # Find the type of the inner template
+        $innerTemplateParameterType = $inner.template.parameters.$parameterName.type
+
+        foreach ($parent in $inner.ParentObject) { # Walk up the list of parent objects until
+            if ($parent.parameters.$mappedParameterName.type -and  # We find this parameter defined
+                $parent.parameters.$mappedParameterName.type -ne $innerTemplateParameterType # with a different type.
+            ) {
+                # If this is the case, write an error
+                Write-Error -ErrorId Inconsistent.Parameter -Message "Parameter '$parameterName' is inconsistently used in inner template '$($inner.ParentObject[0].name)'" -TargetObject ([PSCustomObject]@{
+                    JSONPath = $inner.JSONPath + ".parameters.$parameterName"
+                })
+                break # and then stop processing, because we only wish to compare this against the immediate parent template.
+            }
         }
     }
 }
