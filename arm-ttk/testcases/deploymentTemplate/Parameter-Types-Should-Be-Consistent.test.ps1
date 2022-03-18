@@ -9,6 +9,10 @@ param(
 [PSObject]
 $TemplateObject,
 
+# The original template object, without any modifications ($TemplateObject has replaced any inner templates with blanks).
+[PSObject]
+$OriginalTemplateObject,
+
 # The list of inner templates
 [PSObject[]]
 $InnerTemplates,
