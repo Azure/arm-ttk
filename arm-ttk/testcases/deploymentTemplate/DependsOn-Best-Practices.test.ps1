@@ -1,6 +1,6 @@
 ﻿<#
 .Synopsis
-    Ensures DependsOn does not use if()
+    Ensures DependsOn does not use if() statement
 .Description
     Ensures resources with DependsOn do not use 'if' in their subexpression.
 #>
