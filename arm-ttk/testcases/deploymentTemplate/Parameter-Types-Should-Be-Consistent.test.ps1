@@ -5,11 +5,11 @@
     Ensures Parameter Types are Consistently the same within a deployment template and any inner templates
 #>
 param(
-# The template object
+# The template object, with inline templates removed to keep the proper scope of tests when parsing - could be the mainTemplate.json or a nested template.
 [PSObject]
 $TemplateObject,
 
-# The original template object, without any modifications ($TemplateObject has replaced any inner templates with blanks).
+# The original mainTemplate.json object, without any modifications - nested templates are still inline ($TemplateObject has replaced any inner templates with blanks).
 [PSObject]
 $OriginalTemplateObject,
 
@@ -50,7 +50,7 @@ foreach ($inner in $originalInnerTemplates) {
                 $parent.parameters.$mappedParameterName.type -ne $innerTemplateParameterType # with a different type.
             ) {
                 # If this is the case, write an error
-                Write-Error -ErrorId Inconsistent.Parameter -Message "Parameter '$parameterName' is inconsistently used in inner template '$($inner.ParentObject[0].name)'" -TargetObject ([PSCustomObject]@{
+                Write-Error -ErrorId Inconsistent.Parameter -Message "Type Mismatch: Parameter '$parameterName' in nested template '$($inner.ParentObject[0].name)' is defined as $innerTemplateParameterType, but the parent template defines it as $($parent.parameters.$mappedParameterName.type))." -TargetObject ([PSCustomObject]@{
                     JSONPath = $inner.JSONPath + ".parameters.$parameterName"
                 })
                 break # and then stop processing, because we only wish to compare this against the immediate parent template.
