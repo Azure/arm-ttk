@@ -17,7 +17,7 @@
                 },
                 "mode": "Incremental",
                 "parameters": {
-                    "secret": {
+                    "secretChild": {
                         "value": "[parameters('secret')]"
                     }
                 },
@@ -25,11 +25,10 @@
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
                     "parameters": {
-                        "secret": {
+                        "secretChild": {
                             "type": "secureString"
                         }
                     },
-                    "variables": {},
                     "resources": [
                         {
                             "name": "grandchild",
@@ -41,31 +40,26 @@
                                 },
                                 "mode": "Incremental",
                                 "parameters": {
-                                    "secret": {
-                                        "value": "[parameters('secret')]"
+                                    "secretGrandChild": {
+                                        "value": "[parameters('secretChild')]"
                                     }
                                 },
                                 "template": {
                                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                                     "contentVersion": "1.0.0.0",
                                     "parameters": {
-                                        "secret": {
+                                        "secretGrandChild": {
                                             "type": "secureString"
                                         }
                                     },
-                                    "variables": {},
-                                    "resources": [
-                                    ],
-                                    "outputs": {}
+                                    "resources": [ ]
                                 }
                             }
                         }
 
-                    ],
-                    "outputs": {}
+                    ]
                 }
             }
         }
-    ],
-    "outputs": {}
+    ]
 }
