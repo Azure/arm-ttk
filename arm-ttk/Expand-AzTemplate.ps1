@@ -341,6 +341,9 @@ function Expand-AzTemplate
                 } else {
                     Write-Error "Could not extract inner templates for '$TemplatePath'." -ErrorId InnerTemplate.Extraction.Error
                 }
+            } else {
+                $originalTemplateText = $TemplateText
+                $OriginalTemplateObject = $TemplateObject   
             }
             
             
