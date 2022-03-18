@@ -20,6 +20,7 @@ $IsInnerTemplate
 
 
 if ($IsInnerTemplate) { return }   # If we are evaluating an inner template, return (this test should run once per file)
+if (-not $OriginalTemplateObject) { return} # If there was no original template object, then there is nothing to check.
 # Find the list of original inner templates (using $OriginalTemplateObject)
 $originalInnerTemplates = @(Find-JsonContent -InputObject $OriginalTemplateObject -Key template |
     Where-Object { $_.expressionEvaluationOptions.scope -eq 'inner' } |
