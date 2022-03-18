@@ -147,7 +147,7 @@ function Expand-AzTemplate
                 'MainTemplateResources','MainTemplateVariables','MainTemplateParameters', 'MainTemplateOutputs', 'TemplateMetadata',
                 'isParametersFile', 'ParameterFileName', 'ParameterObject', 'ParameterText',
                 'InnerTemplates', 'InnerTemplatesText', 'InnerTemplatesNames','InnerTemplatesLocations','ParentTemplateText', 'ParentTemplateObject',
-                'ExpandedTemplateText', 'ExpandedTemplateObject'
+                'ExpandedTemplateText', 'ExpandedTemplateObject','OriginalTemplateText','OriginalTemplateObject'
 
             foreach ($_ in $WellKnownVariables) {
                 $ExecutionContext.SessionState.PSVariable.Set($_, $null)
@@ -327,6 +327,7 @@ function Expand-AzTemplate
             if ($innerTemplates) {
                 $anyProblems = $false
                 $originalTemplateText = "$TemplateText"
+                $OriginalTemplateObject = $TemplateObject
                 foreach ($it in $innerTemplates) {
                     $foundInnerTemplate = $it | Resolve-JSONContent -JsonText $TemplateText
                     if (-not $foundInnerTemplate) { $anyProblems = $true; break }
