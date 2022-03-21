@@ -2,11 +2,13 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {        
-        "testBoolean": {
-            "type": "bool",
-            "defaultValue": false,
-            "metadata":{
-                "description": "A Boolean Parameter"
+        "swarmRootdiskSize": {
+            "type": "int",
+            "minValue": 30,
+            "maxValue": 2048,
+            "defaultValue": 30,
+            "metadata": {
+                "description": "Please select the size of the data disk you wish to deploy (value is integer GB)."
             }
         },
         "location": {

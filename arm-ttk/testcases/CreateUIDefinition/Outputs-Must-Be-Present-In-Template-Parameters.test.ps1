@@ -46,8 +46,6 @@ if ($IsInnerTemplate) {
     return
 }
 
-
-
 # First, make sure CreateUIDefinition has outputs
 if (-not $CreateUIDefinitionObject.parameters.outputs) {
     Write-Error "CreateUIDefinition is missing the .parameters.outputs property" -ErrorId CreateUIDefinition.Missing.Outputs     # ( write an error if it doesn't)
@@ -64,8 +62,6 @@ foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk th
             continue 
     }
 
-    
-    
     # If the output name was not declared in the TemplateObject
     if (-not $TemplateObject.parameters.$outputName) {
         # write an error
@@ -78,7 +74,7 @@ foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk th
         if ($AllowedFunctionInOutput) {
             foreach ($af in $AllowedFunctionInOutput.GetEnumerator()) {
                 if ($outputParameterType -eq $af.Key -and $firstOutputFunction -notin $af.Value) {
-                    Write-Warning "output $outputName does not return the expected type '$outputParameterType'" -ErrorId CreateUIDefinition.Output.Incorrect -TargetObject $parameterInfo.outputs
+                    Write-Error "output $outputName does not return the expected type '$outputParameterType'" -ErrorId CreateUIDefinition.Output.Incorrect -TargetObject $parameterInfo.outputs
                 }
             }
         }       
