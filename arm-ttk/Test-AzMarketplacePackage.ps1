@@ -33,7 +33,9 @@ Test-AzMarketplacePackage validates a package to verify if it passes all the min
         "providers_apiVersions-Is-Not-Permitted",
         "ResourceIds-should-not-contain",
         "Template-Should-Not-Contain-Blanks",
-        "VM-Images-Should-Use-Latest-Version"
+        "VM-Images-Should-Use-Latest-Version",
+        "Variables-Must-Be-Referenced",
+        "URIs-Should-Be-Properly-Constructed"
     )
 
     # these tests should only trigger a warning, not a "failure"
