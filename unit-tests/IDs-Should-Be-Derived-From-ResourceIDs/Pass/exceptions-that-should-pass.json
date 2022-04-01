@@ -71,7 +71,12 @@
 					"workerSizeId": "some data value", // Microsoft.Web/serverFarms (older apiVersions)
 					"detector": {
 						"id": "someDetectorID"
-					}
+					},
+					"locations": [
+						{
+							"id": "westus"
+						}
+					]
 				},
 
 				"tags": {
