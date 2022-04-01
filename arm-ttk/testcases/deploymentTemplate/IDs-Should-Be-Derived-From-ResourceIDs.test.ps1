@@ -62,8 +62,9 @@ foreach ($id in $ids) {
         "groupId",                     # Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints
         "sid",                         # Microsoft.Sql/servers/administrators/activeDirectory
         "ruleId",                      # Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies
-        "deploymentSpecId"             # Microsoft.NetApp/netAppAccounts/volumeGroups
-        "detector.id"                  # microsoft.alertsmanagement/smartdetectoralertrules
+        "deploymentSpecId",            # Microsoft.NetApp/netAppAccounts/volumeGroups
+        "detector.id",                 # microsoft.alertsmanagement/smartdetectoralertrules
+        "locations\[\d+\].id"          # Microsoft.insights/webtests
     )
 
     $exceptionRegex = 
