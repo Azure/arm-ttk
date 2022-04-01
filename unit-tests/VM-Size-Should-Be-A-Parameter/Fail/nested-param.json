@@ -1,0 +1,36 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "_artifactsLocation": {
+      "type": "string"
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring"
+    }
+  },
+  "variables": {
+    "vmTemplateLink": "[concat(parameters('_artifactsLocation'),'common/vm.json', parameters('_artifactsLocationSasToken'))]"
+  },
+  "resources": [
+    {
+      "name": "Deploy_VM",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('vmTemplateLink')]"
+        },
+        "parameters": {
+          "vmSize": {
+            "value": "Standard_D2_v3"
+          }
+        }
+      }
+    }
+  ]
+}
