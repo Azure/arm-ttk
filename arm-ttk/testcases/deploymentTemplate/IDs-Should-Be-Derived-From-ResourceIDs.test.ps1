@@ -63,9 +63,15 @@ foreach ($id in $ids) {
         "sid",                         # Microsoft.Sql/servers/administrators/activeDirectory
         "ruleId",                      # Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies
         "deploymentSpecId"             # Microsoft.NetApp/netAppAccounts/volumeGroups
+        "detector.id"                  # microsoft.alertsmanagement/smartdetectoralertrules
     )
 
-    if ($exceptions -contains $myIdFieldName) {
+    $exceptionRegex = 
+        "(?>" + (@(foreach ($ex in $exceptions) {
+            $ex.Replace(".", "\.")
+        }) -join '|') + ")$"
+
+    if ("$($id.JSONPath)" -match $exceptionRegex) {
         # We're checking resource ids, not tenant IDs
         continue
     }
