@@ -68,7 +68,10 @@
 					"tenantId": "some data value", // Common Property name
 					"timezoneId": "some data value", // Microsoft.SQL/managedInstances
 					"vlanId": "some data value", // Unique Id to establish peering when setting up an ExpressRoute circuit
-					"workerSizeId": "some data value" // Microsoft.Web/serverFarms (older apiVersions)
+					"workerSizeId": "some data value", // Microsoft.Web/serverFarms (older apiVersions)
+					"detector": {
+						"id": "someDetectorID"
+					}
 				},
 
 				"tags": {
