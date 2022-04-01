@@ -135,10 +135,10 @@ if ($emptyItems) {  # If we found empty items
                 $emptyPropertyName -match "\s{0,}\/subscriptions\/"){ # a resourceId starts with /subscriptions/
                 continue
             }
-            $lineNumber = @($lineBreaks | ? { $_.Index -lt $emptyItem.Index }).Count + 1
+            $lineNumber = @($lineBreaks | Where-Object { $_.Index -lt $emptyItem.Index }).Count + 1
             $targetObject = $emptyItem.PsObject.Copy()
             $targetObject | Add-Member -MemberType NoteProperty -Name lineNumber -Value $lineNumber
-            Write-Error "Empty property: $emptyItem found on line: $lineNumber" -TargetObject $targetObject
+            Write-Error "Empty property: $emptyItem" -TargetObject $targetObject
         } 
     }
 }
