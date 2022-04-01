@@ -1,0 +1,65 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "secret": {
+            "type": "secureString"
+        }
+    },
+    "resources": [
+        {
+            "name": "child",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                    "secretChild": {
+                        "value": "[parameters('secret')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "secretChild": {
+                            "type": "secureString"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "name": "grandchild",
+                            "type": "Microsoft.Resources/deployments",
+                            "apiVersion": "2021-04-01",
+                            "properties": {
+                                "expressionEvaluationOptions": {
+                                    "scope": "inner"
+                                },
+                                "mode": "Incremental",
+                                "parameters": {
+                                    "secretGrandChild": {
+                                        "value": "[parameters('secretChild')]"
+                                    }
+                                },
+                                "template": {
+                                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                    "contentVersion": "1.0.0.0",
+                                    "parameters": {
+                                        "secretGrandChild": {
+                                            "type": "secureString"
+                                        }
+                                    },
+                                    "resources": [ ]
+                                }
+                            }
+                        }
+
+                    ]
+                }
+            }
+        }
+    ]
+}
