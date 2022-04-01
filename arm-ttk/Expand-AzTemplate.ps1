@@ -199,8 +199,11 @@ function Expand-AzTemplate
                 $templateFile =  $TemplateText = $templateObject = $TemplateFullPath = $templateFileName = $null
             } else {
                 #*$CreateUIDefinitionFullPath (the path to CreateUIDefinition.json)
-                $createUiDefinitionFullPath = Join-Path -childPath 'createUiDefinition.json' -Path $templateFolder
-                if (Test-Path $createUiDefinitionFullPath) {
+                $createUiDefinitionFullPath = 
+                    Get-ChildItem -Path $templateFolder | 
+                    Where-Object Name -eq 'createUiDefinition.json' | 
+                    Select-Object -ExpandProperty FullName
+                if ($createUiDefinitionFullPath -and (Test-Path $createUiDefinitionFullPath)) {
                     #*$CreateUIDefinitionText (the text contents of CreateUIDefinition.json)
                     $createUIDefinitionText = [IO.File]::ReadAllText($createUiDefinitionFullPath)
                     #*$CreateUIDefinitionObject (the createuidefinition text, converted from json)
