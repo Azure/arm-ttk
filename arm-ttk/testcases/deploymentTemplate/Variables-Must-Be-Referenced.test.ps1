@@ -2,7 +2,7 @@
 .Synopsis
     Ensures that all variables are referenced 
 .Description
-    Ensures that all variables declared in a template are in elsewhere in the template.
+    Ensures that all variables declared in a template are referenced elsewhere in the template.
 #>
 param(
     [Parameter(Mandatory = $true, Position = 0)]
