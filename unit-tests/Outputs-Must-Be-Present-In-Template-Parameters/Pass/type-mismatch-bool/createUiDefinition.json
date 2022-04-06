@@ -1,0 +1,55 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [],
+        "steps": [
+            {
+                "name": "swarmConfig",
+                "label": "swarmConfig",
+                "bladeTitle": "app Configuration",
+                "elements": [
+                    {
+                        "name": "deployApp",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Deploy App",
+                        "defaultValue": "true",
+                        "toolTip": "Optionally select to deploy App",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "true",
+                                    "value": "yes"
+                                },
+                                {
+                                    "label": "false",
+                                    "value": "no"
+                                }
+                            ],
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "rootDiskSize",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Swarm instance root disk size",
+                        "defaultValue": "30",
+                        "toolTip": "Provide the size of the Swarm root disk - The size (GB) of the Managed disk.",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^([3-9]\\d{1}\\d*|\\d{3}\\d*)$",
+                            "validationMessage": "Value must be numeric and greater than or equal to 30"
+                        },
+                        "visible": true
+                    }
+                ]
+            }
+        ],
+        // TODO: move this test back to FAIL folder when #629 is properly fixed
+        "outputs": {
+            "location": "[location()]",
+            "testBoolean": "[int('1')]"
+        }
+    }
+}
