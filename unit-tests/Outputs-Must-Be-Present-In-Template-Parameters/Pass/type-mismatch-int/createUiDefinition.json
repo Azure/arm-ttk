@@ -47,6 +47,7 @@
             }
         ],
         "outputs": {
+            // TODO: move this test back to FAIL folder when #629 is properly fixed
             "location": "[location()]",
             "swarmRootDiskSize": "[steps('SwarmConfig').vmSettings.rootDiskSize]"
         }

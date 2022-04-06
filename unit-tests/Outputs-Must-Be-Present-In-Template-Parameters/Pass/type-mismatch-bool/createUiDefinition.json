@@ -46,6 +46,7 @@
                 ]
             }
         ],
+        // TODO: move this test back to FAIL folder when #629 is properly fixed
         "outputs": {
             "location": "[location()]",
             "testBoolean": "[int('1')]"
