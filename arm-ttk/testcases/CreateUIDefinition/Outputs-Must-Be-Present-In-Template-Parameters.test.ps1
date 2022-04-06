@@ -37,7 +37,7 @@ $IsInnerTemplate,
 [Collections.IDictionary]
 $AllowedFunctionInOutput = $(@{
     int = 'int', 'min', 'max', 'div', 'add', 'mod', 'mul', 'sub', 'copyIndex','length', 'coalesce'
-    bool = 'equals', 'less', 'lessOrEquals', 'greater', 'greaterOrEquals', 'and', 'or','not', 'true', 'false', 'contains','empty','coalesce','if'
+    bool = 'bool', 'equals', 'less', 'lessOrEquals', 'greater', 'greaterOrEquals', 'and', 'or','not', 'true', 'false', 'contains','empty','coalesce','if'
 })
 )
 
@@ -68,6 +68,22 @@ foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk th
         Write-Error "output $outputName does not exist in template.parameters" -ErrorId CreateUIDefinition.Output.Missing.From.MainTemplate -TargetObject $parameterInfo.outputs
     }
     
+    # check that the type of the output matches the type declared in the template, note that the output type may be set on the control itself through the same expression
+<#
+
+    TODO:
+    Removing the test for now... there are some controls in CUID that allow setting the value explicitly
+    For these controls we need to check that value property for the allowed functions or type
+    Some of these controls are arrays of values, so we would have to look at each array element for the allowedFunctions
+    Cases to consider:
+    - Checkbox control already returns a bool
+    - DropDown control - array of objects that contain a value property
+    - OptionsGroup - array of objects that contain a value property
+    - slider - returns an int
+
+    Note that these controls can be complex and nested and if the output value does not comply, only then do we need to check the control value for the output
+    With coalescing, this can be tricky.
+
     $outputParameterType = $TemplateObject.parameters.$outputName.type
     if ($outputParameterType -and $outputParameterType -ne 'string') {
         $firstOutputFunction = $output.Value | ?<ARM_Template_Function> -Extract | Select-Object -ExpandProperty FunctionName
@@ -79,4 +95,5 @@ foreach ($output in $parameterInfo.outputs.psobject.properties) { # Then walk th
             }
         }       
     }
+#>
 }
