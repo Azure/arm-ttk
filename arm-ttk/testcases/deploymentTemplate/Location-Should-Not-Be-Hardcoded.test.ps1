@@ -103,6 +103,6 @@ foreach ($locationProp in $resourceLocationProperties) {
     if (($locationProp.location -ne 'global') -and -not (
         $locationProp.location | ?<ARM_Template_Expression>
     )) {
-        Write-Error "Location hardcoded as '$($locationProp.location)'" -TargetObject $locationProp -ErrorId Location.Hardcoded
+        Write-Error "Location value of '$($locationProp.location)' on resource '$($locationProp.name)' must be an expression or 'global'." -TargetObject $locationProp -ErrorId Location.Hardcoded
     }
 }
