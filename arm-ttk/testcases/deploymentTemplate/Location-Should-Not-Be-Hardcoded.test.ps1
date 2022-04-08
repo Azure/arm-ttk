@@ -100,7 +100,7 @@ $resourceLocationProperties = Find-JsonContent -InputObject $TemplateObject -Key
     Where-Object JSONPath -match 'resources\[\d+\]\.location'
 
 foreach ($locationProp in $resourceLocationProperties) {
-    if ($locationProp.location -eq 'global' -or -not (
+    if (($locationProp.location -ne 'global') -and -not (
         $locationProp.location | ?<ARM_Template_Expression>
     )) {
         Write-Error "Location hardcoded as '$($locationProp.location)'" -TargetObject $locationProp -ErrorId Location.Hardcoded
