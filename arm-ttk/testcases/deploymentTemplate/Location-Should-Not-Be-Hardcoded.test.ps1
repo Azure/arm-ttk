@@ -93,3 +93,16 @@ foreach ($spotFound in $foundResourceGroupLocations) {
     }
     Write-Error "$TemplateFileName must use the location parameter, not resourceGroup().location or deployment().location (except when used as a default value in the main template)" -ErrorId Location.Parameter.Should.Be.Used -TargetObject $parameter
 }
+
+
+
+$resourceLocationProperties = Find-JsonContent -InputObject $TemplateObject -Key location |
+    Where-Object JSONPath -match 'resources\[\d+\]\.location'
+
+foreach ($locationProp in $resourceLocationProperties) {
+    if (($locationProp.location -ne 'global') -and -not (
+        $locationProp.location | ?<ARM_Template_Expression>
+    )) {
+        Write-Error "Location value of '$($locationProp.location)' on resource '$($locationProp.name)' must be an expression or 'global'." -TargetObject $locationProp -ErrorId Location.Hardcoded
+    }
+}
