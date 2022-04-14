@@ -52,6 +52,10 @@ Test-AzMarketplacePackage validates a package to verify if it passes all the min
 
     $ttkErrors
 
+    Write-Host "Please fix any failed tests flagged above. All failed tests must be fixed before submission."
+    Write-Host "In addition please review the warnings below and fix them. It is highly recommended to fix these to ensure your customers are able to use your application without issues."
+    Write-Host "For details on fixing these, please check https://aka.ms/arm-ttk-docs"    
+
     $ttkWarnings  | Where-Object Errors | ForEach-Object {
         $_.Warnings = @(foreach ($err in $_.Errors) {
                 Write-Warning -Message "$err" *>&1
