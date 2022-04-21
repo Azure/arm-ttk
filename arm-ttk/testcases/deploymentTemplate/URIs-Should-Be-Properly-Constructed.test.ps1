@@ -31,7 +31,7 @@ foreach ($found in $foundObjects) { # Walk over each found object
             ($foundBadFunction -and -not $foundUriFunction) -or 
             ($foundBadFunction.Index -lt $foundUriFunction.Index -and $foundBadFunction)
         ) {
-            Write-Error "Function'$($foundBadFunction.Groups['FunctionName'].Value)' found within '$($prop.Name)" -TargetObject $found -ErrorId "URI.Improperly.Constructed"
+            Write-Error "Function '$($foundBadFunction.Groups['FunctionName'].Value)' found within '$($prop.Name)'" -TargetObject $found -ErrorId "URI.Improperly.Constructed"
         }
     }
 }
