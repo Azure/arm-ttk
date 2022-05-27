@@ -66,7 +66,9 @@ foreach ($id in $ids) {
         "detector.id",                 # microsoft.alertsmanagement/smartdetectoralertrules
         "contentId",                   # Microsoft.Sentinel/Solutions/Metadata
         "connectorId",                 # Microsoft.Sentinel/Solutions/Analytical Rule/Metadata
-        "parentId"                     # Microsoft.Sentinel/Solutions/Metadata
+        "parentId",                    # Microsoft.Sentinel/Solutions/Metadata
+        "IllusiveIncidentId",          # Microsoft.Sentinel/Solutions/Analytical Rule/Metadata
+        "UniqueFindingId"              # Microsoft.Sentinel/Solutions/Metadata
     )
 
     $exceptionRegex =
