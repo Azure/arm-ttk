@@ -1,5 +1,5 @@
 @{
-    ModuleVersion = 0.9
+    ModuleVersion = 0.10
     ModuleToProcess = 'arm-ttk.psm1'
     Description = 'Validation tools for Azure Resource Manager Templates'
     FormatsToProcess = 'arm-ttk.format.ps1xml'
