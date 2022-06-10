@@ -1,0 +1,54 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {
+                "name": "couchbaseServices",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Couchbase Services",
+                "multiselect": true,
+                "selectAll": true,
+                "toolTip": "The services that the primary cluster will utilize",
+                "constraints": {
+                  "allowedValues": [
+                    {
+                      "label": "Data",
+                      "value": "data"
+                    },
+                    {
+                      "label": "Index",
+                      "value": "index"
+                    },
+                    {
+                      "label": "Query",
+                      "value": "query"
+                    },
+                    {
+                      "label": "Search",
+                      "value": "fts"
+                    },
+                    {
+                      "label": "Eventing",
+                      "value": "eventing"
+                    },
+                    {
+                      "label": "Analytics",
+                      "value": "analytics"
+                    },
+                    {
+                      "label": "Backup",
+                      "value": "backup"
+                    }
+                  ]
+                },
+                "visible": true
+              }
+        ],
+        "outputs": {
+            "Location": "[location()]",
+            "couchbaseServices": "[basics('couchbaseServices')]"
+        }
+    }
+}

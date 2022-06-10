@@ -97,24 +97,30 @@ foreach ($av in $allowedValues) { # Walk thru each thing we find.
             }
     } 
 
+    
     if ($MainTemplateParam.defaultValue -and # If the main template has a default value
-        $MainTemplateParam.defaultValue -replace '\s' -ne '[resourceGroup().location]' -and # and it's not [resourceGroup().location]
-        $reallyAllowedValues -notcontains $MainTemplateParam.defaultValue) { # and the allowedValues list doesn't contain it.
+        $MainTemplateParam.defaultValue -replace '\s' -ne '[resourceGroup().location]') { # and it's not [resourceGroup().location] 
+
+        # Walk thru each potential value in the main template parameter.
+        foreach ($mainTemplateDefault in $MainTemplateParam.defaultValue) {
+            # skip each individual value that is really allowed.
+            if ($reallyAllowedValues -contains $mainTemplateDefault) { continue }
         
         
-        $foundDefaultValue = $false
-        :CheckNextValue # then we want to check each value in order to see if it's permitted.
-            foreach ($rv in $reallyAllowedValues) {
-                foreach ($v in $MainTemplateParam.allowedValues) {
-                    if ($v -like "*$($MainTemplateParam.defaultValue)*") { 
-                        $foundDefaultValue = $true
-                        break CheckNextValue 
+            $foundDefaultValue = $false
+            :CheckNextValue # then we want to check each value in order to see if it's permitted.
+                foreach ($rv in $reallyAllowedValues) {
+                    foreach ($v in $MainTemplateParam.allowedValues) {
+                        if ($v -like "*$($MainTemplateParam.defaultValue)*") { 
+                            $foundDefaultValue = $true
+                            break CheckNextValue 
+                        }
                     }
+                    
                 }
-                
-            }
-        if (-not $foundDefaultValue) {
-            Write-Error "CreateUIDefinition parameter '$paramName' default value is not allowed in the main template parameter '$($theOutput.Name)'" -ErrorId Allowed.Value.Default.Mismatch
+            if (-not $foundDefaultValue) {
+                Write-Error "CreateUIDefinition parameter '$paramName' default value '$mainTemplateDefault' is not allowed in the main template parameter '$($theOutput.Name)'" -ErrorId Allowed.Value.Default.Mismatch
+            }            
         }
     }
 }
