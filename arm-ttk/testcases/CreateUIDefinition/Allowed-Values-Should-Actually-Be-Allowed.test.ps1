@@ -119,7 +119,7 @@ foreach ($av in $allowedValues) { # Walk thru each thing we find.
                     
                 }
             if (-not $foundDefaultValue) {
-                Write-Error "CreateUIDefinition parameter '$paramName' default value is not allowed in the main template parameter '$($theOutput.Name)'" -ErrorId Allowed.Value.Default.Mismatch
+                Write-Error "CreateUIDefinition parameter '$paramName' default value '$mainTemplateDefault' is not allowed in the main template parameter '$($theOutput.Name)'" -ErrorId Allowed.Value.Default.Mismatch
             }            
         }
     }
