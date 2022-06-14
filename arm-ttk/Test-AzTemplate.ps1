@@ -154,8 +154,6 @@ Each test script has access to a set of well-known variables:
 
     begin {
         
-        Compare-TTKVersion
-        
         # First off, let's get all of the built-in test scripts.
         $testCaseSubdirectory = 'testcases'
         $myLocation =  $MyInvocation.MyCommand.ScriptBlock.File
