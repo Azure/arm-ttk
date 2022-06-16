@@ -26,18 +26,29 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
 . $psScriptRoot\ttk.irregular.ps1
 
 # check for a newer version
-function ExtractVersion($s){
-
-    $v = ($s.Replace("@{", "").Replace("}", "") | ConvertFrom-StringData).ModuleVersion
+function ExtractVersion($s) {
+    $a = @()
+    $v = ""
+    try{
+        $v = ($s.Replace("@{", "").Replace("}", "") | ConvertFrom-StringData).ModuleVersion
+    } catch {}
     $a = $v.Split('.')
-    $major = [int]$a[0]
-    $minor = [int]$a[1]
-    return @{"major" = $major; "minor" = $minor}
+    if ($a.length -gt 1) {
+        $major = [int]$a[0]
+        $minor = [int]$a[1]
+        return @{"major" = $major; "minor" = $minor }
+    }
+    else {
+        return @{"major" = 0; "minor" = 0 }
+    }
 }
 
-$latestUri = "https://aka.ms/arm-ttk-version"
+$latestUri = "https://aka.msd/arm-ttk-version"
 
-$r = (Invoke-WebRequest $latestUri).Content
+try {
+    $r = (Invoke-WebRequest $latestUri).Content
+} catch {}
+
 $latestVersion = ExtractVersion $r
 
 $psd = Get-Content -path "$psScriptRoot\arm-ttk.psd1" -raw
