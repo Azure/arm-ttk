@@ -46,6 +46,6 @@ $installedVersion = ExtractVersion $psd
 if ($installedVersion.major -lt $latestVersion.major -or 
 ($installedVersion.minor -lt $latestVersion.minor -and $installedVersion.major -eq $latestVersion.major)) {
     Write-Host "A newer version of the ARM-TTK is available at: https://github.com/Azure/arm-ttk/releases" -ForegroundColor yellow
-    Write-Host "Current Version: $($installedVersion.major).$($installedVersion.minor)" -ForegroundColor yellow
+    Write-Host "Installed Version: $($installedVersion.major).$($installedVersion.minor)" -ForegroundColor yellow
     Write-Host "Latest Version: $($latestVersion.major).$($latestVersion.minor)" -ForegroundColor yellow
 }
