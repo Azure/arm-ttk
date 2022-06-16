@@ -1,5 +1,4 @@
-﻿function Update-TTKCache
-{
+﻿function Update-TTKCache {
     <#
     .Synopsis
         Updates the TTK Cache
@@ -11,10 +10,10 @@
     param()
 
     $MyInvocation.MyCommand.ScriptBlock.File | 
-        Split-Path | 
-        Join-Path -ChildPath cache |
-        Get-ChildItem -Filter *.init.cache.ps1 |
-        ForEach-Object {
-            & $_.Fullname
-        }
+    Split-Path | 
+    Join-Path -ChildPath cache |
+    Get-ChildItem -Filter *.init.cache.ps1 |
+    ForEach-Object {
+        & $_.Fullname
+    }
 }
