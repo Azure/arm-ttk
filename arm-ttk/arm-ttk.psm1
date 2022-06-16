@@ -43,7 +43,7 @@ function ExtractVersion($s) {
     }
 }
 
-$latestUri = "https://aka.msd/arm-ttk-version"
+$latestUri = "https://aka.ms/arm-ttk-version"
 
 try {
     $r = (Invoke-WebRequest $latestUri).Content
