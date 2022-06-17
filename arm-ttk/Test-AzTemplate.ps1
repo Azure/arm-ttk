@@ -385,7 +385,7 @@ Each test script has access to a set of well-known variables:
                                     }
                                 " NestedTemplate $($testOutputGroup.Name) [ Lines $InnerTemplateStartLine - $InnerTemplateEndLine ]"
                             } else {''}
-                        $displayGroup = if ($innerGroup) { $innerGroup } else { $GroupName }
+                        $displayGroup = if ($innerGroup) { $innerGroup } else { $dq }
                         $null= foreach ($testOut in $testOutputGroup.Group) {
                             if ($testOut -is [Exception] -or $testOut -is [Management.Automation.ErrorRecord]) {
                                 $testErrors.Add($testOut)
