@@ -68,7 +68,8 @@ foreach ($id in $ids) {
         "connectorId",                 # Microsoft.Sentinel/Solutions/Analytical Rule/Metadata
         "parentId",                    # Microsoft.Sentinel/Solutions/Metadata
         "IllusiveIncidentId",          # Microsoft.Sentinel/Solutions/Analytical Rule/Metadata
-        "UniqueFindingId"              # Microsoft.Sentinel/Solutions/Metadata
+        "UniqueFindingId",             # Microsoft.Sentinel/Solutions/Metadata
+        "schemaId"                     # Microsoft.ApiManagement/service/apis/operations
     )
 
     $exceptionRegex =
