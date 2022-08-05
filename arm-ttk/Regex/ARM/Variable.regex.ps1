@@ -16,7 +16,7 @@ $safeVariable =
         $Variable -replace # replace whitespace
             '\s','\s' -replace # then replace pound sign
             '#', '\#' -replace # then replace starting dollar sign
-            '^\$', '\$'
+            '\$', '\$'
     } else {
         $Variable # otherwise, match any variable.
     }
