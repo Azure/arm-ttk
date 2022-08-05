@@ -36,40 +36,50 @@ foreach ($id in $ids) {
 
     # these properties are exempt, since they are not actually resourceIds
     $exceptions = @(
-        "appId",                       # Microsoft.Insights
-        "clientId",                    # Microsoft.BotService - common var name
-        "DataTypeId",                  # Microsoft.OperationalInsights/workspaces/dataSources
-        "defaultMenuItemId",           # Microsoft.Portal/dashboards - it's a messy resource
-        "keyVaultSecretId",            # Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
-        "keyVaultId",                  # KeyVaultIDs
-        "keyId",                       # Microsoft.Cdn/profiles urlSigningKeys
-        "objectId",                    # Common Property name
-        "menuId",                      # Microsoft.Portal/dashboards
-        "nodeAgentSkuId",              # Microsoft.Batch/batchAccounts/pools
-        "policyDefinitionReferenceId", # Microsft.Authorization/policySetDefinition unique Id used when setting up a PolicyDefinitionReference
-        "servicePrincipalClientId",    # common var name
-        "StartingDeviceID",            # SQLIaasVMExtension > settings/ServerConfigurationsManagementSettings/SQLStorageUpdateSettings
-        "subscriptionId",              # Microsoft.Cdn/profiles urlSigningKeys
-        "SyntheticMonitorId",          # Microsoft.Insights/webtests
-        "targetProtectionContainerId", # Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings (yes really)
-        "targetWorkerSizeId",          # Microsoft.Web/serverFarms (later apiVersions)
-        "tenantId",                    # Common Property name
-        "timezoneId",                  # Microsoft.SQL/managedInstances
-        "vlanId",                      # Unique Id to establish peering when setting up an ExpressRoute circuit
-        "workerSizeId",                # Microsoft.Web/serverFarms (older apiVersions)
-        "metricId",                    # Microsoft.ServiceBus/namespaces
-        "requestedServiceObjectiveId", # Microsoft.Sql/servers/databases
-        "groupId",                     # Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints
-        "sid",                         # Microsoft.Sql/servers/administrators/activeDirectory
-        "ruleId",                      # Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies
-        "deploymentSpecId"             # Microsoft.NetApp/netAppAccounts/volumeGroups
-        "detector.id",                 # microsoft.alertsmanagement/smartdetectoralertrules
-        "contentId",                   # Microsoft.Sentinel/Solutions/Metadata
-        "connectorId",                 # Microsoft.Sentinel/Solutions/Analytical Rule/Metadata
-        "parentId",                    # Microsoft.Sentinel/Solutions/Metadata
-        "IllusiveIncidentId",          # Microsoft.Sentinel/Solutions/Analytical Rule/Metadata
-        "UniqueFindingId",             # Microsoft.Sentinel/Solutions/Metadata
-        "schemaId"                     # Microsoft.ApiManagement/service/apis/operations
+        "appId",                            # Microsoft.Insights
+        "clientId",                         # Microsoft.BotService - common var name
+        "DataTypeId",                       # Microsoft.OperationalInsights/workspaces/dataSources
+        "defaultMenuItemId",                # Microsoft.Portal/dashboards - it's a messy resource
+        "keyVaultSecretId",                 # Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
+        "keyVaultId",                       # KeyVaultIDs
+        "keyId",                            # Microsoft.Cdn/profiles urlSigningKeys
+        "objectId",                         # Common Property name
+        "menuId",                           # Microsoft.Portal/dashboards
+        "nodeAgentSkuId",                   # Microsoft.Batch/batchAccounts/pools
+        "policyDefinitionReferenceId",      # Microsft.Authorization/policySetDefinition unique Id used when setting up a PolicyDefinitionReference
+        "servicePrincipalClientId",         # common var name
+        "StartingDeviceID",                 # SQLIaasVMExtension > settings/ServerConfigurationsManagementSettings/SQLStorageUpdateSettings
+        "subscriptionId",                   # Microsoft.Cdn/profiles urlSigningKeys
+        "SyntheticMonitorId",               # Microsoft.Insights/webtests
+        "targetProtectionContainerId",      # Microsoft.RecoveryServices/vaults/replicationFabrics/replicationProtectionContainers/replicationProtectionContainerMappings (yes really)
+        "targetWorkerSizeId",               # Microsoft.Web/serverFarms (later apiVersions)
+        "tenantId",                         # Common Property name
+        "timezoneId",                       # Microsoft.SQL/managedInstances
+        "vlanId",                           # Unique Id to establish peering when setting up an ExpressRoute circuit
+        "workerSizeId",                     # Microsoft.Web/serverFarms (older apiVersions)
+        "metricId",                         # Microsoft.ServiceBus/namespaces
+        "requestedServiceObjectiveId",      # Microsoft.Sql/servers/databases
+        "groupId",                          # Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints
+        "sid",                              # Microsoft.Sql/servers/administrators/activeDirectory
+        "ruleId",                           # Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies
+        "deploymentSpecId"                  # Microsoft.NetApp/netAppAccounts/volumeGroups
+        "detector.id",                      # microsoft.alertsmanagement/smartdetectoralertrules
+        "contentId",                        # Microsoft.Sentinel/Solutions/Metadata
+        "connectorId",                      # Microsoft.Sentinel/Solutions/Analytical Rule/Metadata
+        "parentId",                         # Microsoft.Sentinel/Solutions/Metadata
+        "IllusiveIncidentId",               # Microsoft.Sentinel/Solutions/Analytical Rule/Metadata
+        "UniqueFindingId",                  # Microsoft.Sentinel/Solutions/Metadata
+        "schemaId",                         # Microsoft.ApiManagement/service/apis/operations
+        "detection_id",                     # Microsoft.Sentinel/Solutions/Analytical Rule Id
+        "open_id",                          # Microsoft.Sentinel/Solutions/Open Id
+        "TeamsChannelID",                   # Microsoft.Sentinel/Solutions/Playbooks/Teams Channel ID
+        "SAPAuditLogMessageID",             # Microsoft.Sentinel/Solutions/Playbooks/SAP Audit Log Message ID
+        "roleDefinitionId",                 # Microsoft.Sentinel/Solutions/Playbooks/roleDefinitionId
+        "principalId",                      # Microsoft.Sentinel/Solutions/Playbooks/principalId
+        "XDRCustomerID",                    # Microsoft.Sentinel/Solutions/Playbooks/XDR Customer ID
+        "userAssignedIdentityResourceId",   # Microsoft.Sentinel/Solutions/Playbooks/userAssignedIdentityResourceId
+        "channelId",                        # Microsoft.Sentinel/Solutions/Playbooks/Channel ID
+        "extendedAceItemObjectId"           # Microsoft.Sentinel/Solutions/Playbooks/extendedAceItemObjectId
     )
 
     $exceptionRegex =
