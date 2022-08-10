@@ -10,6 +10,17 @@ param(
 $Variable = '.+?'
 )
 
+$safeVariable = 
+    # If there as a specific variable provided
+    if ($PSBoundParameters['Variable']) {
+        $Variable -replace # replace whitespace
+            '\s','\s' -replace # then replace pound sign
+            '#', '\#' -replace # then replace starting dollar sign
+            '\$', '\$'
+    } else {
+        $Variable # otherwise, match any variable.
+    }
+
 @"
 variables                       # the variables keyword
 \s?                             # optional whitespace
@@ -17,11 +28,9 @@ variables                       # the variables keyword
 \s{0,}                          # more optional whitespace
 '                               # a single quote
 (?<VariableName>                # followed by the variable name
-$($Variable -replace '\s','\s')    
+$safeVariable
 )
 '                               # a single quote
 \s{0,}                          # more optional whitespace
 \)                              # closing parenthesis
 "@
-
-
