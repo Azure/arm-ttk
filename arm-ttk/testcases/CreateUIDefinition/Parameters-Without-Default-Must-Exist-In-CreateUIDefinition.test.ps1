@@ -1,8 +1,8 @@
 ﻿<#
 .Synopsis
-    Ensure that parameters that don't have defaultValues are defined CreateUIDefinition.outuputs
+    Ensure that parameters that don't have defaultValues are defined CreateUIDefinition.outputs
 .Description
-    Ensure that parameters that don't have defaultValues are defined CreateUIDefinition.outuputs
+    Ensure that parameters that don't have defaultValues are defined CreateUIDefinition.outputs
 #>
 
 param(
