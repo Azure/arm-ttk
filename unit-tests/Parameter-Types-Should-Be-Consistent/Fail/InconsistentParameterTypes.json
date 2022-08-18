@@ -2,39 +2,91 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "secret": {
-            "type": "secureString"
-        }
+      "secret": {
+        "type": "secureString"
+      },
+      "serverDetails": {
+        "type": "array"
+      }
     },
     "resources": [
-        {
-            "name": "nestedDeployment1",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2021-04-01",
-            "properties": {
-                "expressionEvaluationOptions": {
+      {
+        "name": "nestedDeployment1",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2021-04-01",
+        "properties": {
+          "expressionEvaluationOptions": {
+            "scope": "inner"
+          },
+          "mode": "Incremental",
+          "parameters": {
+            "secret": {
+              "value": "[parameters('secret')]"
+            },
+            "serverDetails": {
+              "value": "[parameters('serverDetails')]"
+            }
+          },
+          "template": {
+            "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+              "secret": {
+                "type": "string"
+              },
+              "serverDetails": {
+                "type": "array"
+              }
+            },
+            "resources": [
+              {
+                "copy": {
+                  "name": "nestedDeployment2",
+                  "count": "[length(parameters('serverDetails'))]"
+                },
+                "type": "Microsoft.Resources/deployments",
+                "apiVersion": "2021-04-01",
+                "name": "[format('nestedDeployment2-{0}', parameters('serverDetails')[copyIndex()].hostName)]",
+                "properties": {
+                  "expressionEvaluationOptions": {
                     "scope": "inner"
-                },
-                "mode": "Incremental",
-                "parameters": {
+                  },
+                  "mode": "Incremental",
+                  "parameters": {
+                    "platformFaultDomain": {
+                      "value": "[parameters('serverDetails')[copyIndex()].platformFaultDomain]"
+                    },
+                    "hostName": {
+                      "value": "[parameters('serverDetails')[copyIndex()].hostName]"
+                    },
                     "secret": {
-                        "value": "[parameters('secret')]"
+                      "value": "[parameters('secret')]"
                     }
-                },
-                "template": {
+                  },
+                  "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
                     "parameters": {
-                        "secret": {
-                            "type": "string"
-                        }
+                      "secret": {
+                        "type": "string"
+                      },
+                      "hostName": {
+                        "type": "string"
+                      },
+                      "platformFaultDomain": {
+                        "type": "int"
+                      }
                     },
                     "variables": {},
                     "resources": [],
                     "outputs": {}
+                  }
                 }
-            }
+              }
+            ]
+          }
         }
+      }
     ],
     "outputs": {}
-}
+  }
