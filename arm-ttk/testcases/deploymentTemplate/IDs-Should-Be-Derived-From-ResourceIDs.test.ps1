@@ -79,7 +79,12 @@ foreach ($id in $ids) {
         "XDRCustomerID",                    # Microsoft.Sentinel/Solutions/Playbooks/XDR Customer ID
         "userAssignedIdentityResourceId",   # Microsoft.Sentinel/Solutions/Playbooks/userAssignedIdentityResourceId
         "channelId",                        # Microsoft.Sentinel/Solutions/Playbooks/Channel ID
-        "extendedAceItemObjectId"           # Microsoft.Sentinel/Solutions/Playbooks/extendedAceItemObjectId
+        "extendedAceItemObjectId",          # Microsoft.Sentinel/Solutions/Playbooks/extendedAceItemObjectId
+        "operationId-ANCEndpointGetById",   # Microsoft.Sentinel/Solutions/Playbooks/CiscoISE
+        "operationId-DeleteDomainById",     # Microsoft.Sentinel/Solutions/Playbooks/CiscoUmbrella
+        "operationId-GetOrganizationId",    # Microsoft.Sentinel/Solutions/Playbooks/CiscoUmbrella
+        "operationId-ProcessMetadataSearchByProcessGUID", # Microsoft.Sentinel/Solutions/Playbooks/Vmware
+        "operationId-SearchForProcessEventsByProcessGUID" # Microsoft.Sentinel/Solutions/Playbooks/Vmware        
     )
 
     $exceptionRegex =
