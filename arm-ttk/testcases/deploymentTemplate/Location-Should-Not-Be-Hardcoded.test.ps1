@@ -91,17 +91,6 @@ foreach ($spotFound in $foundResourceGroupLocations) {
     if ($spotFound.Index -in $ignoredRanges) {
         continue
     }
-    foreach ($deployment in $deployments) {
-        if ($spotFound.Index -in $deployment.Index..($deployment.Index + $deployment.Length)) {
-            if ($deployment.properties.parameters.location -eq $null) {
-                Write-Error "The location parameter must be a set" -ErrorId Location.Parameter.TypeMisMatch -TargetObject $parameter
-                continue
-            }
-            if ($deployment.properties.parameters.location.value -eq "[parameters('location')]") {
-                continue
-            }
-        }
-    }
     Write-Error "$TemplateFileName must use the location parameter, not resourceGroup().location or deployment().location (except when used as a default value in the main template)" -ErrorId Location.Parameter.Should.Be.Used -TargetObject $parameter
 }
 
