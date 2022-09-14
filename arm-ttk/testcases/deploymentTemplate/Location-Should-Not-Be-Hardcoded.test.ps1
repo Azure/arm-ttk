@@ -97,17 +97,7 @@ foreach ($spotFound in $foundResourceGroupLocations) {
                 Write-Error "The location parameter must be a set" -ErrorId Location.Parameter.TypeMisMatch -TargetObject $parameter
                 continue
             }
-            $locationParameter = $deployment.properties.parameters.location
-            if ($locationParameter -ne $null -and $locationParameter.type -ne "string") {
-                Write-Error "The location parameter must be a 'string' type in the parameter declaration `"$($locationParameter.type)`"" -ErrorId Location.Parameter.TypeMisMatch -TargetObject $parameter
-                continue
-            }
-            elseif ($locationParameter.defaultValue -ne $null -and 
-                $locationParameter.defaultValue -notmatch $LocationRegex) {
-                Write-Error "The location parameter of nested templates must not have a defaultValue property. It is `"$($locationParameter.defaultValue)`"" -ErrorId Location.Parameter.DefaultValuePresent -TargetObject $parameter
-                continue
-            }
-            else {
+            if ($deployment.properties.parameters.location.value -eq "[parameters('location')]")
                 continue
             }
         }
