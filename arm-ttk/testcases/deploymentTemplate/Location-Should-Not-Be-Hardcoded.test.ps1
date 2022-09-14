@@ -91,6 +91,23 @@ foreach ($spotFound in $foundResourceGroupLocations) {
     if ($spotFound.Index -in $ignoredRanges) {
         continue
     }
+    foreach ($deployment in $deployments) {
+        if ($spotFound.Index -in $deployment.Index..($deployment.Index + $deployment.Length)) {
+            $locationParameter = $deployment.properties.parameters.location
+            if ($locationParameter -ne $null -and $locationParameter.type -ne "string") {
+                Write-Error "The location parameter must be a 'string' type in the parameter declaration `"$($locationParameter.type)`"" -ErrorId Location.Parameter.TypeMisMatch -TargetObject $parameter
+                continue
+            }
+            else if ($locationParameter.defaultValue -ne $null -and 
+                $locationParameter.defaultValue -notmatch $LocationRegex) {
+                Write-Error "The location parameter of nested templates must not have a defaultValue property. It is `"$($locationParameter.defaultValue)`"" -ErrorId Location.Parameter.DefaultValuePresent -TargetObject $parameter
+                continue
+            }
+            else {
+                continue
+            }
+        }
+    }
     Write-Error "$TemplateFileName must use the location parameter, not resourceGroup().location or deployment().location (except when used as a default value in the main template)" -ErrorId Location.Parameter.Should.Be.Used -TargetObject $parameter
 }
 
