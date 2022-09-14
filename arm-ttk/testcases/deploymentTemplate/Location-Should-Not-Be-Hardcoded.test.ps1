@@ -93,11 +93,11 @@ foreach ($spotFound in $foundResourceGroupLocations) {
     }
     foreach ($deployment in $deployments) {
         if ($spotFound.Index -in $deployment.Index..($deployment.Index + $deployment.Length)) {
-            if ($deployment.properties.parameters.location -eq $null)
+            if ($deployment.properties.parameters.location -eq $null) {
                 Write-Error "The location parameter must be a set" -ErrorId Location.Parameter.TypeMisMatch -TargetObject $parameter
                 continue
             }
-            if ($deployment.properties.parameters.location.value -eq "[parameters('location')]")
+            if ($deployment.properties.parameters.location.value -eq "[parameters('location')]") {
                 continue
             }
         }
