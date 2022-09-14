@@ -93,8 +93,9 @@ foreach ($spotFound in $foundResourceGroupLocations) {
     }
     foreach ($deployment in $deployments) {
         if ($spotFound.Index -in $deployment.Index..($deployment.Index + $deployment.Length)) {
+            $paramsSection  = Resolve-JSONContent -JSONPath 'parameters' -JSONText $TemplateText
             $locationParameter = $deployment.properties.parameters.location
-            if ($locationParameter -eq $null) {
+            if ($locationParameter.value -eq $null) {
                 Write-Error "The location parameter must be a set" -ErrorId Location.Parameter.TypeMisMatch -TargetObject $parameter
                 continue
             }
