@@ -94,6 +94,10 @@ foreach ($spotFound in $foundResourceGroupLocations) {
     foreach ($deployment in $deployments) {
         if ($spotFound.Index -in $deployment.Index..($deployment.Index + $deployment.Length)) {
             $locationParameter = $deployment.properties.parameters.location
+            if ($locationParameter -e $null) {
+                Write-Error "The location parameter must be a set" -ErrorId Location.Parameter.TypeMisMatch -TargetObject $parameter
+                continue
+            }
             if ($locationParameter -ne $null -and $locationParameter.type -ne "string") {
                 Write-Error "The location parameter must be a 'string' type in the parameter declaration `"$($locationParameter.type)`"" -ErrorId Location.Parameter.TypeMisMatch -TargetObject $parameter
                 continue
