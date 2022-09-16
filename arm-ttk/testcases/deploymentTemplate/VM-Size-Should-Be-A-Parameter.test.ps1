@@ -33,7 +33,7 @@ foreach ($vmSizeObject in $vmSizes) {
     
     $vmSize = $vmSizeObject.vmSize
     # If the vmSize was in a parameter, we will want to continue
-    if ($vmSizeObject.JSONPath -match 'parameters\.vmsize$') {
+    if ($vmSizeObject.JSONPath -match '^parameters\.vmsize$') {
         # but not before we check if it was an inner template
         if ($vmSizeObject.ParentObject[0].expressionEvaluationOptions.scope -eq 'inner') {
             # If it was an inner template, check to make sure that the inner template contains a vmSize
