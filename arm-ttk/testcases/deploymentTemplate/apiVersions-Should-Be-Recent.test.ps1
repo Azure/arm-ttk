@@ -71,6 +71,12 @@ foreach ($av in $allApiVersions) {
         continue
     }
 
+    # skip checking this resource only, if metadata array contains the disable directive
+    if ($av.metadata -contains 'disable-apiVersions-should-be-recent'){
+        Write-Warning "Skipping check on $($av.type)/$($av.name) with apiVersion: $($av.apiVersion)"
+        continue
+    }
+
     # Then walk over each object containing an ApiVersion.
     if ($av.ApiVersion -isnot [string]) {
         # If the APIVersion is not a string
