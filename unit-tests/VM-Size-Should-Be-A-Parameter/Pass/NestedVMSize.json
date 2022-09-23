@@ -1,0 +1,106 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "vmSize": {
+        "type": "string",
+        "defaultValue": "Standard_DS3_v2"
+      }
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2020-10-01",
+        "name": "nested-child",
+        "properties": {
+          "expressionEvaluationOptions": {
+            "scope": "inner"
+          },
+          "mode": "Incremental",
+          "parameters": {
+            "vmSize": {
+              "value": "[parameters('vmSize')]"
+            }
+          },
+          "template": {
+            "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+              "vmSize": {
+                "type": "string",
+                "metadata": {
+                  "description": "VM size for the default compute cluster"
+                }
+              }
+            },
+            "resources": [
+              {
+                "type": "Microsoft.Resources/deployments",
+                "apiVersion": "2020-10-01",
+                "name": "nested-granchild",
+                "properties": {
+                  "expressionEvaluationOptions": {
+                    "scope": "inner"
+                  },
+                  "mode": "Incremental",
+                  "parameters": {
+                    "vmSize": {
+                      "value": "[parameters('vmSize')]"
+                    }
+                  },
+                  "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                      "vmSize": {
+                        "type": "string",
+                        "metadata": {
+                          "description": "VM size for the default compute cluster"
+                        }
+                      }
+                    },
+                    "resources": [
+                      {
+                        "type": "Microsoft.Resources/deployments",
+                        "apiVersion": "2020-10-01",
+                        "name": "nested-great-grandchild",
+                        "properties": {
+                          "expressionEvaluationOptions": {
+                            "scope": "inner"
+                          },
+                          "mode": "Incremental",
+                          "parameters": {
+                          },
+                          "template": {
+                            "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                            "contentVersion": "1.0.0.0",
+                            "parameters": {
+                              "vmSize": { // this was the original bug - everything above was preserved from the original template but the param name was changed
+                                "type": "string",
+                                "defaultValue": "Standard_DS2_v2",
+                                "metadata": {
+                                  "description": "Size of the virtual machine"
+                                }
+                              }
+                            },
+                            "resources": [
+                            ],
+                            "outputs": {
+                              "vmSize": {
+                                "type": "string",
+                                "value": "[parameters('vmSize')]"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
