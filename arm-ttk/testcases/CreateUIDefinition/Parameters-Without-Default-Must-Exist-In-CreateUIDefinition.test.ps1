@@ -12,8 +12,15 @@ $TemplateObject,
 
 [Parameter(Mandatory=$true)]
 [PSObject]
-$CreateUIDefinitionObject
+$CreateUIDefinitionObject,
+
+# If set, the TemplateObject is an inner template.
+[switch]
+$IsInnerTemplate
 )
+
+# We do not need to consider if inner template parameters exist in CreateUIDefinition.
+if ($IsInnerTemplate) { return }
 
 foreach ($parameter in $TemplateObject.parameters.psobject.properties) {
     $parameterName = $parameter.Name
