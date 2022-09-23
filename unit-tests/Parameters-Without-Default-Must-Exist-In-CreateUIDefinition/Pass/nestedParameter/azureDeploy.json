@@ -1,0 +1,52 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "metadata": {
+      "_generator": {
+        "name": "bicep",
+        "version": "0.9.1.41621",
+        "templateHash": "4551264275492999207"
+      }
+    },
+    "parameters": {
+      "mainParameter": {
+        "type": "string",
+        "defaultValue": "default-value"
+      }
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2020-10-01",
+        "name": "Module",
+        "properties": {
+          "expressionEvaluationOptions": {
+            "scope": "inner"
+          },
+          "mode": "Incremental",
+          "parameters": {
+            "moduleParameter": {
+              "value": "[parameters('mainParameter')]"
+            }
+          },
+          "template": {
+            "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "metadata": {
+              "_generator": {
+                "name": "bicep",
+                "version": "0.9.1.41621",
+                "templateHash": "15490559216858461434"
+              }
+            },
+            "parameters": {
+              "moduleParameter": {
+                "type": "string"
+              }
+            },
+            "resources": []
+          }
+        }
+      }
+    ]
+  }
