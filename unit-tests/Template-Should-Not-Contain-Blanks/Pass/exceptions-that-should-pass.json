@@ -43,6 +43,9 @@
                 " /subscriptions/guid/providers/blah/blah/blah": {
                 }
             }
+            "metadata": {
+                "description": "This caused false positive, {helmValues: [], helmRepo: <>}"
+            }
         }
     },
     "resources": [
