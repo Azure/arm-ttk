@@ -424,11 +424,13 @@ Each test script has access to a set of well-known variables:
                                             }
                                         }
 
-                                    if ($testOut.InnerTemplateLocation) {
+                                    if ($testOut.InnerTemplateLocation -and $location) {
                                         $location.Line += $testOut.InnerTemplateLocation.Line - 1
                                     }
 
-                                    $testOut | Add-Member NoteProperty Location $location -Force
+                                    if ($location) {
+                                        $testOut | Add-Member NoteProperty Location $location -Force
+                                    }
                                 }
                             }
                             elseif ($testOut -is [Management.Automation.WarningRecord]) {
@@ -565,12 +567,20 @@ Each test script has access to a set of well-known variables:
                     $templateFileName = $fileInfo.Name                    
                     $TemplateObject = $fileInfo.Object
                     $TemplateText = $fileInfo.Text
+                    # If the file had inner templates
                     if ($fileInfo.InnerTemplates) {
+                        # use the inner templates from just this file
                         $InnerTemplates          = $fileInfo.InnerTemplates
                         $InnerTemplatesText      = $fileInfo.InnerTemplatesText
                         $InnerTemplatesNames     = $fileInfo.InnerTemplatesNames
                         $innerTemplatesLocations = $fileInfo.InnerTemplatesLocations
-                    } else {
+                    }
+                    elseif ($fileInfo.Name -match '^(?>parameters|prereq|CreateUIDefinition)\.') {
+                        $InnerTemplates, $InnerTemplateText, $InnerTemplatesNames, $innerTemplatesLocations = $null                         
+                    }
+                    else 
+                    {
+                        # Otherwise, use the inner templates from the main file
                         $InnerTemplates = $mainInnerTemplates
                         $InnerTemplatesText = $mainInnerTemplatesText
                         $InnerTemplatesNames = $MainInnerTemplatesNames
