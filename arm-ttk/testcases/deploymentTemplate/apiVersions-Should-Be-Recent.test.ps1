@@ -34,10 +34,12 @@ param(
     # Test Run Date - date to use when doing comparisons, if not current date (used for unit testing against and old cache)
     [Parameter(Mandatory = $false, Position = 3)]
     [datetime]
-    $TestDate = [DateTime]::Now
+    $TestDate = [DateTime]::Now,
 
+    [Parameter(Mandatory = $true)]
+    [PSCustomObject]
+    $TemplateMetadata 
 )
-
 
 if (-not $TemplateObject.resources) {
     # If we don't have any resources
@@ -48,10 +50,6 @@ if (-not $TemplateObject.resources) {
 # First, find all of the API versions in the main template resources.
 $allApiVersions = Find-JsonContent -Key apiVersion -Value * -Like -InputObject $TemplateObject
     
-
-
-
-
 foreach ($av in $allApiVersions) {
 
     <#
@@ -140,6 +138,12 @@ foreach ($av in $allApiVersions) {
     # Now, get the API version as a string
     $apiString = $av.ApiVersion
     $hasDate = $apiString -match "(?<Year>\d{4,4})-(?<Month>\d{2,2})-(?<Day>\d{2,2})"
+
+    # bicep - if this is a bicep module skip this test for the given resource
+    if( $FullResourceType -eq "Microsoft.Resources/deployments" -and
+        $TemplateMetadata._generator.name -eq 'bicep') {
+        continue
+    }
 
     if (-not $hasDate) {
         # If we couldn't, write an error
