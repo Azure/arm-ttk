@@ -234,7 +234,7 @@ foreach ($av in $allApiVersions) {
             $trimmedApiVersion = $validApiVersions[0].ToString().Substring(0, $validApiVersions[0].ToString().LastIndexOf("-"))
             $nonPreviewVersionInUse = ($trimmedApiVersion -eq $av.apiVersion)
         }
-        if (-not $nonPreviewVersionInUse) {            
+        if ($nonPreviewVersionInUse) {            
             if ($($av.ApiVersion) -eq $latestStableApiVersion) {     
                 #break from loop to avoid throwing error when using latest stable API version           
                 break
