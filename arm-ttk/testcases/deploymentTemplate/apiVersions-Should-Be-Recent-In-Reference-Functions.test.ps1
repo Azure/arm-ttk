@@ -28,8 +28,17 @@ param(
     # Test Run Date - date to use when doing comparisons, if not current date (used for unit testing against and old cache)
     [Parameter(Mandatory = $false, Position = 3)]
     [datetime]
-    $TestDate = [DateTime]::Now
+    $TestDate = [DateTime]::Now,
+    
+    [Parameter(Mandatory = $true)]
+    [PSCustomObject]
+    $TemplateMetadata 
 )
+
+    # bicep - if this is a bicep file, skip since the apiVersions are implicit (most of the time)
+    if( $TemplateMetadata._generator.name -eq 'bicep') {
+        continue
+    }
 
 $foundReferences = $TemplateText | 
 ?<ARM_Template_Function> -FunctionName 'reference|list\w{0,}'
