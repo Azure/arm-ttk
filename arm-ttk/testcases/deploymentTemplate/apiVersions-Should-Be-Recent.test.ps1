@@ -173,7 +173,7 @@ foreach ($av in $allApiVersions) {
             # if we did no  t have any apiVersion of that potential type, continue on.
             if (-not $AllAzureResources.$potentialType) { continue }
             # otherwise, set our ValidApiVersions
-            $validApiVersions = @($AllAzureResources.$potentialType 
+            $validApiVersions = @($AllAzureResources.$potentialType |
                 Select-Object -ExpandProperty apiVersions |
                 Sort-Object -Descending |
                 ForEach-Object { $_.ToLower() }) # (but don't forget to make them lowercase).
@@ -262,7 +262,7 @@ foreach ($av in $allApiVersions) {
         }
     }
 
-    if (! $validApiVersions.Contains($av.apiVersion)) {
+    if (! $validApiVersions.Contains($apiString)) {
         Write-Warning "The apiVersion $($av.apiVersion) was not found for the resource type: $FullResourceType"
     }
 
