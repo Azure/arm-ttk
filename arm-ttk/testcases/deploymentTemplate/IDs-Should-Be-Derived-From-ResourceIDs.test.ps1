@@ -84,7 +84,8 @@ foreach ($id in $ids) {
         "operationId-DeleteDomainById",     # Microsoft.Sentinel/Solutions/Playbooks/CiscoUmbrella
         "operationId-GetOrganizationId",    # Microsoft.Sentinel/Solutions/Playbooks/CiscoUmbrella
         "operationId-ProcessMetadataSearchByProcessGUID", # Microsoft.Sentinel/Solutions/Playbooks/Vmware
-        "operationId-SearchForProcessEventsByProcessGUID" # Microsoft.Sentinel/Solutions/Playbooks/Vmware        
+        "operationId-SearchForProcessEventsByProcessGUID", # Microsoft.Sentinel/Solutions/Playbooks/Vmware  
+        "ApplicationId"                     # Microsoft.Sentinel/Solutions/Playbooks/DomainTools
     )
 
     $exceptionRegex =
