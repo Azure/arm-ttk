@@ -37,8 +37,8 @@ foreach ($vmSizeObject in $vmSizes) {
         # but not before we check if it was an inner template
         if ($vmSizeObject.ParentObject[0].expressionEvaluationOptions.scope -eq 'inner') {
             # If it was an inner template, check to make sure that the inner template contains a vmSize
-            if (-not $vmSize.Value | ?<ARM_Parameter> -Parameter vmSize) {
-                Write-Error "Nested template parameter vmSize does not map to vmSize parameter" -TargetObject $vmSizeObject
+            if (-not $vmSize.Value | ?<ARM_Parameter>) {
+                Write-Error "Nested template parameter vmSize does not map to a parameter" -TargetObject $vmSizeObject
                 continue
             }             
         } else {
@@ -55,7 +55,7 @@ foreach ($vmSizeObject in $vmSizes) {
     $resourceName = $vmSizeObject.ParentObject.name
     
     
-    if (-not $vmSize | ?<ARM_Parameter>) { # If the VMSize does not have a parameter reference
+    if (-not ($vmSize | ?<ARM_Parameter>)) { # If the VMSize does not have a parameter reference
         if ($vmSize | ?<ARM_Variable>) {   # but does have a variable reference
             # try expanding the variable
             $resolvedVmSize = Expand-AzTemplate -Expression $vmSize -InputObject $OriginalTemplateObject
@@ -70,9 +70,4 @@ foreach ($vmSizeObject in $vmSizes) {
             Write-Error "VM Size for resourceType '$resourceType' named '$resourceName' must be a parameter" -TargetObject $vm
         }
     }
-}
-
-if ($vmSizes -and -not $vmSizeTopLevelParameterDeclared) {
-    Write-Error "VMSize parameter must be declared for the parent template"
-    return
 }
