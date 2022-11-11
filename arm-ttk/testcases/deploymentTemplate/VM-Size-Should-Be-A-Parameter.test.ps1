@@ -43,10 +43,16 @@ foreach ($vmSizeObject in $vmSizes) {
                 continue
             }             
         } else {
+
             # Otherwise, make note of the fact that we have a parameter called VMSize
             $vmSizeTopLevelParameterDeclared = $true
         }
-        continue
+        
+        # If the VMSize was in the properties passed to a template, it is not declaring the parameter.
+        # Therefore, if we determine that we are examining properties, we should validate this as any other VMSize parameter.
+        if ($vmSizeObject.JSONPath -notmatch 'resources\[\d+\]\.properties\.parameters') {           
+            continue
+        }
     }
 
     # The only other places we should find VMSizes are in resources.
