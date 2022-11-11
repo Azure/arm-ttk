@@ -1,0 +1,31 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "nodeSku": {}
+    },
+    "resources": [
+        {
+            "type": "Microsoft.MachineLearningServices/workspaces/computes",
+            "apiVersion": "2018-11-19",
+            "name": "[concat(parameters('workspaceName'), '/gpu-cluster')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "computeType": "AmlCompute",
+                "computeLocation": "[parameters('location')]",
+                "description": "gpu nodes",
+                "properties": {
+                    "remoteLoginPortPublicAccess": "Enabled",
+                    "scaleSettings": {
+                        "maxNodeCount": 4,
+                        "minNodeCount": 0
+                    },
+                    "subnet": {
+                        "id": "[variables('subnet')]"
+                    },
+                    "vmSize": "[parameters('nodeSku')]"
+                }
+            }
+        }
+    ]
+}
