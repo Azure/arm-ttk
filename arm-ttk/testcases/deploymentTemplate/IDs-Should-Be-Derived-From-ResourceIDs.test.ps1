@@ -87,6 +87,7 @@ foreach ($id in $ids) {
         "operationId-SearchForProcessEventsByProcessGUID", # Microsoft.Sentinel/Solutions/Playbooks/Vmware  
         "ApplicationId"                     # Microsoft.Sentinel/Solutions/Playbooks/DomainTools
         "policyDefinitionGuid"              # Microsoft.Sentinel/Solutions/AzureStorageAccount
+        "IndicatorId"                       # Network Session Solution for Microsoft
     )
 
     $exceptionRegex =
