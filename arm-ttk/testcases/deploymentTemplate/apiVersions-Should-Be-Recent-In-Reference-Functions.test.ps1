@@ -78,7 +78,8 @@ foreach ($foundRef in $foundReferences) {
 
     $validApiVersions = @($AllAzureResources.$potentialResourceType | # and see if there's an apiVersion.
         Select-Object -ExpandProperty apiVersions |
-        Sort-Object -Descending)
+        Sort-Object -Descending |
+        ForEach-Object { $_.ToLower() })
 
     if (-not $validApiVersions) { 
         $potentialResourceTypes = @($potentialResourceType -split '/')

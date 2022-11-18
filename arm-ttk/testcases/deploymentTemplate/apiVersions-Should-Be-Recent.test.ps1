@@ -10,8 +10,7 @@
         Get-Content ..\..\..\..\100-marketplace-sample\azureDeploy.json | ConvertFrom-Json
     ) -AllAzureResources (
         Get-Content ..\..\cache\AllAzureResources.cache.json | ConvertFrom-Json
-    )
-      -TestDate (
+    ) -TestDate (
           [datetime]::ParseExact("31/08/2019", "dd-mm-yy", $null)
     )
 #>
@@ -136,7 +135,7 @@ foreach ($av in $allApiVersions) {
         }) -join '/'
 
     # Now, get the API version as a string
-    $apiString = $av.ApiVersion
+    $apiString = $av.ApiVersion.ToLower()
     $hasDate = $apiString -match "(?<Year>\d{4,4})-(?<Month>\d{2,2})-(?<Day>\d{2,2})"
 
     # bicep - if this is a bicep module skip this test for the given resource
@@ -153,21 +152,34 @@ foreach ($av in $allApiVersions) {
     }
     $apiDate = [DateTime]::new($matches.Year, $matches.Month, $matches.Day) # now coerce the apiVersion into a DateTime
 
-    # Now find all of the valid versions from this API
-    $validApiVersions = # This is made a little tricky by the fact that some resources don't directly have an API version
-    @(for ($i = $FullResourceTypes.Count - 1; $i -ge 0; $i--) {
-            # so we need to walk backwards thru the list of items
-            $resourceTypeName = $FullResourceTypes[0..$i] -join '/' # construct the resource type name
-            $apiVersionsOfType = $AllAzureResources.$resourceTypeName | # and see if there's an apiVersion.
-            Select-Object -ExpandProperty apiVersions |
-            Sort-Object -Descending
+    # Not all resources have versions directly.
+    $potentialResourceType = $FullResourceType
 
-            if ($apiVersionsOfType) {
-                # If there was,
-                $apiVersionsOfType # set it and break the loop
-                break
-            }
-        })
+    # Therefore, we first have to see 
+    $validApiVersions = @($AllAzureResources.$potentialResourceType | # if there's an apiVersion 
+        Select-Object -ExpandProperty apiVersions |
+        Sort-Object -Descending |
+        ForEach-Object { $_.ToLower() }) # (and we should standarize it's case).
+
+    
+    
+    # If we didn't find any apiVersions
+    if (-not $validApiVersions) { 
+        # get the list of potential types
+        $potentialResourceTypes = @($potentialResourceType -split '/')
+        # and walk backwards thru that list
+        for ($i = ($potentialResourceTypes.Count - 1); $i -ge 1; $i--) {
+            $potentialType = $potentialResourceTypes[0..$i] -join '/'
+            # if we did no  t have any apiVersion of that potential type, continue on.
+            if (-not $AllAzureResources.$potentialType) { continue }
+            # otherwise, set our ValidApiVersions
+            $validApiVersions = @($AllAzureResources.$potentialType |
+                Select-Object -ExpandProperty apiVersions |
+                Sort-Object -Descending |
+                ForEach-Object { $_.ToLower() }) # (but don't forget to make them lowercase).
+            break        
+        }
+    }
 
     # Create a string of recent or allowed apiVersions for display in the error message
     $recentApiVersions = ""
@@ -195,7 +207,7 @@ foreach ($av in $allApiVersions) {
     #if latest stable is already in list, deduplicate
     $recentApiVersions = $recentApiVersions | Select-Object -Unique
 
-    $howOutOfDate = $validApiVersions.IndexOf($av.ApiVersion) # Find out how out of date we are.
+    $howOutOfDate = $validApiVersions.IndexOf($apiString) # Find out how out of date we are.
     # Is the apiVersion even in the list?
     if ($howOutOfDate -eq -1 -and $validApiVersions) {
         # Removing the error for this now - this is happening with the latest versions and outdated manifests
@@ -250,7 +262,7 @@ foreach ($av in $allApiVersions) {
         }
     }
 
-    if (! $validApiVersions.Contains($av.apiVersion)) {
+    if (! $validApiVersions.Contains($apiString)) {
         Write-Warning "The apiVersion $($av.apiVersion) was not found for the resource type: $FullResourceType"
     }
 
