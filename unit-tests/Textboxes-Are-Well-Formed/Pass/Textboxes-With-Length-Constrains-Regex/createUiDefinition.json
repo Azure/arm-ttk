@@ -14,6 +14,17 @@
                     "regex": "^[0-9]{5,10}$",
                     "validationMessage": "Textboxes with constraints.regex contains length limits."
                 }
+            },
+            {
+                "name": "TextBox2",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Textboxes-With-Constrains-Validations",
+                "toolTip": "Textboxes with constraints.validations.",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[0-9][0-9-]{5,9}[0-9]$",
+                    "validationMessage": "Textboxes with constraints.regex contains length limits."
+                }
             }
         ],
         "outputs": {
