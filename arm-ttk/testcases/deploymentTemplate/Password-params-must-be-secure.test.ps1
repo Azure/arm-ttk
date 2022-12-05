@@ -38,7 +38,7 @@ foreach ($parameter in $templateObject.parameters.psobject.properties) {
         $name -like "*accountkey*") {
         # if it's not secure, flag it
 
-        if ($type -ne 'securestring' -and $type -ne 'secureobject') {
+        if ($type -ne 'securestring' -and $type -ne 'secureobject' -and $type -ne 'bool') {
             #except certain patterns we know about in ARM
             # secret + Permissions (keyVault secret perms is an accessPolicy property)
             # secret + Version (url or simply the version property of a secret)
