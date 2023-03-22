@@ -13,8 +13,8 @@ param(
 
 # First, find all textboxes within CreateUIDefinition.
 $allTextBoxes = $CreateUiDefinitionObject | Find-JsonContent -Key type -value Microsoft.Common.TextBox
-# Regex Constraint should contain the pattern {m,n} or {m,} or {m} (Length Check)
-$lengthContraintRegex = [Regex]::new('{\d+(?:,\d+|,)?}')
+# Regex Constraint should contain one of following pattern (Length Check): {m,n} or {m,} or {m}
+$lengthContraintRegex = [Regex]::new('\{(?<Min>\d+)(?:,(?<Max>\d+)|,)?\}')
 
 foreach ($textbox in $allTextBoxes) {
     # Then we walk over each textbox.
