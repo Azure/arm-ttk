@@ -1,33 +1,63 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
-    "handler": "Microsoft.Azure.CreateUIDef",
-    "version": "0.1.2-preview",
-    "parameters": {
-        "basics": [
-            {
-                "name": "TextBox1",
-                "type": "Microsoft.Common.TextBox",
-                "label": "Textboxes-With-Constrains-Validations",
-                "toolTip": "Textboxes with constraints.validations.",
-                "constraints": {
-                    "required": true,
-                    "regex": "^[0-9]{5,10}$",
-                    "validationMessage": "Textboxes with constraints.regex contains length limits."
-                }
-            },
-            {
-                "name": "TextBox2",
-                "type": "Microsoft.Common.TextBox",
-                "label": "Textboxes-With-Constrains-Validations-2",
-                "toolTip": "Textboxes with constraints.validations.",
-                "constraints": {
-                    "regex": "^[A-Za-z][A-Za-z0-9-]{1,61}[A-Za-z0-9]$",
-                    "validationMessage": "Textboxes with constraints.regex contains length limits."
-                }
-            }
-        ],
-        "outputs": {
-            "Location": "[location()]"
-        }
-    }
+	"$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+	"handler": "Microsoft.Azure.CreateUIDef",
+	"version": "0.1.2-preview",
+	"parameters": {
+		"basics": [
+			{
+				"name": "TextBox1",
+				"type": "Microsoft.Common.TextBox",
+				"label": "Textboxes-With-Constrains-Validations",
+				"toolTip": "Textboxes with constraints.validations.",
+				"constraints": {
+					"required": true,
+					"regex": "^[0-9]{5,10}$",
+					"validationMessage": "Textboxes with constraints.regex contains length limits."
+				}
+			},
+			{
+				"name": "TextBox2",
+				"type": "Microsoft.Common.TextBox",
+				"label": "Textboxes-With-Constrains-Validations-2",
+				"toolTip": "Textboxes with constraints.validations.",
+				"constraints": {
+					"regex": "^[A-Za-z][A-Za-z0-9-]{1,61}[A-Za-z0-9]$",
+					"validationMessage": "Textboxes with constraints.regex contains length limits."
+				}
+			},
+			{
+				"name": "TextBox3",
+				"type": "Microsoft.Common.TextBox",
+				"label": "Textboxes-With-Constrains-Validations-3",
+				"toolTip": "Textboxes with constraints.validations.",
+				"constraints": {
+					"regex": "^(?!-)[A-Za-z0-9-]{3,63}(?<!-)$",
+					"validationMessage": "Textboxes with constraints.regex contains length limits."
+				}
+			},
+			{
+				"name": "TextBox4",
+				"type": "Microsoft.Common.TextBox",
+				"label": "Textboxes-With-Constrains-Validations-4",
+				"toolTip": "Textboxes with constraints.validations.",
+				"constraints": {
+					"regex": "^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+					"validationMessage": "Textboxes with constraints.regex contains length limits."
+				}
+			},
+			{
+				"name": "TextBox5",
+				"type": "Microsoft.Common.TextBox",
+				"label": "Textboxes-With-Constrains-Validations-5",
+				"toolTip": "Textboxes with constraints.validations.",
+				"constraints": {
+					"regex": "^[A-Za-z0-9-+/@$!%*?&]{12,}$",
+					"validationMessage": "Textboxes with constraints.regex contains length limits."
+				}
+			}
+		],
+		"outputs": {
+			"Location": "[location()]"
+		}
+	}
 }
