@@ -1,6 +1,6 @@
 [
-    {
-      "Name": "AzureChinaCloud",
+  {
+    "Name": "AzureChinaCloud",
       "Type": "Built-in",
       "EnableAdfsAuthentication": false,
       "OnPremise": false,
