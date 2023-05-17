@@ -1,0 +1,325 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+          {
+            "name": "agSettings",
+            "label": "| Analytic Gateway",
+            "subLabel": {
+              "preValidation": "AG General Properties",
+              "postValidation": "Done"
+            },
+            "bladeTitle": "| Analytic Gateway",
+            "elements": [
+              {
+                "type": "Microsoft.Common.Section",
+                "name": "agSslSection",
+                "label": "AG SSL Settings",
+                "visible": "true",
+                "elements": [
+                  {
+                    "type": "Microsoft.Common.FileUpload",
+                    "name": "ag0KeystoreFile",
+                    "label": "Keystore File 1",
+                    "toolTip": "Keystore File for AG 1 communication.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true
+                    },
+                    "options": {
+                      "multiple": false,
+                      "uploadMode": "file",
+                      "openMode": "binary"
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Common.PasswordBox",
+                    "name": "ag0KeystorePassword",
+                    "label": {
+                      "password": "Keystore Password 1",
+                      "confirmPassword": "Confirm password"
+                    },
+                    "toolTip": "AG 0 Keystore Password to access the Keystore File.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true,
+                      "regex": "^[\\S]{12,127}$",
+                      "validationMessage": "Password must be between 12 and 127 characters."
+                    },
+                    "options": {
+                      "hideConfirmation": false
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Common.FileUpload",
+                    "name": "ag0TruststoreFile",
+                    "label": "Truststore File 1",
+                    "toolTip": "Truststore File for AG 1 communication.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true
+                    },
+                    "options": {
+                      "multiple": false,
+                      "uploadMode": "file",
+                      "openMode": "binary"
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Common.PasswordBox",
+                    "name": "ag0TruststorePassword",
+                    "label": {
+                      "password": "Truststore Password 1",
+                      "confirmPassword": "Confirm password"
+                    },
+                    "toolTip": "AG 0 Truststore Password to access the Truststore File.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true,
+                      "regex": "^[\\S]{12,127}$",
+                      "validationMessage": "Password must be between 12 and 127 characters."
+                    },
+                    "options": {
+                      "hideConfirmation": false
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Common.FileUpload",
+                    "name": "ag1KeystoreFile",
+                    "label": "Keystore File 2",
+                    "toolTip": "Keystore File for AG 2 communication.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true
+                    },
+                    "options": {
+                      "multiple": false,
+                      "uploadMode": "file",
+                      "openMode": "binary"
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Common.PasswordBox",
+                    "name": "ag1KeystorePassword",
+                    "label": {
+                      "password": "Keystore Password 2",
+                      "confirmPassword": "Confirm password"
+                    },
+                    "toolTip": "AG 1 Keystore Password to access the Keystore File.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true,
+                      "regex": "^[\\S]{12,127}$",
+                      "validationMessage": "Password must be between 12 and 127 characters."
+                    },
+                    "options": {
+                      "hideConfirmation": false
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Common.FileUpload",
+                    "name": "ag1TruststoreFile",
+                    "label": "Truststore File 2",
+                    "toolTip": "Truststore File for AG 2 communication.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true
+                    },
+                    "options": {
+                      "multiple": false,
+                      "uploadMode": "file",
+                      "openMode": "binary"
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Common.PasswordBox",
+                    "name": "ag1TruststorePassword",
+                    "label": {
+                      "password": "Truststore Password 2",
+                      "confirmPassword": "Confirm password"
+                    },
+                    "toolTip": "AG 1 Truststore Password to access the Truststore File.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true,
+                      "regex": "^[\\S]{12,127}$",
+                      "validationMessage": "Password must be between 12 and 127 characters."
+                    },
+                    "options": {
+                      "hideConfirmation": false
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Common.FileUpload",
+                    "name": "ag2KeystoreFile",
+                    "label": "Keystore File 3",
+                    "toolTip": "Keystore File for AG 3 communication.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true
+                    },
+                    "options": {
+                      "multiple": false,
+                      "uploadMode": "file",
+                      "openMode": "binary"
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Common.PasswordBox",
+                    "name": "ag2KeystorePassword",
+                    "label": {
+                      "password": "Keystore Password 3",
+                      "confirmPassword": "Confirm password"
+                    },
+                    "toolTip": "AG 2 Keystore Password to access the Keystore File.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true,
+                      "regex": "^[\\S]{12,127}$",
+                      "validationMessage": "Password must be between 12 and 127 characters."
+                    },
+                    "options": {
+                      "hideConfirmation": false
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Common.FileUpload",
+                    "name": "ag2TruststoreFile",
+                    "label": "Truststore File 3",
+                    "toolTip": "Truststore File for AG 3 communication.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true
+                    },
+                    "options": {
+                      "multiple": false,
+                      "uploadMode": "file",
+                      "openMode": "binary"
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Common.PasswordBox",
+                    "name": "ag2TruststorePassword",
+                    "label": {
+                      "password": "Truststore Password 3",
+                      "confirmPassword": "Confirm password"
+                    },
+                    "toolTip": "AG 2 Truststore Password to access the Truststore File.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true,
+                      "regex": "^[\\S]{12,127}$",
+                      "validationMessage": "Password must be between 12 and 127 characters."
+                    },
+                    "options": {
+                      "hideConfirmation": false
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Common.FileUpload",
+                    "name": "ag3KeystoreFile",
+                    "label": "Keystore File 4",
+                    "toolTip": "Keystore File for AG 4 communication.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true
+                    },
+                    "options": {
+                      "multiple": false,
+                      "uploadMode": "file",
+                      "openMode": "binary"
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Common.PasswordBox",
+                    "name": "ag3KeystorePassword",
+                    "label": {
+                      "password": "Keystore Password 4",
+                      "confirmPassword": "Confirm password"
+                    },
+                    "toolTip": "AG 3 Keystore Password to access the Keystore File.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true,
+                      "regex": "^[\\S]{12,127}$",
+                      "validationMessage": "Password must be between 12 and 127 characters."
+                    },
+                    "options": {
+                      "hideConfirmation": false
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Common.FileUpload",
+                    "name": "ag3TruststoreFile",
+                    "label": "Truststore File 4",
+                    "toolTip": "Truststore File for AG 4 communication.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true
+                    },
+                    "options": {
+                      "multiple": false,
+                      "uploadMode": "file",
+                      "openMode": "binary"
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Common.PasswordBox",
+                    "name": "ag3TruststorePassword",
+                    "label": {
+                      "password": "Truststore Password 4",
+                      "confirmPassword": "Confirm password"
+                    },
+                    "toolTip": "AG 3 Truststore Password to access the Truststore File.",
+                    "visible": true,
+                    "constraints": {
+                      "required": true,
+                      "regex": "^[\\S]{12,127}$",
+                      "validationMessage": "Password must be between 12 and 127 characters."
+                    },
+                    "options": {
+                      "hideConfirmation": false
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+      "outputs": {
+        "Location": "[location()]",
+        "agCerts": {
+          "0": {
+            "backendPubKey": "[coalesce(steps('agRestSettings').agRestCertificates.ag0BackendPublicKey, 'NA')]",
+            "keystoreFile": "[coalesce(steps('agSettings').agSslSection.ag0KeystoreFile, 'NA')]",
+            "keystorePass": "[coalesce(steps('agSettings').agSslSection.ag0KeystorePassword, 'NA')]",
+            "truststoreFile": "[coalesce(steps('agSettings').agSslSection.ag0TruststoreFile, 'NA')]",
+            "truststorePass": "[coalesce(steps('agSettings').agSslSection.ag0TruststorePassword, 'NA')]"
+          },
+          "1": {
+            "backendPubKey": "[coalesce(steps('agRestSettings').agRestCertificates.ag1BackendPublicKey, 'NA')]",
+            "keystoreFile": "[coalesce(steps('agSettings').agSslSection.ag1KeystoreFile, 'NA')]",
+            "keystorePass": "[coalesce(steps('agSettings').agSslSection.ag1KeystorePassword, 'NA')]",
+            "truststoreFile": "[coalesce(steps('agSettings').agSslSection.ag1TruststoreFile, 'NA')]",
+            "truststorePass": "[coalesce(steps('agSettings').agSslSection.ag1TruststorePassword, 'NA')]"
+          },
+          "2": {
+            "backendPubKey": "[coalesce(steps('agRestSettings').agRestCertificates.ag2BackendPublicKey, 'NA')]",
+            "keystoreFile": "[coalesce(steps('agSettings').agSslSection.ag2KeystoreFile, 'NA')]",
+            "keystorePass": "[coalesce(steps('agSettings').agSslSection.ag2KeystorePassword, 'NA')]",
+            "truststoreFile": "[coalesce(steps('agSettings').agSslSection.ag2TruststoreFile, 'NA')]",
+            "truststorePass": "[coalesce(steps('agSettings').agSslSection.ag2TruststorePassword, 'NA')]"
+          },
+          "3": {
+            "backendPubKey": "[coalesce(steps('agRestSettings').agRestCertificates.ag3BackendPublicKey, 'NA')]",
+            "keystoreFile": "[coalesce(steps('agSettings').agSslSection.ag3KeystoreFile, 'NA')]",
+            "keystorePass": "[coalesce(steps('agSettings').agSslSection.ag3KeystorePassword, 'NA')]",
+            "truststoreFile": "[coalesce(steps('agSettings').agSslSection.ag3TruststoreFile, 'NA')]",
+            "truststorePass": "[coalesce(steps('agSettings').agSslSection.ag3TruststorePassword, 'NA')]"
+          }
+        }
+      }
+    }
+}
