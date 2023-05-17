@@ -25,8 +25,17 @@ $passwordBoxes = $CreateUIDefinitionObject |
 foreach ($pwb in $passwordBoxes) { # Loop over each password box
     $controlName = $pwb.Name # and find the output it maps to.
     $theOutput = foreach ($out in $CreateUIDefinitionObject.parameters.outputs.psobject.properties) {
-        if (($out.Value -like "*steps(*$controlName*") -or ($out.Value -like "*basics(*$controlName*")) { 
-            $out; break
+        $outputValueType = $out.Value.GetType().Name
+        if ($outputValueType -eq "PSCustomObject") {
+            $outputJson = $out.Value | ConvertTo-Json -Compress
+            if (($outputJson -like "*steps(*$controlName*") -or ($outputJson -like "*basics(*$controlName*")) { 
+                $out; break
+            }
+        }
+        else {
+            if (($out.Value -like "*steps(*$controlName*") -or ($out.Value -like "*basics(*$controlName*")) { 
+                $out; break
+            }
         }
     }
 
@@ -39,13 +48,13 @@ foreach ($pwb in $passwordBoxes) { # Loop over each password box
 
     # If we couldn't find it, write an error.
     if (-not $MainTemplateParam) {
-        Write-Error "Password box $($pwb.Name) is missing from main template parameters "-TargetObject $pwb
+        Write-Error "Password box $($pwb.Name) linked to output $($theOutput.Name) is missing from main template parameters "-TargetObject $pwb
         continue
     }
 
     # If the main template parameter type is neither a Secure String nor a Secure Object
     if (($MainTemplateParam.type -ne 'SecureString') -and ($MainTemplateParam.type -ne 'SecureObject')) {
         # write an error.
-        Write-Error "PasswordBox controls must use secureString or secureObject parameter types.  The Main template parameter '$($pwb.Name)' is a '$($MainTemplateParam.type)'" -TargetObject @($pwb, $MainTemplateParam)
+        Write-Error "PasswordBox controls must use secureString or secureObject parameter types.  The Main template parameter '$($theOutput.Name)' linked to '$($pwb.Name)' is a '$($MainTemplateParam.type)'" -TargetObject @($pwb, $MainTemplateParam)
     }
 }
