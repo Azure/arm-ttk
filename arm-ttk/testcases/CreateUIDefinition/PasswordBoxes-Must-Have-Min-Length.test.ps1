@@ -47,7 +47,7 @@ foreach ($pwb in $passwordBoxes) { # Loop over each password box
                 $totalMins += $match.Groups['Min'].Value -as [int]
             }
             if ($passWordMinLength -gt $totalMins) {
-                Write-Warning "PasswordBox '$($pwb.Name)' regex does not have a minimum length of $PasswordMinLength" -TargetObject $pwb
+                Write-Warning "PasswordBox '$($pwb.Name)' regex does not have a minimum length of $PasswordMinLength"
             }
         }
     } catch {
