@@ -1,0 +1,50 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Azure.CreateUIDef",
+  "version": "0.1.2-preview",
+  "parameters": {
+      "basics": [
+        {
+          "name": "settings",
+          "label": "Settings",
+          "bladeTitle": "Settings",
+          "elements": [
+            {
+              "type": "Microsoft.Common.Section",
+              "name": "section",
+              "label": "Section Settings",
+              "visible": "true",
+              "elements": [
+                {
+                  "type": "Microsoft.Common.PasswordBox",
+                  "name": "passwordBox",
+                  "label": {
+                    "password": "Password",
+                    "confirmPassword": "Confirm password"
+                  },
+                  "toolTip": "Password for password box",
+                  "visible": true,
+                  "constraints": {
+                    "required": true,
+                    "regex": "^[\\S]{10,25}$",
+                    "validationMessage": "Password must be between 10 and 25 characters."
+                  },
+                  "options": {
+                    "hideConfirmation": false
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+    "outputs": {
+      "Location": "[location()]",
+      "certificates": {
+        "0": {
+          "password": "[coalesce(steps('settings').section.passwordBox, 'NA')]"
+        }
+      }
+    }
+  }
+}

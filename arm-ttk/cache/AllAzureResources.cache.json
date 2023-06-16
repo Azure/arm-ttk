@@ -8551,6 +8551,7 @@
       "apiVersions": [
         "2023-01-01-preview",
         "2022-12-01-preview",
+        "2022-11-15-preview",
         "2022-11-01-preview",
         "2022-08-01-preview",
         "2022-04-01-preview",
@@ -61753,6 +61754,139 @@
       "zoneMappings": null
     }
   ],
+  "Microsoft.ModSimWorkbench/instances/consortiums": [
+    {
+      "aliases": null,
+      "apiProfiles": null,
+      "apiVersions": [
+        "2021-03-01-preview"
+      ],
+      "capabilities": "CrossResourceGroupResourceMove, CrossSubscriptionResourceMove, SupportsTags, SupportsLocation",
+      "defaultApiVersion": null,
+      "locationMappings": null,
+      "locations": [
+        "East US 2",
+        "West Central US"
+      ],
+      "properties": null,
+      "resourceType": "Microsoft.ModSimWorkbench/instances/consortiums",
+      "zoneMappings": null
+    }
+  ],
+  "Microsoft.ModSimWorkbench/instances/chambers/workloads": [
+    {
+      "aliases": null,
+      "apiProfiles": null,
+      "apiVersions": [
+        "2021-03-01-preview"
+      ],
+      "capabilities": "CrossResourceGroupResourceMove, CrossSubscriptionResourceMove, SupportsTags, SupportsLocation",
+      "defaultApiVersion": null,
+      "locationMappings": null,
+      "locations": [
+        "East US 2",
+        "West Central US"
+      ],
+      "properties": null,
+      "resourceType": "Microsoft.ModSimWorkbench/instances/chambers/workloads",
+      "zoneMappings": null
+    }
+  ],
+  "Microsoft.ModSimWorkbench/instances/chambers/files": [
+    {
+      "aliases": null,
+      "apiProfiles": null,
+      "apiVersions": [
+        "2021-03-01-preview"
+      ],
+      "capabilities": "None",
+      "defaultApiVersion": null,
+      "locationMappings": null,
+      "locations": [
+        "East US 2",
+        "West Central US"
+      ],
+      "properties": null,
+      "resourceType": "Microsoft.ModSimWorkbench/instances/chambers/files",
+      "zoneMappings": null
+    }
+  ],
+  "Microsoft.ModSimWorkbench/instances/chambers/fileRequests": [
+    {
+      "aliases": null,
+      "apiProfiles": null,
+      "apiVersions": [
+        "2021-03-01-preview"
+      ],
+      "capabilities": "None",
+      "defaultApiVersion": null,
+      "locationMappings": null,
+      "locations": [
+        "East US 2",
+        "West Central US"
+      ],
+      "properties": null,
+      "resourceType": "Microsoft.ModSimWorkbench/instances/chambers/fileRequests",
+      "zoneMappings": null
+    }
+  ],
+  "Microsoft.ModSimWorkbench/instances/chambers/accessProfiles": [
+    {
+      "aliases": null,
+      "apiProfiles": null,
+      "apiVersions": [
+        "2021-03-01-preview"
+      ],
+      "capabilities": "CrossResourceGroupResourceMove, CrossSubscriptionResourceMove, SupportsTags, SupportsLocation",
+      "defaultApiVersion": null,
+      "locationMappings": null,
+      "locations": [
+        "East US 2",
+        "West Central US"
+      ],
+      "properties": null,
+      "resourceType": "Microsoft.ModSimWorkbench/instances/chambers/accessProfiles",
+      "zoneMappings": null
+    }
+  ],
+  "Microsoft.ModSimWorkbench/instances/chambers": [
+    {
+      "aliases": null,
+      "apiProfiles": null,
+      "apiVersions": [
+        "2021-03-01-preview"
+      ],
+      "capabilities": "CrossResourceGroupResourceMove, CrossSubscriptionResourceMove, SupportsTags, SupportsLocation",
+      "defaultApiVersion": null,
+      "locationMappings": null,
+      "locations": [
+        "East US 2",
+        "West Central US"
+      ],
+      "properties": null,
+      "resourceType": "Microsoft.ModSimWorkbench/instances/chambers",
+      "zoneMappings": null
+    }
+  ],
+  "Microsoft.ModSimWorkbench/instances": [
+    {
+      "aliases": null,
+      "apiProfiles": null,
+      "apiVersions": [
+        "2021-03-01-preview"
+      ],
+      "capabilities": "SupportsTags, SupportsLocation",
+      "defaultApiVersion": null,
+      "locationMappings": null,
+      "locations": [
+        "East US 2",
+        "West Central US"
+      ],
+      "properties": null,
+      "resourceType": "Microsoft.ModSimWorkbench/instances",
+      "zoneMappings": null
+    }
+  ],
   "Microsoft.MobileNetwork/sims": [
     {
       "aliases": null,
@@ -67055,6 +67189,94 @@
       "zoneMappings": null
     }
   ],
+  "Microsoft.MachineLearningServices/workspaces/batchEndpoints/jobs": [
+    {
+      "aliases": null,
+      "apiProfiles": null,
+      "apiVersions": [
+        "2020-09-01-preview"
+      ],
+      "capabilities": "None",
+      "defaultApiVersion": null,
+      "locationMappings": null,
+      "locations": [
+        "North Central US",
+        "Canada Central",
+        "Central India",
+        "UK South",
+        "West US",
+        "Central US",
+        "East Asia",
+        "Japan East",
+        "Germany West Central",
+        "Switzerland North",
+        "UAE North",
+        "South Africa North",
+        "Norway East",
+        "East US",
+        "North Europe",
+        "Korea Central",
+        "Brazil South",
+        "France Central",
+        "Australia East",
+        "East US 2",
+        "West US 2",
+        "West Central US",
+        "Southeast Asia",
+        "West Europe",
+        "South Central US",
+        "Canada East",
+        "Sweden Central"
+      ],
+      "properties": null,
+      "resourceType": "Microsoft.MachineLearningServices/workspaces/batchEndpoints/jobs",
+      "zoneMappings": null
+    }
+  ],
+  "Microsoft.MachineLearningServices/workspaces/batchEndpoints/deployments/jobs": [
+    {
+      "aliases": null,
+      "apiProfiles": null,
+      "apiVersions": [
+        "2020-09-01-preview"
+      ],
+      "capabilities": "None",
+      "defaultApiVersion": null,
+      "locationMappings": null,
+      "locations": [
+        "North Central US",
+        "Canada Central",
+        "Central India",
+        "UK South",
+        "West US",
+        "Central US",
+        "East Asia",
+        "Japan East",
+        "Germany West Central",
+        "Switzerland North",
+        "UAE North",
+        "South Africa North",
+        "Norway East",
+        "East US",
+        "North Europe",
+        "Korea Central",
+        "Brazil South",
+        "France Central",
+        "Australia East",
+        "East US 2",
+        "West US 2",
+        "West Central US",
+        "Southeast Asia",
+        "West Europe",
+        "South Central US",
+        "Canada East",
+        "Sweden Central"
+      ],
+      "properties": null,
+      "resourceType": "Microsoft.MachineLearningServices/workspaces/batchEndpoints/deployments/jobs",
+      "zoneMappings": null
+    }
+  ],
   "Microsoft.MachineLearningServices/workspaces/batchEndpoints/deployments": [
     {
       "aliases": null,
@@ -70551,216 +70773,7 @@
       ],
       "properties": null,
       "resourceType": "Microsoft.Kusto/clusters",
-      "zoneMappings": [
-        {
-          "location": "Australia East",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "Brazil South",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "Canada Central",
-          "zones": [
-            "3",
-            "1",
-            "2"
-          ]
-        },
-        {
-          "location": "Central India",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "Central US",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "East Asia",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "East US",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "East US 2",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "France Central",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "Germany West Central",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "Japan East",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "Korea Central",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "North Central US",
-          "zones": []
-        },
-        {
-          "location": "North Europe",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "Norway East",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "Qatar Central",
-          "zones": [
-            "3",
-            "1",
-            "2"
-          ]
-        },
-        {
-          "location": "South Africa North",
-          "zones": [
-            "2",
-            "1",
-            "3"
-          ]
-        },
-        {
-          "location": "South Central US",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "Southeast Asia",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "Sweden Central",
-          "zones": [
-            "1",
-            "3",
-            "2"
-          ]
-        },
-        {
-          "location": "Switzerland North",
-          "zones": [
-            "1",
-            "3",
-            "2"
-          ]
-        },
-        {
-          "location": "UAE North",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "UK South",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "West Europe",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "West US",
-          "zones": []
-        },
-        {
-          "location": "West US 2",
-          "zones": [
-            "2",
-            "3",
-            "1"
-          ]
-        },
-        {
-          "location": "West US 3",
-          "zones": [
-            "3",
-            "1",
-            "2"
-          ]
-        }
-      ]
+      "zoneMappings": null
     }
   ],
   "Microsoft.KubernetesConfiguration/sourceControlConfigurations": [
@@ -125980,7 +125993,7 @@
       "zoneMappings": null
     }
   ],
-  "Microsoft.AzureStackHCI/operations": [
+  "Microsoft.AzureStackHCI/Operations": [
     {
       "aliases": null,
       "apiProfiles": null,
@@ -126006,7 +126019,7 @@
       "locationMappings": null,
       "locations": [],
       "properties": null,
-      "resourceType": "Microsoft.AzureStackHCI/operations",
+      "resourceType": "Microsoft.AzureStackHCI/Operations",
       "zoneMappings": null
     }
   ],
@@ -126050,7 +126063,7 @@
       "zoneMappings": null
     }
   ],
-  "Microsoft.AzureStackHCI/locations/operationstatuses": [
+  "Microsoft.AzureStackHCI/Locations/operationStatuses": [
     {
       "aliases": null,
       "apiProfiles": null,
@@ -126088,7 +126101,7 @@
         "Canada Central"
       ],
       "properties": null,
-      "resourceType": "Microsoft.AzureStackHCI/locations/operationstatuses",
+      "resourceType": "Microsoft.AzureStackHCI/Locations/operationStatuses",
       "zoneMappings": null
     }
   ],

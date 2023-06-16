@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location."
+      }
+    },
+    "certificates": {
+      "type": "secureObject",
+      "defaultValue": [
+        {
+          "password": "password"
+        }
+      ],
+      "metadata": {
+        "description": "Backend data."
+      }
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+  ],
+  "outputs": {
+    "location": {
+      "type": "string",
+      "value": "[parameters('location')]"
+   }
+  }
+}
