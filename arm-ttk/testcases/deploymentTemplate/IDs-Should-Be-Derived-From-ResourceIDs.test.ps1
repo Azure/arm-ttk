@@ -89,8 +89,7 @@ foreach ($id in $ids) {
         "policyDefinitionGuid",            # Microsoft.Sentinel/Solutions/AzureStorageAccount
         "IndicatorId",                       # Network Session Solution for Microsoft
         "aws_iam_functionapp_id",            # Microsoft.Sentinel/Solutions/AWS_IAM
-        "contentProductId",                  # Microsoft.Sentinel/Solutions
-        "id"
+        "contentProductId"                 # Microsoft.Sentinel/Solutions
         )
 
     $exceptionRegex =
