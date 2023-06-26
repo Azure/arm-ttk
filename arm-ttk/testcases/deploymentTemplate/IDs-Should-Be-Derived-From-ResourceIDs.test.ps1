@@ -90,6 +90,7 @@ foreach ($id in $ids) {
         "IndicatorId",                       # Network Session Solution for Microsoft
         "aws_iam_functionapp_id",            # Microsoft.Sentinel/Solutions/AWS_IAM
         "contentProductId"                 # Microsoft.Sentinel/Solutions
+        "id"                               # Microsoft.Sentinel/Solutions
         )
 
     $exceptionRegex =
