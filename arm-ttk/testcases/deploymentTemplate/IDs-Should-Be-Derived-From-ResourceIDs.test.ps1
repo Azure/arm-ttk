@@ -91,8 +91,7 @@ foreach ($id in $ids) {
         "contentProductId",                  # Microsoft.Sentinel/Solutions
         "aws_iam_functionapp_id",            # Microsoft.Sentinel/Solutions/AWS_IAM
         "dataCollectionEndpointId",          # Microsoft Sentinel CCP Connectors
-        "dataCollectionRuleImmutableId",     # Microsoft Sentinel CCP Connectors
-        "id"                                 # Microsoft.Sentinel/Solutions
+        "dataCollectionRuleImmutableId"     # Microsoft Sentinel CCP Connectors
     )
 
     $exceptionRegex =
