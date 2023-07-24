@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "resources": [
+        {
+            "type": "Microsoft.Resources/templateSpecs/versions",
+            "name": "TestName",
+            "properties": {
+                "description": "Test description",
+                "mainTemplate": {
+                    "resources": [
+                        {
+                            "name": "TestdataCollectionRuleId",
+                            "apiVersion": "2021-09-01-preview",
+                            "type": "Microsoft.Insights/dataCollectionRules",
+                            "properties": {
+                                "dataCollectionEndpointId": "[variables('_dataCollectionEndpointId')]",
+                                "destinations": {
+                                    "logAnalytics": [
+                                        {
+                                            "workspaceResourceId": "[variables('workspaceResourceId')]",
+                                            "name": "[variables('destinationName')]"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

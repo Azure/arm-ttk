@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "resources": [        
+    {
+        "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+        "apiVersion": "2023-04-01-preview",
+        "name": "TestName",
+        "dependsOn": [
+            "[extensionResourceId(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace')), 'Microsoft.SecurityInsights/contentPackages', variables('_solutionId'))]"
+        ],
+        "properties": {
+            "packageKind": "Solution",
+            "packageVersion": "3.0.0",
+            "packageName": "TestPackage",
+            "contentSchemaVersion": "3.0.0",
+            "contentId": "TestContentId",
+            "contentKind": "DataConnector",
+            "displayName": "My Solution Display Name",
+            "contentProductId": "DataConnectorcontentProductId",
+            "version": "1.0.0"
+        }
+    }]
+}
