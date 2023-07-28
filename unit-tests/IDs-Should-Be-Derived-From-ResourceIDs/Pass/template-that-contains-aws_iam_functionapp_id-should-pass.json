@@ -1,0 +1,83 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "resources": [
+        {
+            "type": "Microsoft.Resources/templateSpecs/versions",
+            "apiVersion": "2022-02-01",
+            "name": "TestName",
+            "location": "[parameters('workspace-location')]",
+            "tags": {
+                "hidden-sentinelWorkspaceId": "[variables('workspaceResourceId')]",
+                "hidden-sentinelContentType": "Playbook"
+            },
+            "properties": {
+                "description": "This is a test description",
+                "mainTemplate": {
+                    "parameters": {
+                        "PlaybookName": {
+                        "defaultValue": "TestPlaybookName",
+                        "type": "String"
+                        }
+                    },
+                    "variables": {
+                        "aws_iam_functionapp_id": "[variables('_aws_iam_functionapp_id')]"
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Logic/workflows",
+                            "apiVersion": "2017-07-01",
+                            "name": "TestPlaybook",
+                            "properties": {
+                                "state": "Enabled",
+                                "definition": {
+                                    "actions": {
+                                        "For_each_user": {
+                                        "foreach": "@body('Entities_-_Get_Accounts')?['Accounts']",
+                                        "actions": {
+                                            "Scope": {
+                                            "actions": {
+                                                "For_each_access_key": {
+                                                    "foreach": "@body('Parse_ListAccessKeys_response')",
+                                                    "actions": {
+                                                        "DeleteAccessKey": {
+                                                            "type": "Function",
+                                                            "inputs": {
+                                                                "function": {
+                                                                    "id": "[[concat(variables('aws_iam_functionapp_id'), '/functions/DeleteAccessKey')]"
+                                                                },
+                                                                "method": "DELETE",
+                                                                "queries": {
+                                                                    "accesskeyid": "@items('For_each_access_key')",
+                                                                    "username": "@outputs('Get_user_name')"
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    "runAfter": {
+                                                        "Parse_ListAccessKeys_response": ["Succeeded"]
+                                                    },
+                                                    "type": "Foreach"
+                                                }
+                                            },
+                                            "runAfter": {
+                                                "Get_user_name": ["Succeeded"]
+                                            },
+                                            "type": "Scope"
+                                            }
+                                        },
+                                        "runAfter": {
+                                            "Entities_-_Get_Accounts": ["Succeeded"]
+                                        },
+                                        "type": "Foreach"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

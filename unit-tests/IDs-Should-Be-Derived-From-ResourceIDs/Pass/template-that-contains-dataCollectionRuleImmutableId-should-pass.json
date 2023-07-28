@@ -1,0 +1,49 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "resources": [
+        {
+            "type": "Microsoft.Resources/templateSpecs/versions",
+            "apiVersion": "2021-05-01",
+            "name": "TestName",
+            "properties": {
+                "description": "Test description",
+                "mainTemplate": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "[variables('dataConnectorVersion2')]",
+                    "parameters": {
+                        "dcrConfig": {
+                            "type": "object",
+                            "defaultValue": {
+                                "dataCollectionEndpoint": "data collection Endpoint",
+                                "dataCollectionRuleImmutableId": "[variables('_dataCollectionRuleImmutableId')]"
+                            }
+                        },
+                        "guidValue": {
+                            "type": "string",
+                            "defaultValue": "[[newGuid()]"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "name": "[[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',variables('connectorName'))]",
+                            "apiVersion": "2023-02-01-preview",
+                            "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
+                            "location": "[parameters('workspace-location')]",
+                            "kind": "GCP",
+                            "properties": {
+                                "connectorDefinitionName": "[[parameters('connectorDefinitionName')]",
+                                "dcrConfig": {
+                                    "streamName": "[variables('streamName')]",
+                                    "dataCollectionEndpoint": "[[parameters('dcrConfig').dataCollectionEndpoint]",
+                                    "dataCollectionRuleImmutableId": "[[parameters('dcrConfig').dataCollectionRuleImmutableId]"
+                                },
+                                "dataType": "[variables('dataType')]"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
