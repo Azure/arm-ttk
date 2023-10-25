@@ -1,0 +1,56 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.22.6.54827",
+      "templateHash": "2557909781805504768"
+    }
+  },
+  "parameters": {
+    "choice": {
+      "type": "bool"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "module1",
+      "location": "[deployment().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "intext": "[if(parameters('choice'), createObject('value', 'foo'), createObject('value', 'bar'))]"
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.22.6.54827",
+              "templateHash": "10164220933236466129"
+            }
+          },
+          "parameters": {
+            "intext": {
+              "type": "string"
+            }
+          },
+          "resources": [],
+          "outputs": {
+            "outtext": {
+              "type": "string",
+              "value": "[parameters('intext')]"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
