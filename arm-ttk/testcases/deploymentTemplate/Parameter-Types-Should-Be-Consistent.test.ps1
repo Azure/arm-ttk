@@ -55,7 +55,7 @@ foreach ($inner in $originalInnerTemplates) {
                 {
                     $innerTemplateParamValue = $innerTemplateParamValue.value
                 }
-                if(($innerTemplateParamValue -isnot [array]) -and ($innerTemplateParamValue -notmatch $regexParam))
+                if(($innerTemplateParamValue -is [string]) -and ($innerTemplateParamValue -notmatch $regexParam))
                 {
                     # If this is the case, write an error
                 Write-Error -ErrorId Inconsistent.Parameter -Message "Type Mismatch: Parameter '$parameterName' in nested template '$($inner.ParentObject[0].name)' is defined as $innerTemplateParameterType, but the parent template defines it as $($parent.parameters.$mappedParameterName.type))." -TargetObject ([PSCustomObject]@{
