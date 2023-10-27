@@ -45,7 +45,7 @@ process
 
         # First, strip block comments
         $inObj = $_
-        $in = if ($InputObject.Contains('*/')) { 
+        $in = if ($InputObject.Contains('*/') -and $InputObject.Contains('/*')) { 
             $JSONBlockComments.Replace($inObj,'')
         } else {
             $InputObject
