@@ -1,6 +1,6 @@
 ﻿#region JSON Functions
 #powershell 6+ provides support for json with comments
-if ($PSVersionTable.PSVersion.Major -lt 5) {
+if ($PSVersionTable.PSVersion.Major -lt 6) {
     . $psScriptRoot\ConvertFrom-Json.ps1 # Overwriting ConvertFrom-JSON to allow for comments within JSON (not on core)
 }
 
