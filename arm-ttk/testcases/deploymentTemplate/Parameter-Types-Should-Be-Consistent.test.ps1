@@ -50,19 +50,19 @@ foreach ($inner in $originalInnerTemplates) {
                 $parent.parameters.$mappedParameterName.type -ne $innerTemplateParameterType # with a different type.    
             ) {
                 $innerTemplateParamValue = $innerTemplateParam.Value
-                $regexParam = "parameters(?<mappedParameterName>\(.*\))(\[.*?\]|\.|\,)(.*)\]" # https://regex101.com/r/ao6tsK/1 https://github.com/Azure/arm-ttk/issues/635
+                $regexParam = ".*parameters(?<mappedParameterName>\(.*\))(\[.*?\]|\.|\,)(.*)\]" # https://regex101.com/r/V0dzVv/1 and https://regex101.com/r/ao6tsK/1 https://github.com/Azure/arm-ttk/issues/635
                 if($null -ne $innerTemplateParamValue.value)
                 {
                     $innerTemplateParamValue = $innerTemplateParamValue.value
                 }
                 if(($innerTemplateParamValue -is [string]) -and ($innerTemplateParamValue -notmatch $regexParam))
                 {
-                    # If this is the case, write an error
+                # If this is the case, write an error
                 Write-Error -ErrorId Inconsistent.Parameter -Message "Type Mismatch: Parameter '$parameterName' in nested template '$($inner.ParentObject[0].name)' is defined as $innerTemplateParameterType, but the parent template defines it as $($parent.parameters.$mappedParameterName.type))." -TargetObject ([PSCustomObject]@{
-                    JSONPath = $inner.JSONPath + ".parameters.$parameterName"})
+                    JSONPath = $inner.JSONPath + ".parameters.$parameterName"
+                })
                 break # and then stop processing, because we only wish to compare this against the immediate parent template.
                 }
-                
             }
         }
     }
