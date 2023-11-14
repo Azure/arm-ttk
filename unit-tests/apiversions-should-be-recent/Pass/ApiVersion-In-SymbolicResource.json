@@ -30,7 +30,7 @@
     "resources": {
         "NestedDeployment": {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2021-04-01",
+            "apiVersion": "2023-07-01",
             "name": "[variables('nestedTemplateName_ImportVHD-FromZipArchive')]",
             "properties": {
                 "mode": "Incremental",
@@ -99,13 +99,13 @@
                     "resources": [
                         {
                             "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-                            "apiVersion": "2018-11-30",
+                            "apiVersion": "2023-01-31",
                             "name": "[variables('userAssignedIdentityName')]",
                             "location": "[parameters('location')]"
                         },
                         {
                             "type": "Microsoft.Authorization/roleAssignments",
-                            "apiVersion": "2021-04-01-preview",
+                            "apiVersion": "2022-01-01-preview",
                             "name": "[variables('roleAssignmentName')]",
                             "dependsOn": [
                                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))]"
@@ -119,7 +119,7 @@
                         },
                         {
                             "type": "Microsoft.Resources/deploymentScripts",
-                            "apiVersion": "2020-10-01",
+                            "apiVersion": "2023-08-01",
                             "name": "[parameters('deploymentScriptName')]",
                             "location": "[parameters('location')]",
                             "dependsOn": [
