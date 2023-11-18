@@ -4,7 +4,7 @@
     "resources": [
         {
             "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-            "apiVersion": "2022-09-01",
+            "apiVersion": "2023-04-01",
             "name": "[format('{0}/default/{1}', variables('storageAccountName'), variables('blobContainerName'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
