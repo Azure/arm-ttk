@@ -50,7 +50,7 @@ foreach ($inner in $originalInnerTemplates) {
                 $parent.parameters.$mappedParameterName.type -ne $innerTemplateParameterType # with a different type.    
             ) {
                 $innerTemplateParamValue = $innerTemplateParam.Value
-                $regexParam = "[.*parameters(?<mappedParameterName>\(.*\))(\[.*?\]|\.|\,)(.*)\]" # https://regex101.com/r/V0dzVv/1 and https://regex101.com/r/ao6tsK/1 https://github.com/Azure/arm-ttk/issues/635
+                $regexParam = "\[.*parameters(?<mappedParameterName>\(.*\))(\[.*?\]|\.|\,)(.*)\]" # https://regex101.com/r/V0dzVv/1 and https://regex101.com/r/ao6tsK/1 https://github.com/Azure/arm-ttk/issues/635
                 if($null -ne $innerTemplateParamValue.value)
                 {
                     $innerTemplateParamValue = $innerTemplateParamValue.value
