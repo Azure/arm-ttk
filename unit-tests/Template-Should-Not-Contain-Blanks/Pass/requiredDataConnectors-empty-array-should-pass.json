@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "name": "TestAnalyticRule",
+      "properties": {
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.2",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.SecurityInsights/AlertRuleTemplates",
+              "name": "TestAnalyticRuleName",
+              "apiVersion": "2022-04-01-preview",
+              "kind": "Scheduled",
+              "properties": {
+                "displayName": "Test Rule",
+                "enabled": false,
+                "query": "Test Query",
+                "requiredDataConnectors": []
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}
