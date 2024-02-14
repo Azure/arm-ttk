@@ -32,7 +32,8 @@ param(
                             'clientId', # Microsoft.ContainerService/managedClusters.properties.servicePrincipalProfile
                             'allowedCallerIpAddresses', # Microsoft.Logic/workflows Access Control
                             'workerPools', # Microsoft.Web/hostingEnvironments
-                            'AzureMonitor' # Microsoft.Insights/VMDiagnosticsSettings
+                            'AzureMonitor', # Microsoft.Insights/VMDiagnosticsSettings
+                            'requiredDataConnectors' #Microsoft.SecurityInsights/AlertRuleTemplates
     ),
 
     # Some properties can be empty within a given resource.
