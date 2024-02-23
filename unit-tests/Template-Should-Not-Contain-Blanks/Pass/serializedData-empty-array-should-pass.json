@@ -1,0 +1,39 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentTemplates",
+      "apiVersion": "2023-04-01-preview",
+      "name": "TestWorkbookName",
+      "properties": {
+        "description": "Test Workbook with template version 3.0.3",
+        "mainTemplate": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "2.1.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.Insights/workbooks",
+              "name": "TestContent",
+              "kind": "shared",
+              "apiVersion": "2021-08-01",
+              "metadata": {
+                "description": "Test description"
+              },
+              "properties": {
+                "displayName": "Test Workbook Display Name",
+                "serializedData": "{\"version\":\"Notebook/1.0\",\"items\":[{\"type\":1,\"content\":{\"json\":\"# test\"},\"customWidth\":\"35\",\"name\":\"Headline\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"{\\\"version\\\":\\\"ARMEndpoint/1.0\\\",\\\"headers\\\":[],\\\"method\\\":\\\"POST\\\",\\\"path\\\":\\\"/subscriptions/{Subscription:id}/resourceGroups/{resourceGroup}/providers/Microsoft.OperationalInsights/workspaces/{Workspace:name}/providers/Microsoft.SecurityInsights/incidents/{IncidentID}/entities\\\",\\\"urlParams\\\":[{\\\"key\\\":\\\"api-version\\\",\\\"value\\\":\\\"2021-04-01\\\"}],\\\"batchDisabled\\\":false,\\\"transformers\\\":[{\\\"type\\\":\\\"jsonpath\\\",\\\"settings\\\":{\\\"tablePath\\\":\\\"$.metaData\\\",\\\"columns\\\":[]}}]}\\r\\n\",\"size\":2,\"noDataMessage\":\"No entities were found\",\"noDataMessageStyle\":4,\"queryType\":12,\"visualization\":\"piechart\",\"tileSettings\":{\"titleContent\":{\"columnMatch\":\"entityKind\",\"formatter\":12,\"formatOptions\":{\"palette\":\"blue\"}},\"leftContent\":{\"columnMatch\":\"count\",\"formatter\":1,\"numberFormat\":{\"unit\":0,\"options\":{\"style\":\"decimal\"}}},\"showBorder\":false,\"sortCriteriaField\":\"Order\",\"sortOrderField\":1,\"size\":\"auto\"}},\"customWidth\":\"30\",\"name\":\"Entities\"}],\"fromTemplateId\":\"test1\",\"$schema\":\"test\"}\r\n",
+                "version": "1.0"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

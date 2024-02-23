@@ -42,7 +42,8 @@ param(
     # A value of "properties.settings" would allow blanks in any subproperty of settings.
     [Collections.IDictionary]
     $ResourcePropertiesThatCanBeEmpty = @{
-        "Microsoft.Web/sites/config" = "properties"
+        "Microsoft.Web/sites/config" = "properties";
+        "Microsoft.Insights/workbooks" = "properties.serializedData"
     }
 )
 
