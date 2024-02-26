@@ -65,7 +65,7 @@ if ($artifactslocationParameter -ne $null) {
         #if it's not main template, there must not be a defaultValue to ensure the value is passed through
         if ($artifactslocationParameter.defaultValue -or 
             $artifactslocationSasTokenParameter.defaultValue) {
-            Write-Error "The _artifactsLocation and _artifactsLocationSasToken parameters in `"$TemplateFileName`" must not have a defaulValue in a nested template." -ErrorId ArtifactsLocation.Parameter.DefaultValue.NotEmpty
+            Write-Error "The _artifactsLocation and _artifactsLocationSasToken parameters in `"$TemplateFileName`" must not have a defaultValue in a nested template." -ErrorId ArtifactsLocation.Parameter.DefaultValue.NotEmpty
         }    
     } 
 } # there is a parameter named _artifactsLocation
