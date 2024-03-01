@@ -22,6 +22,7 @@ $noToolTipControls = "Microsoft.Common.InfoBox",
                      "Microsoft.Common.Section", 
                      "Microsoft.Common.TextBlock", 
                      "Microsoft.Solutions.ArmApiControl",
+                     "Microsoft.Solutions.GraphApiControl",
                      "Microsoft.Common.EditableGrid"
 
 foreach ($shouldHave in $shouldHaveTooltips) {
