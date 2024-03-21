@@ -47,7 +47,7 @@ Function Format-Json {
 
     End {
         # Convert the array of hashtables to JSON
-        $JSON = $TestCases | ConvertTo-Json -Depth 5
+        $JSON = $TestCases | ConvertTo-Json
 
         # Print the JSON string to the console
         Write-Output $JSON
