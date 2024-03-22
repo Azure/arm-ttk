@@ -24,7 +24,14 @@ This will run the full suite of applicable tests on your template.  To run a spe
 You can also skip tests any tests:
 
     Test-AzTemplate -TemplatePath $thePathToYourTemplate -Skip apiVersions-Should-Be-Recent 
-    # This will exclude the tests indicated by the -Skip parameter from the test run and results     
+    # This will exclude the tests indicated by the -Skip parameter from the test run and results    
+
+You can also change the output format to get detailed test result descriptions in JSON:
+
+    Test-AzTemplate -TemplatePath $thePathToYourTemplate | Format-Json
+    # This will output the test results from Test-AzTemplate to the console in JSON format
+    Test-AzMarketplacePackage -TemplatePath $thePathToYourTemplate | Format-Json
+    # This will output the test results from AzMarketplacePackage to the console in JSON format
 
 ## Running Tests on Linux
 
