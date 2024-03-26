@@ -23,7 +23,8 @@ $noToolTipControls = "Microsoft.Common.InfoBox",
                      "Microsoft.Common.TextBlock", 
                      "Microsoft.Solutions.ArmApiControl",
                      "Microsoft.Solutions.GraphApiControl",
-                     "Microsoft.Common.EditableGrid"
+                     "Microsoft.Common.EditableGrid",
+                     "Microsoft.Solutions.JitConfigurator"
 
 foreach ($shouldHave in $shouldHaveTooltips) {
     # then loop through each control
