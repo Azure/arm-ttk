@@ -6,6 +6,6 @@
     "variables": {},
     "resources": [],
     "outputs": {
-        "NonPreviewVersionWhereSamePreviewDateExists" : "[reference(resourceId('Microsoft.DBforMySQL/servers', 'test'), '2017-12-01')]"
+        "NonPreviewVersionWhereSamePreviewDateExists" : "[reference(resourceId('Microsoft.DBforMySQL/servers', 'test'), '2020-01-01')]"
     }
 }
