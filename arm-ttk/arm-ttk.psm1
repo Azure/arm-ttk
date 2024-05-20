@@ -16,6 +16,7 @@ if ($PSVersionTable.PSVersion.Major -lt 6) {
 . $PSScriptRoot\Test-AzMarketplacePackage.ps1
 
 . $PSScriptRoot\Format-AzTemplate.ps1
+. $PSScriptRoot\Format-Json.ps1
 #endregion Template Functions
 
 #region Cache Functions
