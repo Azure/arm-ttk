@@ -38,7 +38,7 @@ jobs:
           Write-Host "::debug:: RunPester $(@(foreach ($p in $Parameters.GetEnumerator()) {'-' + $p.Key + ' ' + $p.Value}) -join ' ')"
           & './arm-ttk/GitHubWorkflow/Steps/RunPester.ps1' @Parameters
       - name: PublishTestResults
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with: 
           name: PesterResults
           path: '**.TestResults.xml'
