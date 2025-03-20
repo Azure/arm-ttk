@@ -1,8 +1,8 @@
 <#
 .Synopsis
-    Ensures that all adminUsernames are expressions
+    Ensures that all adminPasswords are expressions
 .Description
-    Ensures that all properties within a template named adminUsername are expressions, not literal strings
+    Ensures that all properties within a template named adminPassword are expressions, not literal strings
 #>
 param(
     [Parameter(Mandatory = $true)]
@@ -10,7 +10,7 @@ param(
     $TemplateObject
 )
 
-# Find all references to an adminUserName
+# Find all references to an adminPassword
 # Filtering the complete $TemplateObject directly fails with "The script failed due to call depth overflow." errors
 
 if ("resources" -in $TemplateObject.PSobject.Properties.Name) {
@@ -90,7 +90,7 @@ if ("variables" -in $TemplateObject.PSobject.Properties.Name) {
         $LoginPasswordHasFunction = $trimmedAdminLoginPassword | ?<ARM_Template_Function> -Extract
 
         # If we had a variable reference (not inside of another function) - then check it
-        # TODO this will not flag things like concat so we should add a blacklist here to ensure it's still not a static or deterministic username
+        # TODO this will not flag things like concat so we should add a blacklist here to ensure it's still not a static or deterministic password
         if ($LoginPasswordHasVariable -and $LoginPasswordHasFunction.FunctionName -eq 'variables') { 
             $variableValue = $TemplateObject.variables.($LoginPasswordHasVariable.VariableName)
             $variableValueExpression = $variableValue | ?<ARM_Template_Expression>
@@ -124,7 +124,7 @@ AdminLoginPassword references variable '$($LoginPasswordHasVariable.variableName
         $LoginPasswordHasFunction = $trimmedAdminPassword | ?<ARM_Template_Function> -Extract
 
         # If we had a variable reference (not inside of another function) - then check it
-        # TODO this will not flag things like concat so we should add a blacklist here to ensure it's still not a static or deterministic username
+        # TODO this will not flag things like concat so we should add a blacklist here to ensure it's still not a static or deterministic password
         if ($LoginPasswordHasVariable -and $LoginPasswordHasFunction.FunctionName -eq 'variables') { 
             $variableValue = $TemplateObject.variables.($LoginPasswordHasVariable.VariableName)
             $variableValueExpression = $variableValue | ?<ARM_Template_Expression>
