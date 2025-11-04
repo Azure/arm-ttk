@@ -1,0 +1,124 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Azure.CreateUIDef",
+  "version": "0.1.2-preview",
+  "parameters": {
+    "resourceTypes": [
+      "microsoft.resources/resourcegroups"
+    ],
+    "basics": [
+      {
+        "name": "sites_BETemplate_name",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Site Name",
+        "subLabel": "The name of the site. Will become sitename.azurewebsites.net",
+        "toolTip": "Enter the name of the site. The site name will be sitename.azurewebsites.net",
+        "constraints": {
+          "required": true,
+          "regex": "^[a-zA-Z0-9-]{1,30}$",
+          "validationMessage": "Site name is invalid, pleas re-enter"
+        },
+        "visible": true
+      },
+      {
+        "name": "serverfarms_BETemplatePlan_name",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Server Plan Name",
+        "subLabel": "The Name for the Server Plan.  Recommended: !!SITENAME!!Plan",
+        "toolTip": "The Name for the Server Farm Plan",
+        "constraints": {
+          "required": true,
+          "regex": "^[a-zA-Z0-9-]{1,30}$",
+          "validationMessage": "Please re-enter a valid server plan name"
+        },
+        "visible": true
+      },
+      {
+        "name": "managedIdentityName",
+        "type": "Microsoft.ManagedIdentity.IdentitySelector",
+        "label": "Managed Identity Configuration",
+        "toolTip": {
+          "systemAssignedIdentity": "Enable system assigned identity to grant the resource access to other existing resources.",
+          "userAssignedIdentity": "Add user assigned identities to grant the resource access to other existing resources."
+        },
+        "defaultValue": {
+          "systemAssignedIdentity": "Off"
+        },
+        "constraints": { 
+          "required": true 
+        },
+        "options": {
+          "hideSystemAssignedIdentity": true,
+          "hideUserAssignedIdentity": false
+        },
+        "visible": true
+      },
+      {
+        "name": "storageAccounts_wowtemplatestorage_name",
+        "type": "Microsoft.Common.Section",
+        "label": "Single Selector",
+        "elements": [
+          {
+            "name": "singleStorage",
+            "type": "Microsoft.Storage.StorageAccountSelector",
+            "label": "Storage account",
+            "toolTip": "Enter or create the new storage account for the template",
+            "defaultValue": {
+              "name": "uniquestorageaccount01",
+              "type": "Premium_LRS"
+            },
+            "options": {
+              "hideExisting": true
+            },
+            "visible": true
+          }
+        ],
+        "visible": true
+      },
+      {
+        "name": "entraId_Application_ClientName",
+        "type": "Microsoft.Common.TextBox",
+        "label": "EntraId Application Client Name",
+        "subLabel": "The name of the new client application in EntraId.  Recommended: !!SITENAME!!Client",
+        "toolTip": "The name of the World of Workflows Client Entra Id Application",
+        "constraints": {
+          "required": true,
+          "regex": "^[a-zA-Z0-9]{1,30}$",
+          "validationMessage": "Please enter a valid name for the Entra Id Client Application"
+        },
+        "visible": true
+      },
+      {
+        "name": "entraId_Application_ServerName",
+        "type": "Microsoft.Common.TextBox",
+        "label": "EntraId Application Server Name",
+        "subLabel": "The name of the new server application in EntraId.  Recommended: !!SITENAME!!Server",
+        "toolTip": "The name of the World of Workflows Server Entra Id Application",
+        "constraints": {
+          "required": true,
+          "regex": "^[a-zA-Z0-9]{1,30}$",
+          "validationMessage": "Please enter a valid name for the EntraId Server Application"
+        },
+        "visible": true
+      }
+    ],
+    "steps": [],
+    "outputs": {
+      "sites_BETemplate_name": "[basics('sites_BETemplate_name')]",
+      "serverfarms_BETemplatePlan_name": "[basics('serverfarms_BETemplatePlan_name')]",
+      "managedIdentityName": "[basics('managedIdentityName')]",
+      "managedIdentity": "[basics('managedIdentityName')]",
+      "storageAccounts_wowtemplatestorage_name": "[basics('storageAccounts_wowtemplatestorage_name').singleStorage.name]",
+      "entraId_Application_ClientName": "[basics('entraId_Application_ClientName')]",
+      "entraId_Application_ServerName": "[basics('entraId_Application_ServerName')]",
+      "location":"[location()]"
+    },
+    "outputs.validation": 
+    [
+      {
+        "if": "[empty(basics('managedIdentityName').userAssignedIdentities)]",
+        "message": "Please select at least one user-assigned managed identity before proceeding."
+      }
+    ]
+  }
+}

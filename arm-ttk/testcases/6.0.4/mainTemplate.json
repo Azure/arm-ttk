@@ -1,0 +1,2235 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "sites_BETemplate_name": {
+      "defaultValue": "BETemplate",
+      "type": "String"
+    },
+    "serverfarms_BETemplatePlan_name": {
+      "defaultValue": "BETemplatePlan",
+      "type": "String"
+    },
+    "managedIdentityName": {
+      "type": "object",
+      "metadata": {
+        "description": "The object of the user-assigned managed identity that has permission to create Azure AD applications."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "The location in which the resources should be deployed."
+      }
+    },
+    "storageAccounts_wowtemplatestorage_name": {
+      "defaultValue": "wowtemplatestorage",
+      "type": "String"
+    },
+    "entraId_Application_ClientName": {
+      "type": "String",
+      "defaultValue": "WOW2Client",
+      "metadata": {
+        "description": "The name of the World of Workflows Client Entra Id Application"
+      }
+    },
+    "entraId_Application_ServerName": {
+      "type": "String",
+      "defaultValue": "WOW2Server",
+      "metadata": {
+        "description": "The name of the World of Workflows Server Entra Id Application"
+      }
+    },
+    "releasesStorageAccountName": {
+      "type": "string",
+      "defaultValue": "wowreleases"
+    },
+    "releasesStorageAccountResourceGroup": {
+      "type": "string",
+      "defaultValue": "PRODUCTION"
+    },
+    "blobContainer": {
+      "type": "string",
+      "defaultValue": "latest"
+    },
+    "blobName": {
+      "type": "string",
+      "defaultValue": "linux-x64.v1.8.v445.zip"
+    },
+    "sasStartTime":{
+      "type":"string",
+      "defaultValue":"[dateTimeAdd(utcNow(), '-PT5M')]",
+      "metadata": {
+        "description": "The start time of the sas"
+      }
+    },
+    "sasExpiryTime":{
+      "type":"string",
+      "defaultValue":"[dateTimeAdd(utcNow(), 'P6D')]",
+      "metadata": {
+        "description": "The end time of the sas"
+      }
+    }
+    
+  },
+  "variables": {
+    "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_wowtemplatestorage_name'))]",
+    "LoginLocation": "login.microsoftonline",
+    "sasDefinition": {
+      "canonicalizedResourceOld": "[concat('/blob/', parameters('releasesStorageAccountName'), '/', parameters('blobContainer'), '/', parameters('blobName'))]",
+      "canonicalizedResource":"['/blob/wowreleases/latest/linux-x64.v1.8.v445.zip']",
+      "signedResource":        "b",
+      "signedPermission":      "r",
+      "signedStart":           "[parameters('sasStartTime')]",
+      "signedExpiry":          "[parameters('sasExpiryTime')]",
+      "signedProtocol":        "https"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-04-01",
+      "name": "[parameters('storageAccounts_wowtemplatestorage_name')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "dnsEndpointType": "Standard",
+        "defaultToOAuthAuthentication": false,
+        "publicNetworkAccess": "Enabled",
+        "allowCrossTenantReplication": false,
+        "minimumTlsVersion": "TLS1_2",
+        "allowBlobPublicAccess": false,
+        "allowSharedKeyAccess": true,
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "defaultAction": "Allow"
+        },
+        "supportsHttpsTrafficOnly": true,
+        "encryption": {
+          "requireInfrastructureEncryption": false,
+          "services": {
+            "file": {
+              "keyType": "Account",
+              "enabled": true
+            },
+            "blob": {
+              "keyType": "Account",
+              "enabled": true
+            }
+          },
+          "keySource": "Microsoft.Storage"
+        },
+        "accessTier": "Hot"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2023-01-01",
+      "name": "[parameters('serverfarms_BETemplatePlan_name')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "P1v3",
+        "tier": "PremiumV3",
+        "size": "P1v3",
+        "family": "Pv3",
+        "capacity": 1
+      },
+      "kind": "linux",
+      "properties": {
+        "perSiteScaling": false,
+        "elasticScaleEnabled": false,
+        "maximumElasticWorkerCount": 1,
+        "isSpot": false,
+        "reserved": true,
+        "isXenon": false,
+        "hyperV": false,
+        "targetWorkerCount": 0,
+        "targetWorkerSizeId": 0,
+        "zoneRedundant": false
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/fileServices",
+      "apiVersion": "2023-04-01",
+      "name": "[concat(parameters('storageAccounts_wowtemplatestorage_name'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_wowtemplatestorage_name'))]"
+      ],
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "properties": {
+        "shareDeleteRetentionPolicy": {
+          "enabled": true,
+          "days": 14
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2023-01-01",
+      "name": "[parameters('sites_BETemplate_name')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_BETemplatePlan_name'))]",
+        "[resourceId('Microsoft.Resources/deploymentScripts','CreateAzureADObjectsAndOutput')]"
+      ],
+      "kind": "app,linux",
+      "properties": {
+        "enabled": true,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_BETemplatePlan_name'))]",
+        "reserved": true,
+        "isXenon": false,
+        "hyperV": false,
+        "vnetRouteAllEnabled": false,
+        "vnetImagePullEnabled": false,
+        "vnetContentShareEnabled": false,
+        "siteConfig": {
+          "numberOfWorkers": 1,
+          "linuxFxVersion": "DOTNETCORE|8.0",
+          "acrUseManagedIdentityCreds": false,
+          "alwaysOn": false,
+          "http20Enabled": false,
+          "functionAppScaleLimit": 0,
+          "minimumElasticInstanceCount": 0,
+          "appSettings": [
+            {
+              "name": "AllowedHosts",
+              "value": "*",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__CallbackPath",
+              "value": "/signin.oidc",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__ClientId",
+              "value": "[reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__ClientSecret",
+              "value": "[reference('CreateAzureADObjectsAndOutput').outputs.ServerSecret]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Domain",
+              "value": "ATXPZ9TH3NH0TDR300DGE0XAS5.smtp.exclaimer.cloud",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Instance",
+              "value": "[format('https://{0}.com',variables('LoginLocation'))]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__AuthorizationCode__AuthorizationUrl",
+              "value": "[format('https://{0}.com/{1}/oauth2/v2.0/authorize',variables('LoginLocation'),subscription().tenantId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__AuthorizationCode__TokenUrl",
+              "value": "[format('https://{0}.com/{1}/oauth2/v2.0/token',variables('LoginLocation'),subscription().tenantId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__ClientId",
+              "value": "5b4d46db-91cb-4b8f-8d72-24c77cf1745f",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Description",
+              "value": "Azure Active Directory using OAuth2.0",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Name",
+              "value": "Azure Active Directory",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__CountStats.Read.All__Description",
+              "value": "Read count statistical conuts",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__CountStats.Read.All__Value",
+              "value": "[format('api://{0}/CountStats.Read.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__DataTypes.Read.All__Description",
+              "value": "Read data types",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__DataTypes.Read.All__Value",
+              "value": "[format('api://{0}/DataTypes.Read.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Identity.Read.Own__Description",
+              "value": "Read permissions",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Identity.Read.Own__Value",
+              "value": "[format('api://{0}/Identity.Read.Own',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.Delete.All__Description",
+              "value": "Delete object instances",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.Delete.All__Value",
+              "value": "[format('api://{0}/ObjectInstances.Delete.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.InvokeWorkflow.All__Description",
+              "value": "Invoke object instance workflows",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.InvokeWorkflow.All__Value",
+              "value": "[format('api://{0}/ObjectInstances.InvokeWorkflow.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.Read.All__Description",
+              "value": "Read object instances",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.Read.All__Value",
+              "value": "[format('api://{0}/ObjectInstances.Read.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.Read.Basic__Description",
+              "value": "Read basic object instance info",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.Read.Basic__Value",
+              "value": "[format('api://{0}/ObjectInstances.Read.Basic',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.Read.Current__Description",
+              "value": "Read current object instance data",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.Read.Current__Value",
+              "value": "[format('api://{0}/ObjectInstances.Read.Current',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.Read.History__Description",
+              "value": "Read object instance history",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.Read.History__Value",
+              "value": "[format('api://{0}/ObjectInstances.Read.History',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.ReadWrite.All__Description",
+              "value": "Read and write object instances",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.ReadWrite.All__Value",
+              "value": "[format('api://{0}/ObjectInstances.ReadWrite.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.Write.All__Description",
+              "value": "Create and update object instances",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectInstances.Write.All__Value",
+              "value": "[format('api://{0}/ObjectInstances.Write.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectTypes.Delete.All__Description",
+              "value": "Delete object types",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectTypes.Delete.All__Value",
+              "value": "[format('api://{0}/ObjectTypes.Delete.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectTypes.Read.All__Description",
+              "value": "Read object type definitions",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectTypes.Read.All__Value",
+              "value": "[format('api://{0}/ObjectTypes.Read.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectTypes.ReadWrite.All__Description",
+              "value": "Read and write object type definitions",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectTypes.ReadWrite.All__Value",
+              "value": "[format('api://{0}/ObjectTypes.ReadWrite.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectTypes.Write.All__Description",
+              "value": "Write object instances",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ObjectTypes.Write.All__Value",
+              "value": "[format('api://{0}/ObjectTypes.Write.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Plugins.Add__Description",
+              "value": "Add plugins",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Plugins.Add__Value",
+              "value": "[format('api://{0}/Plugins.Add',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Plugins.Read.All__Description",
+              "value": "Read plugins",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Plugins.Read.All__Value",
+              "value": "[format('api://{0}/Plugins.Read.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Server.Backup__Description",
+              "value": "Initiate database backup",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Server.Backup__Value",
+              "value": "[format('api://{0}/Server.Backup',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Server.FixElsa__Description",
+              "value": "Repair Elsa HTTP endpoints",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Server.FixElsa__Value",
+              "value": "[format('api://{0}/Server.FixElsa',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Server.Restart__Description",
+              "value": "Restart the server",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Server.Restart__Value",
+              "value": "[format('api://{0}/Server.Restart',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Assign.All__Description",
+              "value": "Assign tasks to any user",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Assign.All__Value",
+              "value": "format('api://{0}/Tasks.Assign.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Assign.AssignedTo__Description",
+              "value": "Reassign tasks to any user",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Assign.AssignedTo__Value",
+              "value": "[format('api://{0}/Tasks.Assign.AssignedTo',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Assign.Available__Description",
+              "value": "Assign available tasks to any user",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Assign.Available__Value",
+              "value": "[format('api://{0}/Tasks.Assign.Available',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.AssignToSelf.All__Description",
+              "value": "Pick any tasks",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.AssignToSelf.All__Value",
+              "value": "[format('api://{0}/Tasks.AssignToSelf.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.AssignToSelf.Available__Description",
+              "value": "Pick available tasks",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.AssignToSelf.Available__Value",
+              "value": "[format('api://{0}/Tasks.AssignToSelf.Available',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Close.All__Description",
+              "value": "Close all tasks",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Close.All__Value",
+              "value": "[format('api://{0}/Tasks.Close.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Close.AssignedTo__Description",
+              "value": "Close assigned tasks",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Close.AssignedTo__Value",
+              "value": "[format('api://{0}/Tasks.Close.AssignedTo',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Read.All__Description",
+              "value": "Read all tasks",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Read.All__Value",
+              "value": "[format('api://{0}/Tasks.Read.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Read.Assigned__Description",
+              "value": "Read assigned tasks",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Read.Assigned__Value",
+              "value": "[format('api://{0}/Tasks.Read.Assigned',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Read.AssignedTo__Description",
+              "value": "Read assigned tasks",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Read.AssignedTo__Value",
+              "value": "[format('api://{0}/Tasks.Read.AssignedTo',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Read.Available__Description",
+              "value": "Read available tasks",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Read.Available__Value",
+              "value": "[format('api://{0}/Tasks.Read.Available',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.ReadWrite.All__Description",
+              "value": "Read and write tasks",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.ReadWrite.All__Value",
+              "value": "[format('api://{0}/Tasks.ReadWrite.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Unassign.AssignedTo__Description",
+              "value": "Deallocate assigned task",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Unassign.AssignedTo__Value",
+              "value": "[format('api://{0}/Tasks.Unassign.AssignedTo',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Write.All__Description",
+              "value": "Write tasks",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Tasks.Write.All__Value",
+              "value": "[format('api://{0}/Tasks.Write.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ViewDefinitions.Read.All__Description",
+              "value": "Read view definitions",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ViewDefinitions.Read.All__Value",
+              "value": "[format('api://{0}/ViewDefinitions.Read.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ViewDefinitions.ReadWrite.All__Description",
+              "value": "Read and write view defintions",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ViewDefinitions.ReadWrite.All__Value",
+              "value": "[format('api://{0}/ViewDefinitions.ReadWrite.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ViewDefinitions.Write.All__Description",
+              "value": "Write view definitions",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__ViewDefinitions.Write.All__Value",
+              "value": "[format('api://{0}/ViewDefinitions.Write.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Views.Read.All__Description",
+              "value": "Read view data",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Views.Read.All__Value",
+              "value": "[format('api://{0}/Views.Read.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Workflow.Invoke.All__Description",
+              "value": "Invoke workflows",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__Workflow.Invoke.All__Value",
+              "value": "[format('api://{0}/Workflow.Invoke.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowActivityDefinition.Read.All__Description",
+              "value": "Read workflow activity definitions",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowActivityDefinition.Read.All__Value",
+              "value": "[format('api://{0}/WorkflowActivityDefinition.Read.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowActivityStatistics.Read.All__Description",
+              "value": "Read workflow activity statistics",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowActivityStatistics.Read.All__Value",
+              "value": "[format('api://{0}/WorkflowActivityStatistics.Read.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowConductor.Invoke.All__Description",
+              "value": "Invoke workflow conductors",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowConductor.Invoke.All__Value",
+              "value": "[format('api://{0}/WorkflowConductor.Invoke.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowConductor.Invoke.Events__Description",
+              "value": "Invoke workflow conductor events",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowConductor.Invoke.Events__Value",
+              "value": "[format('api://{0}/WorkflowConductor.Invoke.Events',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowConductor.Invoke.Tasks__Description",
+              "value": "Invoke workflow conductor tasks",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowConductor.Invoke.Tasks__Value",
+              "value": "[format('api://{0}/WorkflowConductor.Invoke.Tasks',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowDefinition.Delete.All__Description",
+              "value": "Delete workflow definitions",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowDefinition.Delete.All__Value",
+              "value": "[format('api://{0}/WorkflowDefinition.Delete.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowDefinition.Publish.All__Description",
+              "value": "Publish workflow definitions",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowDefinition.Publish.All__Value",
+              "value": "[format('api://{0}/WorkflowDefinition.Publish.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowDefinition.Read.All__Description",
+              "value": "Read workflow definitions",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowDefinition.Read.All__Value",
+              "value": "[format('api://{0}/WorkflowDefinition.Read.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowDefinition.ReadWrite.All__Description",
+              "value": "Read and write workflow definitions",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowDefinition.ReadWrite.All__Value",
+              "value": "[format('api://{0}/WorkflowDefinition.ReadWrite.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowDefinition.Test.All__Description",
+              "value": "Test workflow definitions",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowDefinition.Test.All__Value",
+              "value": "[format('api://{0}/WorkflowDefinition.Test.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowDefinition.Write.All__Description",
+              "value": "Write workflow definitions",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowDefinition.Write.All__Value",
+              "value": "[format('api://{0}/WorkflowDefinition.Write.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowDesigner.Read.All__Description",
+              "value": "Use workflow designer",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowDesigner.Read.All__Value",
+              "value": "[format('api://{0}/WorkflowDesigner.Read.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowInstance.Cancel.All__Description",
+              "value": "Cancel workflow instances",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowInstance.Cancel.All__Value",
+              "value": "[format('api://{0}/WorkflowInstance.Cancel.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowInstance.Delete.All__Description",
+              "value": "Delete workflow instances",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowInstance.Delete.All__Value",
+              "value": "[format('api://{0}/WorkflowInstance.Delete.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowInstance.Read.All__Description",
+              "value": "Read workflow instances",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowInstance.Read.All__Value",
+              "value": "[format('api://{0}/WorkflowInstance.Read.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowInstance.Retry.All__Description",
+              "value": "Retry workflow instances",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowInstance.Retry.All__Value",
+              "value": "[format('api://{0}/WorkflowInstance.Retry.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowInstanceExecutionLog.Read.All__Description",
+              "value": "Read workflow instance execution logs",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowInstanceExecutionLog.Read.All__Value",
+              "value": "[format('api://{0}/WorkflowInstanceExecutionLog.Read.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowSecrets.ReadWrite.All__Description",
+              "value": "Read and write workflow secrets",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowSecrets.ReadWrite.All__Value",
+              "value": "[format('api://{0}/WorkflowSecrets.ReadWrite.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowSignal.InvokeByName.All__Description",
+              "value": "Invoke workflow signals by name",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__OpenApi__Scopes__WorkflowSignal.InvokeByName.All__Value",
+              "value": "[format('api://{0}/WorkflowSignal.InvokeByName.All',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Objects__Instances__Delete__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Objects__Instances__InvokeWorkflow__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Objects__Instances__Read__Current__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Objects__Instances__Read__Desired__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Objects__Instances__Read__History__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Objects__Instances__Write__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Objects__Types__Columns__Delete__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Objects__Types__Columns__Write__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Objects__Types__Delete__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Objects__Types__Write__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Plugins__Add__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Plugins__Read__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Server__Backup__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Server__FixElsa__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Server__Restart__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Stats__ReadAllCounts__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Tasks__Assign__All__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Tasks__Assign__AssignedTo__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Tasks__Assign__Available__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Tasks__AssignToSelf__All__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Tasks__Close__All__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Tasks__Count__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Tasks__Read__All__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Users__Count__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Views__Definitions__Write__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Workflows__Activity__Definition__Read__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Workflows__Activity__Statistics__Read__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Workflows__Definitions__Delete__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Workflows__Definitions__Publish__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Workflows__Definitions__Read__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Workflows__Definitions__Test__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Workflows__Definitions__Write__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Workflows__Instance__ExecutionLog__Read__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Workflows__Instance__Instance__Cancel__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Workflows__Instance__Instance__Delete__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Workflows__Instance__Instance__Read__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Workflows__Instance__Instance__Retry__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Workflows__Invoke__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Workflows__Secrets__Manage__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Roles__Workflows__Signal__InvokeByName__0",
+              "value": "Administrator",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__DataTypes__Read",
+              "value": "DataTypes.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Identity__Read",
+              "value": "Identity.Read.Own",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__Delete",
+              "value": "ObjectInstances.Delete.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__InvokeWorkflow",
+              "value": "ObjectInstances.InvokeWorkflow.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__Read__Basic__0",
+              "value": "ObjectInstances.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__Read__Basic__1",
+              "value": "ObjectInstances.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__Read__Basic__2",
+              "value": "ObjectInstances.Read.Basic",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__Read__Basic__3",
+              "value": "ObjectInstances.Read.Current",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__Read__Current__0",
+              "value": "ObjectInstances.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__Read__Current__1",
+              "value": "ObjectInstances.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__Read__Current__2",
+              "value": "ObjectInstances.Read.Current",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__Read__Desired__0",
+              "value": "ObjectInstances.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__Read__Desired__1",
+              "value": "ObjectInstances.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__Read__History__0",
+              "value": "ObjectInstances.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__Read__History__1",
+              "value": "ObjectInstances.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__Read__History__2",
+              "value": "ObjectInstances.Read.History",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__Write__0",
+              "value": "ObjectInstances.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Instances__Write__1",
+              "value": "ObjectInstances.Write.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Types__Columns__Delete__0",
+              "value": "ObjectTypes.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Types__Columns__Delete__1",
+              "value": "ObjectTypes.Write.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Types__Columns__Read__0",
+              "value": "ObjectTypes.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Types__Columns__Read__1",
+              "value": "ObjectTypes.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Types__Columns__Write__0",
+              "value": "ObjectTypes.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Types__Columns__Write__1",
+              "value": "ObjectTypes.Write.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Types__Count__0",
+              "value": "CountStats.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Types__Count__1",
+              "value": "ObjectTypes.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Types__Count__2",
+              "value": "ObjectTypes.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Types__Delete",
+              "value": "ObjectTypes.Delete.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Types__Read__0",
+              "value": "ObjectTypes.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Types__Read__1",
+              "value": "ObjectTypes.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Types__Write__0",
+              "value": "ObjectTypes.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Objects__Types__Write__1",
+              "value": "ObjectTypes.Write.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Plugins__Add",
+              "value": "Plugins.Add",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Plugins__Read",
+              "value": "Plugins.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Server__Backup",
+              "value": "Server.Backup",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Server__FixElsa",
+              "value": "Server.FixElsa",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Server__Restart",
+              "value": "Server.Restart",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Stats__ReadAllCounts",
+              "value": "CountStats.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Assign__All__0",
+              "value": "Tasks.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Assign__All__1",
+              "value": "Tasks.Write.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Assign__All__2",
+              "value": "Tasks.Assign.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Assign__AssignedTo__0",
+              "value": "Tasks.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Assign__AssignedTo__1",
+              "value": "Tasks.Write.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Assign__AssignedTo__2",
+              "value": "Tasks.Assign.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Assign__AssignedTo__3",
+              "value": "Tasks.Assign.AssignedTo",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Assign__Available__0",
+              "value": "Tasks.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Assign__Available__1",
+              "value": "Tasks.Write.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Assign__Available__2",
+              "value": "Tasks.Assign.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Assign__Available__3",
+              "value": "Tasks.Assign.Available",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__AssignToSelf__All__0",
+              "value": "Tasks.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__AssignToSelf__All__1",
+              "value": "Tasks.Write.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__AssignToSelf__All__2",
+              "value": "Tasks.Assign.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__AssignToSelf__All__3",
+              "value": "Tasks.AssignToSelf.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__AssignToSelf__Available__0",
+              "value": "Tasks.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__AssignToSelf__Available__1",
+              "value": "Tasks.Write.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__AssignToSelf__Available__2",
+              "value": "Tasks.Assign.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__AssignToSelf__Available__3",
+              "value": "Tasks.Assign.Available",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__AssignToSelf__Available__4",
+              "value": "Tasks.AssignToSelf.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__AssignToSelf__Available__5",
+              "value": "Tasks.AssignToSelf.Available",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Close__All__0",
+              "value": "Tasks.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Close__All__1",
+              "value": "Tasks.Write.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Close__All__2",
+              "value": "Tasks.Close.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Close__AssignedTo__0",
+              "value": "Tasks.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Close__AssignedTo__1",
+              "value": "Tasks.Write.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Close__AssignedTo__2",
+              "value": "Tasks.Close.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Close__AssignedTo__3",
+              "value": "Tasks.Close.AssignedTo",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Count__0",
+              "value": "CountStats.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Count__1",
+              "value": "Tasks.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Count__2",
+              "value": "Tasks.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Read__All__0",
+              "value": "Tasks.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Read__All__1",
+              "value": "Tasks.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Read__AssignedTo__0",
+              "value": "Tasks.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Read__AssignedTo__1",
+              "value": "Tasks.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Read__AssignedTo__2",
+              "value": "Tasks.Read.AssignedTo",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Read__Available__0",
+              "value": "Tasks.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Read__Available__1",
+              "value": "Tasks.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Read__Available__2",
+              "value": "Tasks.Read.Available",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Unassign__AssignedTo__0",
+              "value": "Tasks.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Unassign__AssignedTo__1",
+              "value": "Tasks.Write.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Unassign__AssignedTo__2",
+              "value": "Tasks.Assign.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Unassign__AssignedTo__3",
+              "value": "Tasks.Unassign.AssignedTo",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Write__All__0",
+              "value": "Tasks.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Tasks__Write__All__1",
+              "value": "Tasks.Write.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Users__Count",
+              "value": "CountStats.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Views__Data__Read",
+              "value": "Views.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Views__Definitions__Count__0",
+              "value": "CountStats.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Views__Definitions__Count__1",
+              "value": "ViewDefinitions.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Views__Definitions__Count__2",
+              "value": "ViewDefinitions.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Views__Definitions__Read__0",
+              "value": "ViewDefinitions.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Views__Definitions__Read__1",
+              "value": "ViewDefinitions.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Views__Definitions__Write__0",
+              "value": "ViewDefinitions.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Views__Definitions__Write__1",
+              "value": "ViewDefinitions.Write.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Activity__Definition__Read__0",
+              "value": "WorkflowDesigner.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Activity__Definition__Read__1",
+              "value": "WorkflowActivityDefinition.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Activity__Statistics__Read__0",
+              "value": "WorkflowActivityStatistics.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Conductor__Event__Invoke__0",
+              "value": "Workflow.Invoke.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Conductor__Event__Invoke__1",
+              "value": "WorkflowConductor.Invoke.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Conductor__Event__Invoke__2",
+              "value": "WorkflowConductor.Invoke.Events",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Conductor__Task__Invoke__0",
+              "value": "Workflow.Invoke.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Conductor__Task__Invoke__1",
+              "value": "WorkflowConductor.Invoke.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Conductor__Task__Invoke__2",
+              "value": "WorkflowConductor.Invoke.Tasks",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Definitions__Delete__0",
+              "value": "WorkflowDefinition.Delete.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Definitions__Publish__0",
+              "value": "WorkflowDefinition.Publish.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Definitions__Read__0",
+              "value": "WorkflowDefinition.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Definitions__Read__1",
+              "value": "WorkflowDefinition.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Definitions__Test__0",
+              "value": "Workflow.Invoke.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Definitions__Test__1",
+              "value": "WorkflowDefinition.Test.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Definitions__Write__0",
+              "value": "WorkflowDefinition.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Definitions__Write__1",
+              "value": "WorkflowDefinition.Write.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Designer__RuntimeSelectListItems__Read__0",
+              "value": "WorkflowDesigner.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Features__Read__0",
+              "value": "WorkflowDesigner.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Instance__ExecutionLog__Read__0",
+              "value": "WorkflowInstanceExecutionLog.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Instance__Instance__Cancel__0",
+              "value": "WorkflowInstance.Cancel.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Instance__Instance__Delete__0",
+              "value": "WorkflowInstance.Delete.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Instance__Instance__Read__0",
+              "value": "WorkflowInstance.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Instance__Instance__Retry__0",
+              "value": "WorkflowInstance.Retry.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Invoke__0",
+              "value": "Workflow.Invoke.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Scripting__TypeDefinitions__Read__0",
+              "value": "WorkflowDesigner.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Secrets__Manage__0",
+              "value": "WorkflowSecrets.ReadWrite.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__Signal__InvokeByName__0",
+              "value": "WorkflowSignal.InvokeByName.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__WorkflowProviders__Read__0",
+              "value": "WorkflowDesigner.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__Scopes__Workflows__WorkflowStorageProviders__Read__0",
+              "value": "WorkflowDesigner.Read.All",
+              "slotSetting": false
+            },
+            {
+              "name": "AzureAd__TenantId",
+              "value": "[subscription().tenantId]",
+              "slotSetting": false
+            },
+            {
+              "name": "Backup",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Backups__LocalBackupLocation",
+              "value": "/data/backups",
+              "slotSetting": false
+            },
+            {
+              "name": "BackupStorageConnectionString",
+              "value": "",
+              "slotSetting": false
+            },
+            {
+              "name": "BackupToAzureStorage",
+              "value": "False",
+              "slotSetting": false
+            },
+            {
+              "name": "ConnectionStrings__H1SQL",
+              "value": "Server=.;Database=WorldOfWorkflows;Trusted_Connection=True;Encrypt=False;",
+              "slotSetting": false
+            },
+            {
+              "name": "ConnectionStrings__H1WFSQlite",
+              "value": "Data Source=/data/worldofworkflows.db;Cache=Shared;",
+              "slotSetting": false
+            },
+            {
+              "name": "ConnectionStrings__Sqlite",
+              "value": "Data Source=/data/worldofworkflows.db;Cache=Shared;",
+              "slotSetting": false
+            },
+            {
+              "name": "ConnectionType",
+              "value": "SQLite",
+              "slotSetting": false
+            },
+            {
+              "name": "Cors__AllowedOrigins",
+              "value": "[format('https://{0}.azurewebsites.net',parameters('sites_BETemplate_name'))]",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__Azure__ServiceBus__ConnectionStringName",
+              "value": "AzureServiceBus",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__Azure__ServiceBus__Enabled",
+              "value": "False",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__Conductor",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__Console",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__DefaultPersistence__ConnectionStringIdentifier",
+              "value": "Sqlite",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__DefaultPersistence__Enabled",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__DefaultPersistence__Framework",
+              "value": "EntityFrameworkCore",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__DispatcherHangfire",
+              "value": "False",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__Email",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__ExecuteSqlServerQuery__Enabled",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__File",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__Http",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__JavaScriptActivities",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__Mqtt__Enabled",
+              "value": "False",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__RabbitMq__ConnectionStringIdentifier",
+              "value": "RabbitMq",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__RabbitMq__Enabled",
+              "value": "False",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__Secrets__ConnectionStringIdentifier",
+              "value": "Sqlite",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__Secrets__Enabled",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__Secrets__Framework",
+              "value": "EntityFrameworkCore",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__Secrets__Http",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__Telnyx",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__TemporalQuartz",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__UserTask",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__Webhooks__ConnectionStringIdentifier",
+              "value": "Sqlite",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__Webhooks__Enabled",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__Webhooks__Framework",
+              "value": "EntityFrameworkCore",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__WorkflowSettings__ConnectionStringIdentifier",
+              "value": "Sqlite",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__WorkflowSettings__Enabled",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Features__WorkflowSettings__Framework",
+              "value": "EntityFrameworkCore",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Retention__BatchSize",
+              "value": "10",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Retention__SweepInterval",
+              "value": "1:00:00:00",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Retention__TimeToLive",
+              "value": "01:00:00:00",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Server__BaseUrl",
+              "value": "[format('https://{0}.azurewebsites.net',parameters('sites_BETemplate_name'))]",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Server__FrontendBaseUrl",
+              "value": "/workflowdashboard",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Smtp__DefaultSender",
+              "value": "noreply@acme.com",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Smtp__Host",
+              "value": "localhost",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__Smtp__Port",
+              "value": "2525",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__WorkflowChannels__Channels__0",
+              "value": "High",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__WorkflowChannels__Channels__1",
+              "value": "Normal",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__WorkflowChannels__Channels__2",
+              "value": "Low",
+              "slotSetting": false
+            },
+            {
+              "name": "Elsa__WorkflowChannels__Default",
+              "value": "Normal",
+              "slotSetting": false
+            },
+            {
+              "name": "Logging__LogLevel.Disabled__Default",
+              "value": "Warning",
+              "slotSetting": false
+            },
+            {
+              "name": "Logging__LogLevel.Disabled__HubOneWorkflows.MetaModel",
+              "value": "Warning",
+              "slotSetting": false
+            },
+            {
+              "name": "Logging__LogLevel.Disabled__Microsoft",
+              "value": "Warning",
+              "slotSetting": false
+            },
+            {
+              "name": "Logging__LogLevel.Disabled__Microsoft.EntityFrameworkCore",
+              "value": "Warning",
+              "slotSetting": false
+            },
+            {
+              "name": "Logging__LogLevel.Disabled__Microsoft.Hosting.Lifetime",
+              "value": "Warning",
+              "slotSetting": false
+            },
+            {
+              "name": "Solutions__StoreAccountName",
+              "value": "wowjimteststg",
+              "slotSetting": false
+            },
+            {
+              "name": "Solutions__StoreListWorkflowName",
+              "value": "ListSolutionFiles",
+              "slotSetting": false
+            },
+            {
+              "name": "Solutions__WorkflowsStoreClient__BaseAddress",
+              "value": "https://newjimtest.azurewebsites.net/",
+              "slotSetting": false
+            },
+            {
+              "name": "Plugins__CertificatePath",
+              "value": "./WorldOfWorkflows.cer",
+              "slotSetting": false
+            },
+            {
+              "name": "Plugins__CommunityCertificateFolder",
+              "value": "/data/plugins/Community-Certificates",
+              "slotSetting": false
+            },
+            {
+              "name": "Plugins__PEDBFolder",
+              "value": "/data/pedb",
+              "slotSetting": false
+            },
+            {
+              "name": "Plugins__PluginConfigurationFile",
+              "value": "/data/plugins/PluginConfiguration.db",
+              "slotSetting": false
+            },
+            {
+              "name": "Plugins__PluginDirectory",
+              "value": "/data/plugins",
+              "slotSetting": false
+            },
+            {
+              "name": "Workflows__Info__contact__email",
+              "value": "support@worldofworkflows.com",
+              "slotSetting": false
+            },
+            {
+              "name": "Workflows__Info__contact__name",
+              "value": "API Support",
+              "slotSetting": false
+            },
+            {
+              "name": "Workflows__Info__contact__url",
+              "value": "https://worldofworkflows.com/support",
+              "slotSetting": false
+            },
+            {
+              "name": "Workflows__Info__description",
+              "value": "This is the API for this implementation of World of Workflows.",
+              "slotSetting": false
+            },
+            {
+              "name": "Workflows__Info__termsOfService",
+              "value": "https://worldofworkflows.com/terms",
+              "slotSetting": false
+            },
+            {
+              "name": "Workflows__Info__title",
+              "value": "World of Workflows",
+              "slotSetting": false
+            },
+            {
+              "name": "WorldOfWorkflows__ClientConfiguration__AzureAd__Authority",
+              "value": "[format('https://{0}.com/{1}',variables('LoginLocation'),subscription().tenantId)]",
+              "slotSetting": false
+            },
+            {
+              "name": "WorldOfWorkflows__ClientConfiguration__AzureAd__ClientId",
+              "value": "[reference('CreateAzureADObjectsAndOutput').outputs.ClientClientId]",
+              "slotSetting": false
+            },
+            {
+              "name": "WorldOfWorkflows__ClientConfiguration__AzureAd__ValidateAuthority",
+              "value": "True",
+              "slotSetting": false
+            },
+            {
+              "name": "WorldOfWorkflows__ClientConfiguration__WorldOfWorkflows__Server__Scopes__Default__0",
+              "value": "[format('api://{0}/.default',reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId)]",
+              "slotSetting": false
+            }
+          ],
+          "connectionStrings": [
+            {
+              "name": "Elsa",
+              "connectionString": "Data Source=/data/wowworkflows.db",
+              "type": "Custom",
+              "slotSetting": false
+            },
+            {
+              "name": "WorldOfWorkflows",
+              "connectionString": "Data Source=/data/wowdata.db",
+              "type": "Custom",
+              "slotSetting": false
+            }
+          ]
+
+        },
+        "scmSiteAlsoStopped": false,
+        "clientAffinityEnabled": false,
+        "clientCertEnabled": false,
+        "clientCertMode": "Required",
+        "hostNamesDisabled": false,
+        "containerSize": 0,
+        "dailyMemoryTimeQuota": 0,
+        "httpsOnly": true,
+        "redundancyMode": "None",
+        "publicNetworkAccess": "Enabled",
+        "storageAccountRequired": false,
+        "keyVaultReferenceIdentity": "SystemAssigned"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+      "apiVersion": "2023-01-01",
+      "name": "[concat(parameters('sites_BETemplate_name'), '/ftp')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_BETemplate_name'))]"
+      ],
+      "properties": {
+        "allow": false
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2023-01-01",
+      "name": "[concat(parameters('sites_BETemplate_name'), '/web')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_BETemplate_name'))]"
+      ],
+      "properties": {
+        "numberOfWorkers": 1,
+        "defaultDocuments": [
+          "Default.htm",
+          "Default.html",
+          "Default.asp",
+          "index.htm",
+          "index.html",
+          "iisstart.htm",
+          "default.aspx",
+          "index.php",
+          "hostingstart.html"
+        ],
+        "netFrameworkVersion": "v4.0",
+        "linuxFxVersion": "DOTNETCORE|8.0",
+        "requestTracingEnabled": false,
+        "remoteDebuggingEnabled": false,
+        "remoteDebuggingVersion": "VS2022",
+        "httpLoggingEnabled": false,
+        "acrUseManagedIdentityCreds": false,
+        "logsDirectorySizeLimit": 35,
+        "detailedErrorLoggingEnabled": false,
+        "scmType": "None",
+        "use32BitWorkerProcess": true,
+        "webSocketsEnabled": false,
+        "alwaysOn": false,
+        "managedPipelineMode": "Integrated",
+        "virtualApplications": [
+          {
+            "virtualPath": "/",
+            "physicalPath": "site\\wwwroot",
+            "preloadEnabled": false
+          }
+        ],
+        "loadBalancing": "LeastRequests",
+
+        "autoHealEnabled": false,
+        "vnetRouteAllEnabled": false,
+        "vnetPrivatePortsCount": 0,
+        "publicNetworkAccess": "Enabled",
+        "localMySqlEnabled": false,
+        "ipSecurityRestrictions": [
+          {
+            "ipAddress": "Any",
+            "action": "Allow",
+            "priority": 2147483647,
+            "name": "Allow all",
+            "description": "Allow all access"
+          }
+        ],
+        "scmIpSecurityRestrictions": [
+          {
+            "ipAddress": "Any",
+            "action": "Allow",
+            "priority": 2147483647,
+            "name": "Allow all",
+            "description": "Allow all access"
+          }
+        ],
+        "scmIpSecurityRestrictionsUseMain": false,
+        "http20Enabled": false,
+        "minTlsVersion": "1.2",
+        "scmMinTlsVersion": "1.2",
+        "ftpsState": "FtpsOnly",
+        "preWarmedInstanceCount": 0,
+        "elasticWebAppScaleLimit": 0,
+        "functionsRuntimeScaleMonitoringEnabled": false,
+        "minimumElasticInstanceCount": 0,
+        "azureStorageAccounts": {
+          "wowstorage": {
+            "type": "AzureFiles",
+            "accountName": "[parameters('storageAccounts_wowtemplatestorage_name')]",
+            "shareName": "wowdata",
+            "mountPath": "/data",
+            "accessKey": "[listKeys(variables('storageAccountId'), '2023-01-01').keys[0].value]"
+          }
+        }
+
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/hostNameBindings",
+      "apiVersion": "2023-01-01",
+      "name": "[concat(parameters('sites_BETemplate_name'), '/', parameters('sites_BETemplate_name'), '.azurewebsites.net')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('sites_BETemplate_name'))]"
+      ],
+      "properties": {
+        "siteName": "[parameters('sites_BETemplate_name')]",
+        "hostNameType": "Verified"
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2023-08-01",
+      "name": "CreateAzureADObjectsAndOutput",
+      "location": "[parameters('location')]",
+      "kind": "AzurePowerShell",
+      "identity": {
+        "type": "[parameters('managedIdentityName').type]",
+        "userAssignedIdentities": 
+          "[parameters('managedIdentityName').userAssignedIdentities]"
+        
+      },
+
+      "properties": {
+        "forceUpdateTag": "1",
+        "azPowerShellVersion": "8.3",
+        "primaryScriptUri": "https://raw.githubusercontent.com/World-of-Workflows/Business-Edition/main/Deployment/ADDeploymentScript.ps1",
+        "arguments": "[concat('-TenantId ',subscription().tenantId,' -ServerappName', ' \\\"', parameters('entraId_Application_ServerName'), '\\\" -ClientappName \\\"', parameters('entraId_Application_ClientName'), '\\\" -BaseAddress \\\"https://', parameters('sites_BETemplate_Name'),'.azurewebsites.net\\\"')]",
+        "timeout": "PT1H",
+        "cleanupPreference": "OnSuccess",
+        "retentionInterval": "P1D"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+      "apiVersion": "2023-04-01",
+      "name": "[concat(parameters('storageAccounts_wowtemplatestorage_name'), '/default/wowdata')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccounts_wowtemplatestorage_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_wowtemplatestorage_name'))]"
+      ],
+      "properties": {
+        "accessTier": "TransactionOptimized",
+        "shareQuota": 5120,
+        "enabledProtocols": "SMB"
+      }
+    },
+    {
+
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2023-08-01",
+      "kind": "AzurePowerShell",
+      "name": "WaitSection",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+
+        "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccounts_wowtemplatestorage_name'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_wowtemplatestorage_name'))]",
+        "[resourceId('Microsoft.Web/sites', parameters('sites_BETemplate_name'))]"
+      ],
+      "properties": {
+
+        "azPowerShellVersion": "11.0",
+        "scriptContent": "start-sleep -Seconds 100",
+        "cleanupPreference": "Always",
+        "retentionInterval": "PT1H"
+      }
+    },
+    {
+      "type":"Microsoft.Web/sites/extensions",
+      "apiVersion":"2023-01-01",
+      "name":"[format('{0}/ZipDeploy',parameters('sites_BETemplate_name'))]",
+      "dependsOn":["WaitSection"],
+      /*"propertiesOld":{
+        "packageUri":"[uri(concat('https://',parameters('releasesStorageAccountName'),'.blob',environment().suffixes.storage,'/'),concat(parameters('blobContainer'),'/',parameters('blobName'),listServiceSas(resourceId(parameters('releasesStorageAccountResourceGroup'),'Microsoft.Storage/storageAccounts',parameters('releasesStorageAccountName')),'2023-04-01', variables('sasDefinition')).serviceSasToken))]"
+       }, */
+       "properties":{
+        "packageUri":"[uri(concat('https://',parameters('releasesStorageAccountName'),'.blob',environment().suffixes.storage,'/'),concat(parameters('blobContainer'),'/',parameters('blobName'),listServiceSas(resourceId(parameters('releasesStorageAccountResourceGroup'),'Microsoft.Storage/storageAccounts',parameters('releasesStorageAccountName')),'2023-04-01', variables('sasDefinition')).serviceSasToken))]"
+       }
+    }
+  ],
+  "outputs":{}
+}
+
+ 
