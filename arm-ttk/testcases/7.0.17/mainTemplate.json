@@ -45,55 +45,35 @@
     },
     "blobName": {
       "type": "string",
-      "defaultValue": "linux-x64.v1.8.v4.zip"
+      "defaultValue": "BELinux.1.8.475.zip"
     },
-    "sasStartTime": {
+    "scriptForceRunId": {
       "type": "string",
-      "defaultValue": "[dateTimeAdd(utcNow(), '-PT5M')]",
-      "metadata": {
-        "description": "The start time of the sas"
-      }
-    },
-    "sasExpiryTime": {
-      "type": "string",
-      "defaultValue": "[dateTimeAdd(utcNow(), 'P6D')]",
-      "metadata": {
-        "description": "The end time of the sas"
-      }
-    },
-    "releasesResourceGroupName": {
-      "type": "string",
-
-      "defaultValue": "PRODUCTION",
-      "metadata": {
-        "description": "Resource group containing the releases storage account (e.g., wowreleases)."
-      }
-    },
-    "releasesSubscriptionId": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Subscription ID containing the releases storage account. Accepts GUID or '/subscriptions/<GUID>'. Leave blank to use current subscription."
-      }
+      "defaultValue": "[newGuid()]",
+      "metadata": { "description": "Forces the deployment script to re-run when this value changes." }
     }
   },
   "variables": {
+
+
+// --- Key Vault wiring (hard-coded; not exposed in createUiDefinition) ---
+  "kvName": "WoWKeyVault",
+  // Leave empty to use current subscription, or set a specific subscription ID
+  "kvSubscriptionId": "785430fb-1d9c-479c-9b5d-22066c2adcc5",
+
+  // Secret that stores ONLY the SAS querystring (NO leading '?')
+  "zipSasSecretName": "zip-package-sas",
+
+ 
+  
+  // --- Your user-assigned managed identity (UAMI) resource ID (in your subscription) ---
+  // Format: /subscriptions/<SUB>/resourceGroups/<RG>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<NAME>
+  "uamiResourceId": "/subscriptions/785430fb-1d9c-479c-9b5d-22066c2adcc5/resourceGroups/PRODUCTION/providers/Microsoft.ManagedIdentity/userAssignedIdentities/WOWBEInstaller",
+
+ 
     "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNameFinal'))]",
     "LoginLocation": "login.microsoftonline",
-    "sasDefinition": {
-      "canonicalizedResource": "[concat('/blob/', parameters('releasesStorageAccountName'), '/', parameters('blobContainer'), '/', parameters('blobName'))]",
-      "signedResource": "b",
-      "signedPermission": "r",
-      "signedStart": "[parameters('sasStartTime')]",
-      "signedExpiry": "[parameters('sasExpiryTime')]",
-      "signedProtocol": "https"
-    },
     "storageAccountNameFinal": "[parameters('storageAccounts_wowtemplatestorage_name')]",
-    "releasesSubParam": "[parameters('releasesSubscriptionId')]",
-    "releasesSubIsPrefixed": "[startsWith(variables('releasesSubParam'), '/subscriptions/')]",
-    "releasesSubSanitized": "[if(variables('releasesSubIsPrefixed'), substring(variables('releasesSubParam'), 15, sub(length(variables('releasesSubParam')), 15)), variables('releasesSubParam'))]",
-    "releasesEffectiveSubscriptionId": "[if(equals(variables('releasesSubSanitized'), ''), subscription().subscriptionId, variables('releasesSubSanitized'))]",
-    "releasesStorageAccountId": "[resourceId(variables('releasesEffectiveSubscriptionId'), parameters('releasesResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('releasesStorageAccountName'))]"
   },
   "resources": [
     {
@@ -2199,6 +2179,36 @@
       }
     },
     {
+  "type": "Microsoft.Resources/deploymentScripts",
+  "apiVersion": "2023-08-01",
+  "name": "GetZipSasFromKeyVault",
+  "location": "[parameters('location')]",
+  "kind": "AzureCLI",
+  "identity": {
+    "type": "UserAssigned",
+    "userAssignedIdentities": {
+      "[variables('uamiResourceId')]": {}
+    }
+  },
+  "properties": {
+    "azCliVersion": "2.56.0",
+    "retentionInterval": "P1D",
+    "timeout": "PT10M",
+    "forceUpdateTag": "[parameters('scriptForceRunId')]",
+    "scriptContent": "
+KV_NAME='[variables('kvName')]'
+SECRET_NAME='[variables('zipSasSecretName')]'
+KV_SUB='[variables('kvSubscriptionId')]'
+
+# Read secret value from the remote Key Vault (NO leading '?')
+SAS=$(az keyvault secret show --vault-name \"$KV_NAME\" --name \"$SECRET_NAME\" --subscription \"$KV_SUB\" --query value -o tsv)
+
+# Emit as JSON to $AZ_SCRIPTS_OUTPUT_PATH
+echo \"{ \\\"sas\\\": \\\"$SAS\\\" }\" > \"$AZ_SCRIPTS_OUTPUT_PATH\"
+"
+  }
+},
+    {
       "type": "Microsoft.Resources/deploymentScripts",
       "apiVersion": "2023-08-01",
       "kind": "AzurePowerShell",
@@ -2224,8 +2234,10 @@
         "WaitSection"
       ],
       "properties": {
-        "packageUri": "[uri(concat('https://',parameters('releasesStorageAccountName'),'.blob',environment().suffixes.storage,'/'),concat(parameters('blobContainer'),'/',parameters('blobName'),listServiceSas(resourceId('Microsoft.Storage/storageAccounts',parameters('releasesStorageAccountName')),'2023-04-01', variables('sasDefinition') ).serviceSasToken))]"
-      }
+//        "packageUri": "[uri(concat('https://', parameters('releasesStorageAccountName'), '.blob', environment().suffixes.storage, '/'), concat(parameters('blobContainer'), '/', parameters('blobName'), listServiceSas(variables('releasesStorageAccountId'), '2023-04-01', variables('sasDefinition')).serviceSasToken))]"
+//        "packageUri": "[uri(concat('https://wowreleases.blob.',environment().suffixes.storage,'/'),'latest/linux-x64.v1.8.zip?sp=r&st=2025-03-05T09:27:42Z&se=2026-07-31T18:27:42Z&spr=https&sv=2022-11-02&sr=b&sig=Zw9OtzbPvmH2UJOpo91YuQef66tZxfe%2F5Wd1S5KH98E%3D')]"
+          "packageUri": "[uri(concat('https://', parameters('releasesStorageAccountName'), '.blob', environment().suffixes.storage, '/'), concat(parameters('blobContainer'), '/', parameters('blobName'), '?', reference('GetZipSasFromKeyVault', '2023-08-01').outputs.sas))]"
+}
     }
   ]
 }

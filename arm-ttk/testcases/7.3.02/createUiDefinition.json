@@ -1,0 +1,162 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Azure.CreateUIDef",
+  "version": "0.1.2-preview",
+  "parameters": {
+    "resourceTypes": [
+      "microsoft.resources/resourcegroups"
+    ],
+    "basics": [
+      {
+        "name": "sites_BETemplate_name",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Site Name",
+        "subLabel": "The name of the site. Will become sitename.azurewebsites.net",
+        "toolTip": "Letters, digits, and hyphens allowed. Mixed case is OK; storage name will be derived in lowercase.",
+        "constraints": {
+          "required": true,
+          "regex": "^[A-Za-z0-9-]{3,60}$",
+          "validationMessage": "Use 3\u201360 characters: letters, digits, or hyphens."
+        },
+        "visible": true
+      },
+      {
+        "name": "serverfarms_BETemplatePlan_name",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Server Plan Name",
+        "subLabel": "The Name for the Server Plan",
+        "toolTip": "The Name for the Server Farm Plan",
+        "constraints": {
+          "required": false,
+          "regex": "^[a-zA-Z0-9-]{1,30}$",
+          "validationMessage": "Please re-enter a valid server plan name"
+        },
+        "visible": false
+      },
+      {
+        "name": "managedIdentityName",
+        "type": "Microsoft.ManagedIdentity.IdentitySelector",
+        "label": "Managed Identity Configuration",
+        "toolTip": {
+          "systemAssignedIdentity": "Enable system assigned identity to grant the resource access to other existing resources.",
+          "userAssignedIdentity": "Add user assigned identities to grant the resource access to other existing resources."
+        },
+        "defaultValue": {
+          "systemAssignedIdentity": "Off"
+        },
+        "options": {
+          "hideSystemAssignedIdentity": true,
+          "hideUserAssignedIdentity": false
+        },
+        "visible": true
+      },
+      {
+        "name": "entraId_Application_ClientName",
+        "type": "Microsoft.Common.TextBox",
+        "label": "EntraId Application Client Name",
+        "subLabel": "The name of the new client application in EntraId",
+        "toolTip": "The name of the World of Workflows Client Entra Id Application",
+        "constraints": {
+          "required": false,
+          "regex": "^[a-zA-Z0-9]{1,30}$",
+          "validationMessage": "Please enter a valid name for the Entra Id Client Application"
+        },
+        "visible": false
+      },
+      {
+        "name": "entraId_Application_ServerName",
+        "type": "Microsoft.Common.TextBox",
+        "label": "EntraId Application Server Name",
+        "subLabel": "The name of the new server application in EntraId",
+        "toolTip": "The name of the World of Workflows Server Entra Id Application",
+        "constraints": {
+          "required": false,
+          "regex": "^[a-zA-Z0-9]{1,30}$",
+          "validationMessage": "Please enter a valid name for the EntraId Server Application"
+        },
+        "visible": false
+      },
+      {
+        "name": "storageAccounts_wowtemplatestorage_name",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Storage Account",
+        "visible": false,
+        "toolTip": "Hidden: derived from Site Name in lowercase as <sitename> + 'stg', trimmed to 24 chars.",
+        "constraints": {
+          "required": true,
+          "regex": "^[a-z0-9]{3,24}$",
+          "validationMessage": "Derived storage account name must be 3\u201324 lowercase letters or digits."
+        }
+      },
+      {
+        "name": "adminUserPrincipalName",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Administrator UPN or email",
+        "toolTip": "Enter the UPN/email address (e.g. admin@contoso.com) of the user who will be added as Administrator to the server application.",
+        "constraints": {
+          "required": true,
+          "regex": "^(?=.{5,256}$)[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+          "validationMessage": "Enter a valid UPN, e.g. user@contoso.com."
+        }
+      },
+      {
+        "name": "companyNameForWoWLicence",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Company name for World of Workflows licence",
+        "toolTip": "Enter your organisation's legal or trading name. A 90-day trial licence will be issued to this company.",
+        "constraints": {
+          "required": true,
+          "regex": "^.{2,100}$",
+          "validationMessage": "Enter a valid company name (2–100 characters)."
+        }
+      },
+      {
+        "name": "licensingInfo",
+        "type": "Microsoft.Common.InfoBox",
+        "label": "Licensing information",
+        "options": {
+          "icon": "Info",
+          "text": "World of Workflows Business Edition is provided with a 90-day free licence. During the trial period we will contact your nominated billing contact to discuss ongoing licensing options.",
+          "uri": "https://worldofworkflows.com"  // optional, or omit
+        }
+      },
+      {
+        "name": "acceptTrialLicence",
+        "type": "Microsoft.Common.CheckBox",
+        "label": "90-day trial licence agreement",
+        "toolTip": "Confirm that you accept a 90-day free licence and agree to be contacted to discuss licensing during this period.",
+        "defaultValue": false,
+        "constraints": {
+          "required": true,
+          "validationMessage": "You must accept the 90-day trial licence terms to continue."
+        }
+      },
+      {
+        "name": "billingEmailForWoWLicence",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Billing contact email",
+        "toolTip": "Enter the email address of the person responsible for licensing and billing. We will use this contact during the 90-day trial to discuss ongoing licensing.",
+        "constraints": {
+          "required": true,
+          "regex": "^(?=.{5,256}$)[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+          "validationMessage": "Enter a valid email address (for example, user@contoso.com)."
+        }
+      }
+      
+    ],
+    "steps": [],
+    "outputs": {
+      "sites_BETemplate_name": "[basics('sites_BETemplate_name')]",
+      "serverfarms_BETemplatePlan_name": "[concat(basics('sites_BETemplate_name'), 'Plan')]",
+      "managedIdentityName": "[basics('managedIdentityName')]",
+      "storageAccounts_wowtemplatestorage_name": "[toLower(substring(concat(replace(basics('sites_BETemplate_name'), '-', ''), 'stg'), 0, 24))]",
+      "entraId_Application_ClientName": "[concat(basics('sites_BETemplate_name'), 'Client')]",
+      "entraId_Application_ServerName": "[concat(basics('sites_BETemplate_name'), 'Server')]",
+      "location": "[location()]",
+      "adminUserPrincipalName": "[basics('adminUserPrincipalName')]",
+      "companyNameForWoWLicence": "[basics('companyNameForWoWLicence')]",
+      "billingEmailForWoWLicence": "[basics('billingEmailForWoWLicence')]",
+      "applicationResourceName": "[concat(basics('sites_BETemplate_name'), 'MA')]",
+    }
+  }
+}

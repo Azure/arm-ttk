@@ -35,65 +35,25 @@
         "description": "The name of the World of Workflows Server Entra Id Application"
       }
     },
-    "releasesStorageAccountName": {
-      "type": "string",
-      "defaultValue": "wowreleases"
-    },
-    "blobContainer": {
-      "type": "string",
-      "defaultValue": "latest"
-    },
     "blobName": {
       "type": "string",
-      "defaultValue": "linux-x64.v1.8.v4.zip"
+      "defaultValue": "BELinux.1.8.475.zip"
     },
-    "sasStartTime": {
+    "scriptForceRunId": {
       "type": "string",
-      "defaultValue": "[dateTimeAdd(utcNow(), '-PT5M')]",
-      "metadata": {
-        "description": "The start time of the sas"
-      }
-    },
-    "sasExpiryTime": {
-      "type": "string",
-      "defaultValue": "[dateTimeAdd(utcNow(), 'P6D')]",
-      "metadata": {
-        "description": "The end time of the sas"
-      }
-    },
-    "releasesResourceGroupName": {
-      "type": "string",
-
-      "defaultValue": "PRODUCTION",
-      "metadata": {
-        "description": "Resource group containing the releases storage account (e.g., wowreleases)."
-      }
-    },
-    "releasesSubscriptionId": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Subscription ID containing the releases storage account. Accepts GUID or '/subscriptions/<GUID>'. Leave blank to use current subscription."
-      }
+      "defaultValue": "[newGuid()]",
+      "metadata": { "description": "Forces the deployment script to re-run when this value changes." }
     }
   },
   "variables": {
     "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNameFinal'))]",
     "LoginLocation": "login.microsoftonline",
-    "sasDefinition": {
-      "canonicalizedResource": "[concat('/blob/', parameters('releasesStorageAccountName'), '/', parameters('blobContainer'), '/', parameters('blobName'))]",
-      "signedResource": "b",
-      "signedPermission": "r",
-      "signedStart": "[parameters('sasStartTime')]",
-      "signedExpiry": "[parameters('sasExpiryTime')]",
-      "signedProtocol": "https"
-    },
     "storageAccountNameFinal": "[parameters('storageAccounts_wowtemplatestorage_name')]",
-    "releasesSubParam": "[parameters('releasesSubscriptionId')]",
-    "releasesSubIsPrefixed": "[startsWith(variables('releasesSubParam'), '/subscriptions/')]",
-    "releasesSubSanitized": "[if(variables('releasesSubIsPrefixed'), substring(variables('releasesSubParam'), 15, sub(length(variables('releasesSubParam')), 15)), variables('releasesSubParam'))]",
-    "releasesEffectiveSubscriptionId": "[if(equals(variables('releasesSubSanitized'), ''), subscription().subscriptionId, variables('releasesSubSanitized'))]",
-    "releasesStorageAccountId": "[resourceId(variables('releasesEffectiveSubscriptionId'), parameters('releasesResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('releasesStorageAccountName'))]"
+
+     // --- Your user-assigned managed identity (UAMI) resource ID (in your subscription) ---
+    // Format: /subscriptions/<SUB>/resourceGroups/<RG>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<NAME>
+    "uamiResourceId": "/subscriptions/785430fb-1d9c-479c-9b5d-22066c2adcc5/resourceGroups/PRODUCTION/providers/Microsoft.ManagedIdentity/userAssignedIdentities/WOWBEInstaller",
+
   },
   "resources": [
     {
@@ -250,7 +210,7 @@
             },
             {
               "name": "AzureAd__OpenApi__ClientId",
-              "value": "5b4d46db-91cb-4b8f-8d72-24c77cf1745f",
+              "value": "[reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId]",
               "slotSetting": false
             },
             {
@@ -2199,6 +2159,24 @@
       }
     },
     {
+  "type": "Microsoft.Resources/deploymentScripts",
+  "apiVersion": "2023-08-01",
+  "name": "GetDeploymentConfig",
+  "location": "[parameters('location')]",
+  "kind": "AzureCLI",
+  "identity": {
+        "type": "[parameters('managedIdentityName').type]",
+        "userAssignedIdentities": "[parameters('managedIdentityName').userAssignedIdentities]"
+  },
+  "properties": {
+    "azCliVersion": "2.56.0",
+    "retentionInterval": "P1D",
+    "timeout": "PT10M",
+    "forceUpdateTag": "[parameters('scriptForceRunId')]",
+    "scriptContent": "[concat('#!/bin/bash\nset -e\n\nCONFIG_URL=\"https://wowcentral.azurewebsites.net/api/deployment-config\"\nDEFAULT_BLOB=\"', parameters('blobName'), '\"\n\necho \"=== Fetching Deployment Configuration ===\"\necho \"Config URL: $CONFIG_URL\"\necho \"Default Blob: $DEFAULT_BLOB\"\necho \"\"\n\n# Fetch configuration from your central URL (includes SAS token)\necho \"Attempting to fetch configuration from URL...\"\nCONFIG_JSON=$(curl -s -f -m 10 \"$CONFIG_URL\" 2>/dev/null || echo \"{}\")\n\nif [ \"$CONFIG_JSON\" = \"{}\" ] || [ -z \"$CONFIG_JSON\" ]; then\n  echo \"ERROR: Failed to fetch config from URL\"\n  echo \"Configuration API must be available for deployment\"\n  exit 1\nfi\n\necho \"SUCCESS: Configuration fetched from URL\"\necho \"Raw JSON response:\"\necho \"$CONFIG_JSON\" | jq . 2>/dev/null || echo \"$CONFIG_JSON\"\necho \"\"\n\n# Parse JSON to get blob name, container, and SAS token\nBLOB_NAME=$(echo \"$CONFIG_JSON\" | jq -r \".blobName // \\\"$DEFAULT_BLOB\\\"\" 2>/dev/null || echo \"$DEFAULT_BLOB\")\nCONTAINER=$(echo \"$CONFIG_JSON\" | jq -r \".container // \\\"latest\\\"\" 2>/dev/null || echo \"latest\")\nSAS_TOKEN=$(echo \"$CONFIG_JSON\" | jq -r \".sasToken // \\\"\\\"\" 2>/dev/null || echo \"\")\nVERSION=$(echo \"$CONFIG_JSON\" | jq -r \".version // \\\"unknown\\\"\" 2>/dev/null || echo \"unknown\")\n\nif [ -z \"$SAS_TOKEN\" ]; then\n  echo \"ERROR: No SAS token in configuration response\"\n  exit 1\nfi\n\necho \"Parsed configuration:\"\necho \"  Version: $VERSION\"\necho \"  Blob Name: $BLOB_NAME\"\necho \"  Container: $CONTAINER\"\necho \"  SAS Token Length: ${#SAS_TOKEN} characters\"\necho \"\"\n\n# Remove leading ? if present\nif [[ $SAS_TOKEN == \\?* ]]; then\n  echo \"Removing leading ? from SAS token\"\n  SAS_TOKEN=\"${SAS_TOKEN#\\?}\"\nfi\n\necho \"Writing outputs to $AZ_SCRIPTS_OUTPUT_PATH\"\necho \"{ \\\"sas\\\": \\\"$SAS_TOKEN\\\", \\\"blobName\\\": \\\"$BLOB_NAME\\\", \\\"container\\\": \\\"$CONTAINER\\\", \\\"version\\\": \\\"$VERSION\\\" }\" > \"$AZ_SCRIPTS_OUTPUT_PATH\"\n\necho \"=== Configuration Retrieval Complete ===\"\n')]"
+  }
+},
+    {
       "type": "Microsoft.Resources/deploymentScripts",
       "apiVersion": "2023-08-01",
       "kind": "AzurePowerShell",
@@ -2217,14 +2195,30 @@
       }
     },
     {
-      "type": "Microsoft.Web/sites/extensions",
-      "apiVersion": "2023-01-01",
-      "name": "[format('{0}/ZipDeploy',parameters('sites_BETemplate_name'))]",
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2023-08-01",
+      "name": "DeployZipPackage",
+      "location": "[parameters('location')]",
+      "kind": "AzurePowerShell",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[variables('uamiResourceId')]": {}
+        }
+      },
       "dependsOn": [
-        "WaitSection"
+        "[resourceId('Microsoft.Resources/deploymentScripts', 'WaitSection')]",
+        "[resourceId('Microsoft.Resources/deploymentScripts', 'GetDeploymentConfig')]",
+        "[resourceId('Microsoft.Web/sites', parameters('sites_BETemplate_name'))]",
+        "[resourceId('Microsoft.Web/sites/config', parameters('sites_BETemplate_name'), 'web')]"
       ],
       "properties": {
-        "packageUri": "[uri(concat('https://',parameters('releasesStorageAccountName'),'.blob',environment().suffixes.storage,'/'),concat(parameters('blobContainer'),'/',parameters('blobName'),listServiceSas(resourceId('Microsoft.Storage/storageAccounts',parameters('releasesStorageAccountName')),'2023-04-01', variables('sasDefinition') ).serviceSasToken))]"
+        "azPowerShellVersion": "11.0",
+        "retentionInterval": "P1D",
+        "timeout": "PT30M",
+        "forceUpdateTag": "[parameters('scriptForceRunId')]",
+        "arguments": "[concat('-ResourceGroupName ', resourceGroup().name, ' -WebAppName ', parameters('sites_BETemplate_name'), ' -SubscriptionId ', subscription().subscriptionId, ' -StorageAccount ', reference('GetDeploymentConfig').outputs.releasesStorageAccountName, ' -Container ', reference('GetDeploymentConfig').outputs.container, ' -BlobName ', reference('GetDeploymentConfig').outputs.blobName, ' -SasToken ''', reference('GetDeploymentConfig').outputs.sas, ''' -StorageSuffix ', environment().suffixes.storage)]",
+        "scriptContent": "param(\n    [string]$ResourceGroupName,\n    [string]$WebAppName,\n    [string]$SubscriptionId,\n    [string]$StorageAccount,\n    [string]$Container,\n    [string]$BlobName,\n    [string]$SasToken,\n    [string]$StorageSuffix\n)\n\n$ErrorActionPreference = 'Stop'\n$notificationUrl = 'https://wowcentral.azurewebsites.net/deploymentNotification'\n$logMessages = @()\n$kuduUsername = $null\n$kuduPassword = $null\n\nfunction Log-Message {\n    param([string]$Message)\n    $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'\n    $logEntry = \"[$timestamp] $Message\"\n    Write-Host $Message\n    $script:logMessages += $logEntry\n}\n\nfunction Send-Notification {\n    param(\n        [string]$Status,\n        [string]$Error = $null\n    )\n    \n    $payload = @{\n        resourceGroup = $ResourceGroupName\n        webAppName = $WebAppName\n        subscriptionId = $SubscriptionId\n        status = $Status\n        timestamp = (Get-Date -Format 'o')\n        log = ($script:logMessages -join \"`n\")\n        kuduUsername = $script:kuduUsername\n        kuduPassword = $script:kuduPassword\n        blobName = $BlobName\n    }\n    \n    if ($Error) {\n        $payload.error = $Error\n    }\n    \n    try {\n        $body = $payload | ConvertTo-Json -Depth 10\n        $response = Invoke-RestMethod -Uri $notificationUrl -Method Post -Body $body -ContentType 'application/json' -UseBasicParsing\n        Write-Host \"Notification sent successfully\"\n    } catch {\n        Write-Warning \"Failed to send notification: $($_.Exception.Message)\"\n    }\n}\n\ntry {\n    Log-Message \"=== Starting ZIP Deployment Process ===\"\n    Log-Message \"Resource Group: $ResourceGroupName\"\n    Log-Message \"Web App: $WebAppName\"\n    Log-Message \"Storage Account: $StorageAccount\"\n    Log-Message \"Container: $Container\"\n    Log-Message \"Blob: $BlobName\"\n    Log-Message \"Storage Suffix: $StorageSuffix\"\n    Log-Message \"\"\n\n    # Construct the package URI\n    $packageUri = \"https://$StorageAccount.blob.$StorageSuffix/$Container/$BlobName\"\n    if ($SasToken -notmatch '^\\?') {\n        $packageUri += \"?$SasToken\"\n    } else {\n        $packageUri += $SasToken\n    }\n\n    Log-Message \"Package URI constructed (without SAS): https://$StorageAccount.blob.$StorageSuffix/$Container/$BlobName\"\n    Log-Message \"\"\n\n    Log-Message \"Testing package URL accessibility...\"\n    $response = Invoke-WebRequest -Uri $packageUri -Method Head -UseBasicParsing -ErrorAction Stop\n    Log-Message \"SUCCESS: Package is accessible\"\n    Log-Message \"Status Code: $($response.StatusCode)\"\n    Log-Message \"Content-Length: $($response.Headers['Content-Length']) bytes\"\n    Log-Message \"\"\n\n    Log-Message \"Getting web app publish profile...\"\n    $xml = [xml](Get-AzWebAppPublishingProfile -ResourceGroupName $ResourceGroupName -Name $WebAppName)\n    $script:kuduUsername = $xml.SelectNodes('//publishProfile[@publishMethod=\"MSDeploy\"]/@userName').value\n    $script:kuduPassword = $xml.SelectNodes('//publishProfile[@publishMethod=\"MSDeploy\"]/@userPWD').value\n    $kuduUrl = \"https://$WebAppName.scm.azurewebsites.net\"\n\n    Log-Message \"Kudu URL: $kuduUrl\"\n    Log-Message \"Kudu Username: $script:kuduUsername\"\n    Log-Message \"\"\n\n    # Create credentials\n    $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(\"$($script:kuduUsername):$($script:kuduPassword)\"))\n\n    Log-Message \"Initiating ZIP deployment via Kudu API...\"\n    $deployUrl = \"$kuduUrl/api/zipdeploy?isAsync=true\"\n\n    $headers = @{\n        Authorization = \"Basic $base64AuthInfo\"\n        \"Content-Type\" = \"application/json\"\n    }\n    \n    $body = @{\n        packageUri = $packageUri\n    } | ConvertTo-Json\n    \n    Log-Message \"Sending deployment request...\"\n    $deployResponse = Invoke-RestMethod -Uri $deployUrl -Method POST -Headers $headers -Body $body -UseBasicParsing\n    \n    Log-Message \"SUCCESS: Deployment initiated\"\n    Log-Message \"Response: $($deployResponse | ConvertTo-Json -Depth 3)\"\n    Log-Message \"\"\n    \n    # Wait for deployment to complete\n    Log-Message \"Waiting for deployment to complete...\"\n    $statusUrl = \"$kuduUrl/api/deployments/latest\"\n    $maxAttempts = 60\n    $attempt = 0\n    \n    do {\n        Start-Sleep -Seconds 10\n        $attempt++\n        Log-Message \"[Attempt $attempt/$maxAttempts] Checking deployment status...\"\n        \n        try {\n            $status = Invoke-RestMethod -Uri $statusUrl -Headers @{Authorization = \"Basic $base64AuthInfo\"} -UseBasicParsing\n            Log-Message \"  Status Code: $($status.status)\"\n            Log-Message \"  Message: $($status.message)\"\n            \n            if ($status.status -eq 4) {\n                Log-Message \"\"\n                Log-Message \"SUCCESS: Deployment completed successfully!\"\n                Send-Notification -Status \"Success\"\n                break\n            } elseif ($status.status -eq 3) {\n                Log-Message \"\"\n                Log-Message \"FAILED: Deployment failed with message: $($status.message)\"\n                Send-Notification -Status \"Failed\" -Error $status.message\n                throw \"Deployment failed\"\n            }\n        } catch {\n            Log-Message \"  Warning: Status check attempt failed: $($_.Exception.Message)\"\n        }\n    } while ($attempt -lt $maxAttempts)\n    \n    if ($attempt -ge $maxAttempts) {\n        Log-Message \"WARNING: Deployment status check timed out after $maxAttempts attempts\"\n        Log-Message \"The deployment may still be in progress. Check the web app manually.\"\n        Send-Notification -Status \"Timeout\" -Error \"Status check timed out after $maxAttempts attempts\"\n    }\n\n    Log-Message \"\"\n    Log-Message \"=== ZIP Deployment Process Completed ===\"\n    $DeploymentScriptOutputs = @{}\n    $DeploymentScriptOutputs['result'] = 'Success'\n    \n} catch {\n    $errorMsg = \"Deployment failed: $($_.Exception.Message)`nStack trace: $($_.ScriptStackTrace)\"\n    Log-Message $errorMsg\n    Send-Notification -Status \"Error\" -Error $errorMsg\n    throw\n}\n"
       }
     }
   ]

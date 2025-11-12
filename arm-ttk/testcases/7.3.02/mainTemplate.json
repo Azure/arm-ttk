@@ -34,66 +34,24 @@
       "metadata": {
         "description": "The name of the World of Workflows Server Entra Id Application"
       }
-    },
-    "releasesStorageAccountName": {
+    },"adminUserPrincipalName": {
       "type": "string",
-      "defaultValue": "wowreleases"
-    },
-    "blobContainer": {
-      "type": "string",
-      "defaultValue": "latest"
-    },
-    "blobName": {
-      "type": "string",
-      "defaultValue": "linux-x64.v1.8.v4.zip"
-    },
-    "sasStartTime": {
-      "type": "string",
-      "defaultValue": "[dateTimeAdd(utcNow(), '-PT5M')]",
       "metadata": {
-        "description": "The start time of the sas"
+        "description": "UPN of the admin user to assign to the server enterprise app (e.g. jim@worldofworkflows.com)."
       }
     },
-    "sasExpiryTime": {
-      "type": "string",
-      "defaultValue": "[dateTimeAdd(utcNow(), 'P6D')]",
-      "metadata": {
-        "description": "The end time of the sas"
-      }
+    "companyNameForWoWLicence": {
+     "type": "string"
     },
-    "releasesResourceGroupName": {
-      "type": "string",
-
-      "defaultValue": "PRODUCTION",
-      "metadata": {
-        "description": "Resource group containing the releases storage account (e.g., wowreleases)."
-      }
-    },
-    "releasesSubscriptionId": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Subscription ID containing the releases storage account. Accepts GUID or '/subscriptions/<GUID>'. Leave blank to use current subscription."
-      }
+    "billingEmailForWoWLicence": {
+      "type": "string"
     }
+  
   },
   "variables": {
     "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountNameFinal'))]",
     "LoginLocation": "login.microsoftonline",
-    "sasDefinition": {
-      "canonicalizedResource": "[concat('/blob/', parameters('releasesStorageAccountName'), '/', parameters('blobContainer'), '/', parameters('blobName'))]",
-      "signedResource": "b",
-      "signedPermission": "r",
-      "signedStart": "[parameters('sasStartTime')]",
-      "signedExpiry": "[parameters('sasExpiryTime')]",
-      "signedProtocol": "https"
-    },
-    "storageAccountNameFinal": "[parameters('storageAccounts_wowtemplatestorage_name')]",
-    "releasesSubParam": "[parameters('releasesSubscriptionId')]",
-    "releasesSubIsPrefixed": "[startsWith(variables('releasesSubParam'), '/subscriptions/')]",
-    "releasesSubSanitized": "[if(variables('releasesSubIsPrefixed'), substring(variables('releasesSubParam'), 15, sub(length(variables('releasesSubParam')), 15)), variables('releasesSubParam'))]",
-    "releasesEffectiveSubscriptionId": "[if(equals(variables('releasesSubSanitized'), ''), subscription().subscriptionId, variables('releasesSubSanitized'))]",
-    "releasesStorageAccountId": "[resourceId(variables('releasesEffectiveSubscriptionId'), parameters('releasesResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('releasesStorageAccountName'))]"
+    "storageAccountNameFinal": "[parameters('storageAccounts_wowtemplatestorage_name')]"
   },
   "resources": [
     {
@@ -250,7 +208,7 @@
             },
             {
               "name": "AzureAd__OpenApi__ClientId",
-              "value": "5b4d46db-91cb-4b8f-8d72-24c77cf1745f",
+              "value": "[reference('CreateAzureADObjectsAndOutput').outputs.ServerClientId]",
               "slotSetting": false
             },
             {
@@ -1935,7 +1893,7 @@
             },
             {
               "name": "Solutions__StoreAccountName",
-              "value": "wowjimteststg",
+              "value": "wowcentralproductionstg",
               "slotSetting": false
             },
             {
@@ -1945,7 +1903,7 @@
             },
             {
               "name": "Solutions__WorkflowsStoreClient__BaseAddress",
-              "value": "https://newjimtest.azurewebsites.net/",
+              "value": "https://wowcentral.azurewebsites.net/",
               "slotSetting": false
             },
             {
@@ -1971,6 +1929,26 @@
             {
               "name": "Plugins__PluginDirectory",
               "value": "/data/plugins",
+              "slotSetting": false
+            },
+            {
+              "name": "Plugins__MaxAllowedFiles",
+              "value": "5",
+              "slotSetting": false
+            },
+            {
+              "name": "Plugins__StoreListWorkflowName",
+              "value": "ListPluginFiles",
+              "slotSetting": false
+            },
+            {
+              "name": "Plugins__StoreAccountName",
+              "value": "wowcentralproductionstg",
+              "slotSetting": false
+            },
+            {
+              "name": "Plugins__WorkflowsStoreClient__BaseAddress",
+              "value": "https://wowcentral.azurewebsites.net/",
               "slotSetting": false
             },
             {
@@ -2027,13 +2005,13 @@
           "connectionStrings": [
             {
               "name": "Elsa",
-              "connectionString": "Data Source=/data/wowworkflows.db",
+              "connectionString": "Data Source=/data/wowworkflows.db;cache=shared;",
               "type": "Custom",
               "slotSetting": false
             },
             {
               "name": "WorldOfWorkflows",
-              "connectionString": "Data Source=/data/wowdata.db",
+              "connectionString": "Data Source=/data/wowdata.db;cache=shared;",
               "type": "Custom",
               "slotSetting": false
             }
@@ -2178,7 +2156,13 @@
         "forceUpdateTag": "1",
         "azPowerShellVersion": "8.3",
         "primaryScriptUri": "https://raw.githubusercontent.com/World-of-Workflows/Business-Edition/main/Deployment/ADDeploymentScript.ps1",
-        "arguments": "[concat('-TenantId ',subscription().tenantId,' -ServerappName', ' \\\"', parameters('entraId_Application_ServerName'), '\\\" -ClientappName \\\"', parameters('entraId_Application_ClientName'), '\\\" -BaseAddress \\\"https://', parameters('sites_BETemplate_Name'),'.azurewebsites.net\\\"')]",
+       "arguments": "[concat(
+          '-TenantId ', subscription().tenantId,
+          ' -ServerappName \\\"', parameters('entraId_Application_ServerName'), '\\\"',
+          ' -ClientappName \\\"', parameters('entraId_Application_ClientName'), '\\\"',
+          ' -BaseAddress \\\"https://', parameters('sites_BETemplate_Name'), '.azurewebsites.net\\\"',
+          ' -AdminUserPrincipalName \\\"', parameters('adminUserPrincipalName'), '\\\"'
+        )]",
         "timeout": "PT1H",
         "cleanupPreference": "OnSuccess",
         "retentionInterval": "P1D"
@@ -2198,6 +2182,7 @@
         "enabledProtocols": "SMB"
       }
     },
+    
     {
       "type": "Microsoft.Resources/deploymentScripts",
       "apiVersion": "2023-08-01",
@@ -2217,14 +2202,39 @@
       }
     },
     {
-      "type": "Microsoft.Web/sites/extensions",
-      "apiVersion": "2023-01-01",
-      "name": "[format('{0}/ZipDeploy',parameters('sites_BETemplate_name'))]",
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2023-08-01",
+      "name": "WowCentralDeployRequest",
+      "location": "[parameters('location')]",
+      "kind": "AzurePowerShell",
+      "identity": {
+        "type": "[parameters('managedIdentityName').type]",
+        "userAssignedIdentities": "[parameters('managedIdentityName').userAssignedIdentities]"
+      },
       "dependsOn": [
-        "WaitSection"
+        "[resourceId('Microsoft.Web/sites', parameters('sites_BETemplate_name'))]"
       ],
       "properties": {
-        "packageUri": "[uri(concat('https://',parameters('releasesStorageAccountName'),'.blob',environment().suffixes.storage,'/'),concat(parameters('blobContainer'),'/',parameters('blobName'),listServiceSas(resourceId('Microsoft.Storage/storageAccounts',parameters('releasesStorageAccountName')),'2023-04-01', variables('sasDefinition') ).serviceSasToken))]"
+        "forceUpdateTag": "1",
+        "azPowerShellVersion": "8.3",
+        "primaryScriptUri": "https://raw.githubusercontent.com/World-of-Workflows/Business-Edition/main/Deployment/WowCentralDeployRequest.ps1",
+        "arguments": "[concat(
+          '-ResourceGroupName ', resourceGroup().name,
+          ' -WebAppName ', '\"', parameters('sites_BETemplate_name'), '\"',
+          ' -ManagedResourceGroup ', '\"', resourceGroup().name, '\"',
+          ' -SubscriptionId ', subscription().subscriptionId,
+          ' -AppServicePlanName ', '\"', parameters('serverfarms_BETemplatePlan_name'), '\"',
+          ' -Location ', '\"', parameters('location'), '\"',
+          ' -ClientAppName ', '\"', parameters('entraId_Application_ClientName'), '\"',
+          ' -ServerAppName ', '\"', parameters('entraId_Application_ServerName'), '\"',
+          ' -StorageAccountName ', '\"', variables('storageAccountNameFinal'), '\"',
+          ' -CompanyNameForWoWLicence ', '\"', parameters('companyNameForWoWLicence'), '\"',
+          ' -BillingEmailForWoWLicence ', '\"', parameters('billingEmailForWoWLicence'), '\"'
+
+        )]",
+        "timeout": "PT10M",
+        "cleanupPreference": "OnSuccess",
+        "retentionInterval": "P1D"
       }
     }
   ]
