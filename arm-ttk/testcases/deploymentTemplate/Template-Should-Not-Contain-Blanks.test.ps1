@@ -33,7 +33,8 @@ param(
                             'allowedCallerIpAddresses', # Microsoft.Logic/workflows Access Control
                             'workerPools', # Microsoft.Web/hostingEnvironments
                             'AzureMonitor', # Microsoft.Insights/VMDiagnosticsSettings
-                            'requiredDataConnectors' #Microsoft.SecurityInsights/AlertRuleTemplates
+                            'requiredDataConnectors', #Microsoft.SecurityInsights/AlertRuleTemplates
+                            'UserTokenPrepend' # Microsoft.OperationalInsights/workspaces/providers/dataConnectors - JWTauth may require an empty string 
     ),
 
     # Some properties can be empty within a given resource.
