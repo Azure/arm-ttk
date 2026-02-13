@@ -65,12 +65,14 @@ foreach ($id in $ids) {
         "deploymentSpecId"                  # Microsoft.NetApp/netAppAccounts/volumeGroups
         "detector.id",                      # microsoft.alertsmanagement/smartdetectoralertrules
         "contentId",                        # Microsoft.Sentinel/Solutions/Metadata
+        "definitionId",                     # Microsoft.ApiCenter/services/workspaces/apis/deployments
         "connectorId",                      # Microsoft.Sentinel/Solutions/Analytical Rule/Metadata
         "parentId",                         # Microsoft.Sentinel/Solutions/Metadata
         "IllusiveIncidentId",               # Microsoft.Sentinel/Solutions/Analytical Rule/Metadata
         "UniqueFindingId",                  # Microsoft.Sentinel/Solutions/Metadata
         "schemaId",                         # Microsoft.ApiManagement/service/apis/operations
         "detection_id",                     # Microsoft.Sentinel/Solutions/Analytical Rule Id
+        "environmentId",                    # Microsoft.ApiCenter/services/workspaces/apis/deployments
         "open_id",                          # Microsoft.Sentinel/Solutions/Open Id
         "TeamsChannelID",                   # Microsoft.Sentinel/Solutions/Playbooks/Teams Channel ID
         "SAPAuditLogMessageID",             # Microsoft.Sentinel/Solutions/Playbooks/SAP Audit Log Message ID

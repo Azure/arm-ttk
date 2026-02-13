@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.ApiCenter/services/workspaces/apis/deployments",
+      "apiVersion": "2024-03-01",
+      "name": "testService/testWorkspace/testApi/testDeployment",
+      "properties": {
+        "title": "Test Deployment",
+        "description": "Test deployment for API Center",
+        "definitionId": "/workspaces/testWorkspace/apis/testApi/versions/v1/definitions/openapi",
+        "environmentId": "/workspaces/testWorkspace/environments/production",
+        "server": {
+          "runtimeUri": [
+            "https://api.example.com"
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}
