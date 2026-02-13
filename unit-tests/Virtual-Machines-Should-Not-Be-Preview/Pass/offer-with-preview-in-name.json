@@ -7,10 +7,10 @@
             "properties": {
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "Canonical",
+                        "publisher": "TrendMicro",
                         "version": "latest",
-                        "offer": "UbuntuServer-preview",
-                        "sku": "16.04-LTS"
+                        "offer": "zero-trust-secure-access-preview-st",
+                        "sku": "standard"
                     }
                 }
             }
