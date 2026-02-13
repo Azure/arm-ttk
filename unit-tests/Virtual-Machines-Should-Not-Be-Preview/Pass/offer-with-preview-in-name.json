@@ -7,9 +7,9 @@
             "properties": {
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "TrendMicro",
+                        "publisher": "TestPublisher",
                         "version": "latest",
-                        "offer": "zero-trust-secure-access-preview-st",
+                        "offer": "product-preview-edition",
                         "sku": "standard"
                     }
                 }

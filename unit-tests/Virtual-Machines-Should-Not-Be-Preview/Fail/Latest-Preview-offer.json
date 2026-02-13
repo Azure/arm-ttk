@@ -7,10 +7,10 @@
             "properties": {
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "Canonical",
+                        "publisher": "TestPublisher",
                         "version": "latest",
-                        "offer": "UbuntuServer-preview",
-                        "sku": "16.04-LTS"
+                        "offer": "test-offer-preview",
+                        "sku": "standard"
                     }
                 }
             }
