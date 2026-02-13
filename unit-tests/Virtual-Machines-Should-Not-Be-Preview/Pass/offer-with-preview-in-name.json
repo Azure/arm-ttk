@@ -9,7 +9,7 @@
                     "imageReference": {
                         "publisher": "TestPublisher",
                         "version": "latest",
-                        "offer": "test-offer-preview",
+                        "offer": "product-preview-edition",
                         "sku": "standard"
                     }
                 }
