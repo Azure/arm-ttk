@@ -1,0 +1,37 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {
+    "serverFarmName": "myAppServicePlan",
+    "configXml": "<MonitoringManagement></MonitoringManagement>"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2024-04-01",
+      "name": "[variables('serverFarmName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "P1v2",
+        "tier": "PremiumV2"
+      },
+      "properties": {}
+    },
+    {
+      "comments": "Defines what events the Geneva Monitoring Agent should upload. This should be a placeholder configuration for services using GCS.",
+      "type": "Microsoft.Web/serverfarms/firstPartyApps/settings",
+      "name": "[concat(variables('serverFarmName'), '/AntMDS/MdsConfigXml')]",
+      "apiVersion": "2024-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('serverFarmName'))]"
+      ],
+      "properties": {
+        "firstPartyId": "AntMDS",
+        "settingName": "MdsConfigXml",
+        "settingValue": "[variables('configXml')]"
+      }
+    }
+  ],
+  "outputs": {}
+}

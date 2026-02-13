@@ -40,6 +40,7 @@ foreach ($id in $ids) {
         "clientId",                         # Microsoft.BotService - common var name
         "DataTypeId",                       # Microsoft.OperationalInsights/workspaces/dataSources
         "defaultMenuItemId",                # Microsoft.Portal/dashboards - it's a messy resource
+        "firstPartyId",                     # Microsoft.Web/serverfarms/firstPartyApps/settings - hardcoded ID for internal identification
         "keyVaultSecretId",                 # Microsoft.Network/applicationGateways sslCertificates - this is actually a uri created with reference() and concat /secrets/secretname
         "keyVaultId",                       # KeyVaultIDs
         "keyId",                            # Microsoft.Cdn/profiles urlSigningKeys
