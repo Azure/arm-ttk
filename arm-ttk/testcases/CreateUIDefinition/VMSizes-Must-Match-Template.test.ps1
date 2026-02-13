@@ -22,6 +22,7 @@ $MainTemplateParameters
 #break
 
 # Helper function to recursively search for a pattern in nested objects
+# Returns the top-level property name and the matching value when found
 function Find-OutputProperty {
     param(
         [Parameter(Mandatory=$true)]
@@ -31,22 +32,24 @@ function Find-OutputProperty {
         [string]$Pattern,
         
         [Parameter(Mandatory=$false)]
-        [string]$PropertyName = $null
+        [string]$TopLevelPropertyName = $null
     )
     
     foreach ($prop in $Object.psobject.properties) {
-        $currentName = if ($PropertyName) { $PropertyName } else { $prop.Name }
+        # Track the top-level property name for matching with template parameters
+        # This is the property name we'll use to look up in MainTemplateParameters
+        $topLevelName = if ($TopLevelPropertyName) { $TopLevelPropertyName } else { $prop.Name }
         
         if ($prop.Value -is [string] -and $prop.Value -like $Pattern) {
-            # Found a matching string value
+            # Found a matching string value - return the top-level property name
             return [PSCustomObject]@{
-                Name = $currentName
+                Name = $topLevelName
                 Value = $prop.Value
             }
         }
         elseif ($prop.Value -is [PSCustomObject] -or $prop.Value -is [System.Collections.Specialized.OrderedDictionary]) {
-            # Recursively search nested objects
-            $result = Find-OutputProperty -Object $prop.Value -Pattern $Pattern -PropertyName $currentName
+            # Recursively search nested objects, preserving the top-level property name
+            $result = Find-OutputProperty -Object $prop.Value -Pattern $Pattern -TopLevelPropertyName $topLevelName
             if ($result) {
                 return $result
             }
