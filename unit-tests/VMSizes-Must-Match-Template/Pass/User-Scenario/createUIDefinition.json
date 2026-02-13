@@ -1,0 +1,121 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [],
+        "steps": [
+            {
+                "label": "Scheduler",
+                "name": "scheduler",
+                "bladeTitle": "Scheduler Configuration",
+                "elements": [
+                    {
+                        "label": "Scheduler Section",
+                        "name": "schedulerSection",
+                        "type": "Microsoft.Common.Section",
+                        "elements": [
+                            {
+                                "label": "Scheduler VM Size",
+                                "name": "vmsize",
+                                "type": "Microsoft.Compute.SizeSelector",
+                                "osPlatform": "Linux",
+                                "count": 1,
+                                "recommendedSizes": ["Standard_D2s_v3"]
+                            }
+                        ]
+                    },
+                    {
+                        "label": "Login Nodes Section",
+                        "name": "loginNodesSection",
+                        "type": "Microsoft.Common.Section",
+                        "elements": [
+                            {
+                                "label": "Login Node VM Size",
+                                "name": "vmsize",
+                                "type": "Microsoft.Compute.SizeSelector",
+                                "osPlatform": "Linux",
+                                "count": 1,
+                                "recommendedSizes": ["Standard_D2s_v3"]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "label": "Slurm Settings",
+                "name": "slurmSettings",
+                "bladeTitle": "Slurm Configuration",
+                "elements": [
+                    {
+                        "label": "HTC Section",
+                        "name": "HTCSection",
+                        "type": "Microsoft.Common.Section",
+                        "elements": [
+                            {
+                                "label": "HTC VM Size",
+                                "name": "vmsize",
+                                "type": "Microsoft.Compute.SizeSelector",
+                                "osPlatform": "Linux",
+                                "count": 1,
+                                "recommendedSizes": ["Standard_F2s_v2"]
+                            }
+                        ]
+                    },
+                    {
+                        "label": "HPC Section",
+                        "name": "HPCSection",
+                        "type": "Microsoft.Common.Section",
+                        "elements": [
+                            {
+                                "label": "HPC VM Size",
+                                "name": "vmsize",
+                                "type": "Microsoft.Compute.SizeSelector",
+                                "osPlatform": "Linux",
+                                "count": 1,
+                                "recommendedSizes": ["Standard_HC44rs"]
+                            }
+                        ]
+                    },
+                    {
+                        "label": "GPU Section",
+                        "name": "GPUSection",
+                        "type": "Microsoft.Common.Section",
+                        "elements": [
+                            {
+                                "label": "GPU VM Size",
+                                "name": "vmsize",
+                                "type": "Microsoft.Compute.SizeSelector",
+                                "osPlatform": "Linux",
+                                "count": 1,
+                                "recommendedSizes": ["Standard_NC6"]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "outputs": {
+            "location": "[location()]",
+            "clusters": {
+                "slurm": {
+                    "schedulerNode": {
+                        "sku": "[steps('scheduler').schedulerSection.vmsize]"
+                    },
+                    "loginNodes": {
+                        "sku": "[steps('scheduler').loginNodesSection.vmsize]"
+                    },
+                    "htc": {
+                        "sku": "[steps('slurmSettings').HTCSection.vmsize]"
+                    },
+                    "hpc": {
+                        "sku": "[steps('slurmSettings').HPCSection.vmsize]"
+                    },
+                    "gpu": {
+                        "sku": "[steps('slurmSettings').GPUSection.vmsize]"
+                    }
+                }
+            }
+        }
+    }
+}
