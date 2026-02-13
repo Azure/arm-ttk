@@ -1,0 +1,49 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [],
+        "steps": [
+            {
+                "label": "Scheduler",
+                "name": "scheduler",
+                "bladeTitle": "Scheduler",
+                "bladeSubtitle": "Configure Scheduler",
+                "subLabel": {
+                    "preValidation": "Configure Scheduler",
+                    "postValidation": "Done"
+                },
+                "elements": [
+                    {
+                        "label": "Scheduler Section",
+                        "name": "schedulerSection",
+                        "type": "Microsoft.Common.Section",
+                        "elements": [
+                            {
+                                "label": "VM Size",
+                                "name": "vmsize",
+                                "toolTip": "Scheduler VM size",
+                                "type": "Microsoft.Compute.SizeSelector",
+                                "osPlatform": "Linux",
+                                "count": 1,
+                                "recommendedSizes": [
+                                    "Standard_B1s",
+                                    "Standard_B1ms"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "outputs": {
+            "location": "[location()]",
+            "clusters": {
+                "schedulerNode": {
+                    "sku": "[steps('scheduler').schedulerSection.vmsize]"
+                }
+            }
+        }
+    }
+}

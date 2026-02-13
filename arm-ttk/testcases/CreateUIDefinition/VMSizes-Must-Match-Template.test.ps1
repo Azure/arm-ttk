@@ -21,6 +21,41 @@ $MainTemplateParameters
 #Write-Warning "Skipping Test..."
 #break
 
+# Helper function to recursively search for a pattern in nested objects
+function Find-OutputProperty {
+    param(
+        [Parameter(Mandatory=$true)]
+        [PSObject]$Object,
+        
+        [Parameter(Mandatory=$true)]
+        [string]$Pattern,
+        
+        [Parameter(Mandatory=$false)]
+        [string]$PropertyName = $null
+    )
+    
+    foreach ($prop in $Object.psobject.properties) {
+        $currentName = if ($PropertyName) { $PropertyName } else { $prop.Name }
+        
+        if ($prop.Value -is [string] -and $prop.Value -like $Pattern) {
+            # Found a matching string value
+            return [PSCustomObject]@{
+                Name = $currentName
+                Value = $prop.Value
+            }
+        }
+        elseif ($prop.Value -is [PSCustomObject] -or $prop.Value -is [System.Collections.Specialized.OrderedDictionary]) {
+            # Recursively search nested objects
+            $result = Find-OutputProperty -Object $prop.Value -Pattern $Pattern -PropertyName $currentName
+            if ($result) {
+                return $result
+            }
+        }
+    }
+    
+    return $null
+}
+
 # First, find all size selectors in CreateUIDefinition.
 $sizeSelectors = $CreateUIDefinitionObject | 
     Find-JsonContent -Key type -Value Microsoft.Compute.SizeSelector
@@ -42,11 +77,9 @@ foreach ($selector in $sizeSelectors) { # Then walk each selector,
         } else {
             "*basics(*$($controlName)*"
         } 
-    $theOutput = foreach ($out in $CreateUIDefinitionObject.parameters.outputs.psobject.properties) {
-        if ($out.Value -like $lookingFor) { 
-            $out; break
-        }
-    }
+    
+    # Use the helper function to recursively search for the pattern in outputs
+    $theOutput = Find-OutputProperty -Object $CreateUIDefinitionObject.parameters.outputs -Pattern $lookingFor
 
     if (-not $theOutput) {
         Write-Error "Could not find VM SizeSelector '$($selector.Name)' in outputs" -TargetObject $selector
