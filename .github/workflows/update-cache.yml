@@ -8,14 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2.8.0
       - name: Log in with Azure
-        uses: azure/login@v1
+        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1.6.1
         with: 
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: true
       - name: Update TTK Cache
-        uses: Azure/powershell@v1
+        uses: Azure/powershell@1300bbd2b3e1c21c029fe34887d16d2809a1397f # v1.4.0
         with: 
           errorActionPreference: Continue
           inlineScript: |
