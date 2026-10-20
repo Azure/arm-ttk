@@ -12,6 +12,8 @@ For detailed instruction on how to use the arm-ttk, see this [readme](/arm-ttk/R
 
 For a guided tutorial on the arm-ttk, check out this [MS LEARN module](https://docs.microsoft.com/learn/modules/arm-template-test/).
 
+If you want to run the arm-ttk in a CI/CD pipeline, [MegaLinter](https://megalinter.io/) is an open-source linters aggregator that runs it out of the box (see the [arm-ttk descriptor](https://megalinter.io/latest/descriptors/arm_arm_ttk/)).
+
 ## Philosophy
 
 A little bit about the tests...  These are the tests that are used to validate templates for the [Azure QuickStart Repo](https://github.com/Azure/azure-quickstart-templates) and the [Azure Marketplace](https://azuremarketplace.microsoft.com/marketplace/).  The purpose is to ensure a standard or consistent set of coding practices to make it easier to develop expertise using the template language (easy to read, write, debug).
