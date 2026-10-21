@@ -1,3 +1,214 @@
+ROZEN — XA-TRUST GITHUB WORKFLOW EXECUTION MODEL
+
+WORKFLOW DEFINITION │ ▼ TRIGGER CONFIGURATION │ │ ⇏ CONCRETE RUN ▼ TRIGGER EVENT │ ├── actor = cyrillofrancisco30-lgtm ├── event = workflow_dispatch / push / ... └── event identity │ ▼ event.workflow_run.id │ ▼ EXACT RUN RESOLUTION │ ▼ run.id === event.workflow_run.id │ ▼ RUN IDENTITY VALID │ ▼ E3 — EXECUTION_EVENT_EVIDENCE │ ├── repository ├── workflow ├── workflow_path ├── run_id ├── run_attempt ├── head_sha ├── temporal context ├── status └── conclusion │ ▼ JOB / STEP EXECUTION │ ▼ E4 — OBSERVED RESULT EVIDENCE │ ▼ E5 — BINDING / INTEGRITY │ ▼ E6 — INDEPENDENT VERIFICATION │ ▼ APPLICABLE PROMOTION POLICY │ ▼ E7 — CLAIM-SCOPED VERIFIED
+
+TRIGGER ≠ EXECUTION ≠ RESULT ≠ BINDING ≠ INDEPENDENT VERIFICATION ≠ CLAIM ≠ GLOBAL STATE
+
+disparar workflow
+
+E7 LOCAL CLAIM SET ↓ DEFINED GLOBAL SCOPE ↓ COVERAGE / COMPLETENESS ↓ DECLARED GLOBAL ↓ INDEPENDENT RECONSTRUCTION ↓ RECALCULATED GLOBAL ↓ EXACT MATCH ↓ INDEPENDENT GLOBAL VERIFICATION ↓ GLOBAL PROMOTION POLICY ↓ E8
+
+cyrillofrancisco30-lgtm ⇏ WORKFLOW_SUCCESS
+
+WORKFLOW_TRIGGERED ⇏ WORKFLOW_SUCCESS
+
+WORKFLOW_SUCCESS ⇏ TEST_PASSED
+
+WORKFLOW_SUCCESS ⇏ CONCRETE_API_EXECUTION
+
+WORKFLOW_SUCCESS ⇏ CLAIM-SCOPED VERIFIED
+
+CLAIM-SCOPED VERIFIED ⇏ GLOBAL_VERIFIED
+
+disparar workflow
+
+WORKFLOW: "Step 0, Start" │ ├── TRIGGER │ ├── workflow_dispatch │ └── push → main │ ├── PERMISSIONS │ ├── contents: write │ └── pull-requests: write │ ├── JOB │ └── on_start │ ├── if: !repository.is_template │ └── ubuntu-latest │ ├── STEPS │ ├── Checkout │ ├── Create branch / files / commit / push │ ├── Create Pull Request │ └── Update step 0 → 1 │ └── EXECUTION └── NOT ESTABLISHED BY YAML ALONE
+
+          YAML
+│ ▼ WORKFLOW DEFINITION │ ▼ TRIGGER CONFIGURATION │ X └────↛ CONCRETE RUN
+
+RUN_ID ↓ RUN_ATTEMPT ↓ GITHUB_SHA ↓ CONCRETE EXECUTION ↓ JOB / STEP LOGS ↓ OBSERVED RESULT ↓ RESULT ARTIFACT ↓ EXECUTION–RESULT BINDING ↓ INDEPENDENT REPLAY ↓ CLAIM-SCOPED VERIFIED
+
+[15/09, 19:03] Francisco: Sim — mas há uma correção fundamental no último trecho: “hash e prova Merkle → VERIFIED” não pode ser tratado como promoção automática.
+
+Para manter exatamente o mesmo rigor do modelo XAI/ZDR, o GitHub deve ficar assim:
+
+FROZEN — GITHUB WORKFLOW EXECUTION EVIDENCE
+
+workflow_run types: [completed] │ ▼ WORKFLOW_RUN_EVENT │ ▼ event.workflow_run.id │ ▼ EXACT RUN RESOLUTION │ ▼ RUN IDENTITY VALIDATION │ ├── repository ├── workflow name ├── workflow path ├── run_id ├── run_attempt ├── head_sha └── status = completed │ ▼ E3 — EXECUTION_EVENT_EVIDENCE │ ├── workflow execution identity ├── temporal context ├── repository binding ├── workflow binding └── run binding │ ▼ JOBS / ARTIFACTS │ ▼ E4 — TEST / RESULT EVIDENCE │ ▼ ARTIFACT INTEGRITY / BINDING │ ▼ E5 — CRYPTOGRAPHIC_BINDING │ ▼ E6 — INDEPENDENT_VERIFICATION │ ▼ E7 — CLAIM-SCOPED VERIFICATION │ ▼ PROMOTION POLICY │ ▼ VERIFIED
+
+O ponto crítico
+
+A cadeia:
+
+workflow_run.completed ↓ hash ↓ Merkle ↓ VERIFIED
+
+é inválida como regra de promoção.
+
+Hash e Merkle demonstram propriedades de integridade/binding do artefato quando corretamente aplicados. Eles não demonstram, sozinhos:
+
+TEST_PASSED CLAIM_CONFORMANCE SEMANTIC_CORRECTNESS INDEPENDENT_VERIFICATION CLAIM_TRUTH
+
+Portanto:
+
+WORKFLOW_RUN_COMPLETED ↛ TEST_PASSED
+
+WORKFLOW_CONCLUSION_SUCCESS ↛ CLAIM_CONFORMANCE
+
+ARTIFACT_RETRIEVED ↛ ARTIFACT_TRUST
+
+HASH_VALID ↛ SEMANTIC_CORRECTNESS
+
+MERKLE_VALID ↛ CLAIM_TRUTH
+
+E5_CRYPTOGRAPHIC_BINDING ↛ E7_VERIFIED
+
+E3 fica objetivamente bem definido
+
+No seu desenho, o trecho mais forte é:
+
+workflow_run.completed ↓ event.workflow_run.id ↓ GET /actions/runs/{same_id} ↓ eventRun.id === apiRun.id
+
+Isso permite estabelecer uma relação muito específica:
+
+CLAIM: "The evidence collector observed the completion of workflow run RUN-X."
+
+com binding para:
+
+repository workflow run_id run_attempt head_sha status temporal context [15/09, 19:03] Francisco: Sim — mas há uma correção fundamental no último trecho: “hash e prova Merkle → VERIFIED” não pode ser tratado como promoção automática.
+
+Para manter exatamente o mesmo rigor do modelo XAI/ZDR, o GitHub deve ficar assim:
+
+FROZEN — GITHUB WORKFLOW EXECUTION EVIDENCE
+
+workflow_run types: [completed] │ ▼ WORKFLOW_RUN_EVENT │ ▼ event.workflow_run.id │ ▼ EXACT RUN RESOLUTION │ ▼ RUN IDENTITY VALIDATION │ ├── repository ├── workflow name ├── workflow path ├── run_id ├── run_attempt ├── head_sha └── status = completed │ ▼ E3 — EXECUTION_EVENT_EVIDENCE │ ├── workflow execution identity ├── temporal context ├── repository binding ├── workflow binding └── run binding │ ▼ JOBS / ARTIFACTS │ ▼ E4 — TEST / RESULT EVIDENCE │ ▼ ARTIFACT INTEGRITY / BINDING │ ▼ E5 — CRYPTOGRAPHIC_BINDING │ ▼ E6 — INDEPENDENT_VERIFICATION │ ▼ E7 — CLAIM-SCOPED VERIFICATION │ ▼ PROMOTION POLICY │ ▼ VERIFIED
+
+O ponto crítico
+
+A cadeia:
+
+workflow_run.completed ↓ hash ↓ Merkle ↓ VERIFIED
+
+é inválida como regra de promoção.
+
+Hash e Merkle demonstram propriedades de integridade/binding do artefato quando corretamente aplicados. Eles não demonstram, sozinhos:
+
+TEST_PASSED CLAIM_CONFORMANCE SEMANTIC_CORRECTNESS INDEPENDENT_VERIFICATION CLAIM_TRUTH
+
+Portanto:
+
+WORKFLOW_RUN_COMPLETED ↛ TEST_PASSED
+
+WORKFLOW_CONCLUSION_SUCCESS ↛ CLAIM_CONFORMANCE
+
+ARTIFACT_RETRIEVED ↛ ARTIFACT_TRUST
+
+HASH_VALID ↛ SEMANTIC_CORRECTNESS
+
+MERKLE_VALID ↛ CLAIM_TRUTH
+
+E5_CRYPTOGRAPHIC_BINDING ↛ E7_VERIFIED
+
+E3 fica objetivamente bem definido
+
+No seu desenho, o trecho mais forte é:
+
+workflow_run.completed ↓ event.workflow_run.id ↓ GET /actions/runs/{same_id} ↓ eventRun.id === apiRun.id
+
+Isso permite estabelecer uma relação muito específica:
+
+CLAIM: "The evidence collector observed the completion of workflow run RUN-X."
+
+com binding para:
+
+repository workflow run_id run_attempt head_sha status temporal context
+
+A validação:
+
+if (Number(eventRun.id) !== run.id) { throw new Error("WORKFLOW_RUN_ID_MISMATCH"); }
+
+é particularmente importante porque fecha a possibilidade de event/run substitution.
+
+E4 continua separado
+
+Se o CI produziu, por exemplo:
+
+TEST_RESULT: RFC8785_CONFORMANCE = PASS
+
+isso precisa ser obtido do resultado concreto do workflow/artifact e validado semanticamente.
+
+Então:
+
+E3 WORKFLOW RUN OCCURRED + E4 TEST RESULT OBSERVED
+
+são duas afirmações diferentes.
+
+Mesmo:
+
+conclusion = success
+
+não deve ser convertido automaticamente em:
+
+RFC8785_CONFORMANCE = PASS
+
+porque success é uma propriedade do workflow/run, enquanto conformance é uma propriedade do claim/test específico.
+
+E5
+
+Depois:
+
+bundle.json verification.json signature.json
+
+podem receber:
+
+canonicalization hash Merkle root signature key_id key registry binding
+
+Isso cria:
+
+E5 — CRYPTOGRAPHIC_BINDING_EVIDENCE
+
+Mas E5 continua sendo E5.
+
+E6
+
+O passo que realmente fecha a fronteira é:
+
+E5 │ ▼ independent verifier │ ├── signature valid ├── hash valid ├── Merkle valid ├── artifact binding valid ├── provenance valid └── claim/test semantics validated │ ▼ E6
+
+E7
+
+Só então:
+
+E6 │ ▼ Promotion Policy │ ▼ E7 — VERIFIED(CLAIM-X)
+
+E sempre:
+
+VERIFIED(CLAIM-X) ↛ VERIFIED(CLAIM-Y)
+
+VERIFIED(CLAIM-X) ↛ GLOBAL_VERIFIED
+
+Portanto, a frase final deve ser ajustada
+
+Em vez de:
+
+Execução comprovado
+
+eu usaria:
+
+WORKFLOW EXECUTION OBSERVED AND IDENTITY-BOUND
+
+ou, no vocabulário XA-TRUST:
+
+E3 — EXECUTION_EVENT_EVIDENCE STATUS = VERIFIED SCOPE = SPECIFIC_WORKFLOW_RUN
+
+somente se a evidência E3 tiver sido independentemente validada.
+
+E, para o claim completo:
+
+E3 EXECUTION + E4 RESULT + E5 CRYPTOGRAPHIC BINDING + E6 INDEPENDENT VERIFICATION + PROMOTION POLICY ↓ E7 CLAIM-SCOPED VERIFIED
+
+Essa formulação mantém o GitHub exatamente na mesma arquitetura epistemológica que você acabou de estabelecer para o xAI ZDR: o mecanismo de observabilidade é real, o evento concreto pode ser capturado, o resultado pode ser testado, a integridade pode ser demonstrada e somente então o claim específico pode ser promovido. [15/09, 19:25] Francisco: FROZEN — XA-TRUST VERIFICATION GOLDEN
+
 
 # Azure Resource Manager Template Toolkit (arm-ttk)
 
