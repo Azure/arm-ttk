@@ -1,3 +1,151 @@
+WORKFLOW DEFINITION
+        │
+        ▼
+workflow_run.completed
+        │
+        ▼
+E3 — EXECUTION_EVENT_EVIDENCE
+        │
+        ├── run_id
+        ├── run_attempt
+        ├── repository
+        ├── workflow name
+        ├── workflow path
+        ├── event
+        ├── head_sha
+        ├── status
+        ├── conclusion
+        └── timestamps
+        │
+        ▼
+EXACT RUN RESOLUTION
+        │
+        ▼
+RUN ID BINDING
+        │
+        ├── event.workflow_run.id
+        │       ==
+        └── API run.id
+        │
+        ▼
+JOBS + ARTIFACTS
+        │
+        ▼
+E4 — OBSERVED RESULT
+        │
+        ▼
+E5 — BINDING / INTEGRITY
+        │
+        ├── canonical record
+        ├── hashes
+        ├── Merkle proof
+        └── signature
+        │
+        ▼
+E6 — INDEPENDENT VERIFICATION
+        │
+        ▼
+E7 — CLAIM-SCOPED VERIFICATION RESULT
+        │
+        ▼
+PROMOTION POLICY
+        │
+        ▼
+CLAIM-SCOPED VERIFIED
+
+registro canônico
+→ hash e prova Merkle
+→ VERIFIED
+→ assinatura
+
+registro canônico
+→ hash / Merkle / assinatura
+→ E5 BINDING / INTEGRITY
+→ E6 INDEPENDENT VERIFICATION
+→ E7 VERIFICATION RESULT
+→ PROMOTION DECISION
+→ CLAIM-SCOPED VERIFIED
+
+
+WORKFLOW_RUN_COMPLETED
+↛ TEST_PASSED
+
+WORKFLOW_CONCLUSION_SUCCESS
+↛ CLAIM_CONFORMANCE
+
+ARTIFACT_RETRIEVED
+↛ ARTIFACT_VALID
+
+HASHED
+↛ SEMANTICALLY_TRUE
+
+SIGNED
+↛ INDEPENDENTLY_VERIFIED
+
+E3
+↛ E7
+
+CLAIM-SCOPED VERIFIED
+↛ GLOBAL VERIFIED
+
+
+CI
+│
+└── completed
+      │
+      ▼
+workflow_run event
+      │
+      ▼
+event.workflow_run.id
+      │
+      ▼
+getWorkflowRun(id)
+      │
+      ▼
+eventRun.id === run.id
+
+
+workflow_run
+    → github.event.workflow_run.id
+
+workflow_dispatch
+    → inputs.workflow_run_id
+
+schedule
+    → resolução determinística de execução concluída
+
+
+    event.workflow_run.id
+        ==
+API run.id
+        ==
+canonical_record.workflow_run_id
+
+
+
+WORKFLOW_RUN.COMPLETED
+        ↓
+E3 EXECUTION EVENT
+        ↓
+EXACT RUN IDENTITY
+        ↓
+E3 ↔ E4 WORKFLOW_EXECUTION_BINDING
+        ↓
+E4 OBSERVED RESULT
+        ↓
+E5 BINDING / INTEGRITY
+        ↓
+E6 INDEPENDENT VERIFICATION
+        ↓
+E7 VERIFICATION RESULT
+        ↓
+PROMOTION POLICY
+        ↓
+CLAIM-SCOPED VERIFIED
+
+
+
 
 # Azure Resource Manager Template Toolkit (arm-ttk)
 
